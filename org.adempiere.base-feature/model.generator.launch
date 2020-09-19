@@ -195,9 +195,6 @@
         <setEntry value="org.krysalis.barcode4j@default:default"/>
         <setEntry value="org.mortbay.jasper.apache-el@default:true"/>
         <setEntry value="org.mortbay.jasper.apache-jsp@default:true"/>
-        <setEntry value="org.objectweb.asm*7.0.0@default:default"/>
-        <setEntry value="org.objectweb.asm.commons*7.0.0@default:default"/>
-        <setEntry value="org.objectweb.asm.tree*7.0.0@default:default"/>
         <setEntry value="org.passay@default:default"/>
         <setEntry value="org.sat4j.core@default:default"/>
         <setEntry value="org.sat4j.pb@default:default"/>
