@@ -16,4 +16,4 @@ EXCEPTION WHEN others THEN
 END;
 $BODY$;
 
-SELECT register_migration_script('202009101327-GO-1290.sql') FROM dual;
+SELECT register_migration_script('202009101327_GO-1290.sql') FROM dual;
