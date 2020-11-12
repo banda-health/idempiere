@@ -855,6 +855,7 @@ public class Query
 		{
 			pstmt.setQueryTimeout(queryTimeout);
 		}
+		log.warning(pstmt.toString());
 		return pstmt.executeQuery();
 	}
 	

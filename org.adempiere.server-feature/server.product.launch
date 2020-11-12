@@ -91,6 +91,7 @@
         <setEntry value="javax.inject@default:default"/>
         <setEntry value="javax.interceptor-api@default:default"/>
         <setEntry value="javax.jms@default:default"/>
+        <setEntry value="javax.servlet@default:default"/>
         <setEntry value="javax.transaction-api@default:default"/>
         <setEntry value="javax.validation.api@default:default"/>
         <setEntry value="javax.websocket-api@default:default"/>
@@ -360,6 +361,7 @@
         <setEntry value="org.apache.ecs@default:default"/>
         <setEntry value="org.bandahealth.idempiere.base.editor@default:default"/>
         <setEntry value="org.bandahealth.idempiere.base@default:default"/>
+        <setEntry value="org.bandahealth.idempiere.graphql@default:true"/>
         <setEntry value="org.bandahealth.idempiere.rest@default:true"/>
         <setEntry value="org.bandahealth.idempiere.webui@default:false"/>
         <setEntry value="org.compiere.db.oracle.provider@default:default"/>
