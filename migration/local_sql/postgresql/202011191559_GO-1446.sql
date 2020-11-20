@@ -170,6 +170,12 @@ UPDATE ad_column
 SET columnname = 'BH_DbrdBtnGrp_Btn_UU', name = 'BH_DbrdBtnGrp_Btn_UU'
 WHERE columnname = 'BH_HmScrn_ButtonGroupLine_UU';
 
+-- We also need to udpate AD_Element
+UPDATE ad_element SET columnname = 'BH_DbrdBtnGrp_ID', name = 'BH_DbrdBtnGrp_ID', printname = 'Button Group' WHERE ad_element_uu = '6a6d008b-3531-4c75-8483-5f4b859a6dfe';
+UPDATE ad_element SET columnname = 'BH_DbrdBtnGrp_UU', name = 'BH_DbrdBtnGrp_UU', printname = 'BH_DbrdBtnGrp_UU' WHERE ad_element_uu = 'd7ba3d57-65f4-432f-b194-b04f8e95c4d8';
+UPDATE ad_element SET columnname = 'BH_DbrdBtnGrp_Btn_ID', name = 'BH_DbrdBtnGrp_Btn_ID', printname = 'BH_DbrdBtnGrp_Btn_ID' WHERE ad_element_uu = '616de46c-495b-44b3-aa37-ac230f6b404c';
+UPDATE ad_element SET columnname = 'BH_DbrdBtnGrp_Btn_UU', name = 'BH_DbrdBtnGrp_Btn_UU', printname = 'BH_DbrdBtnGrp_Btn_UU' WHERE ad_element_uu = '6646b341-7ed3-40ee-a457-ce2a98cfbd54';
+
 /**********************************************************************************************************/
 -- Add translation tables for the (former) home screen buttons
 /**********************************************************************************************************/
@@ -248,6 +254,10 @@ ON CONFLICT DO NOTHING;
 UPDATE ad_sequence
 SET currentnext = (SELECT MAX(ad_sequence_id) + 1 FROM ad_sequence)
 WHERE name = 'AD_Sequence';
+
+-- Insert the new values into ad_element
+INSERT INTO ad_element (ad_element_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, columnname, entitytype, name, printname, description, help, po_name, po_printname, po_description, po_help, ad_element_uu, placeholder) VALUES ((SELECT MAX(ad_element_id) + 1 FROM ad_element), 0, 0, 'Y', '2019-03-20 15:39:51.493000', 100, '2019-03-20 15:39:51.493000', 100, 'BH_DbrdBtnGrp_Trl_UU', 'U', 'BH_DbrdBtnGrp_Trl_UU', 'BH_DbrdBtnGrp_Trl_UU', null, null, null, null, null, null, 'ec3b4a4d-5026-4bdf-b7bd-ae756981ba2e', null) ON CONFLICT DO NOTHING;
+INSERT INTO ad_element (ad_element_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, columnname, entitytype, name, printname, description, help, po_name, po_printname, po_description, po_help, ad_element_uu, placeholder) VALUES ((SELECT MAX(ad_element_id) + 1 FROM ad_element), 0, 0, 'Y', '2019-03-20 15:39:53.192000', 100, '2019-03-20 15:39:53.192000', 100, 'BH_DbrdBtnGrp_Btn_Trl_UU', 'U', 'BH_DbrdBtnGrp_Btn_Trl_UU', 'BH_DbrdBtnGrp_Btn_Trl_UU', null, null, null, null, null, null, '1b62f6ad-569b-4bb3-b8eb-99ac7087fb5e', null) ON CONFLICT DO NOTHING;
 
 /**********************************************************************************************************/
 -- Insert translation data for the (former) home screen buttons
