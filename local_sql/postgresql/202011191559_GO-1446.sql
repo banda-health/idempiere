@@ -255,10 +255,6 @@ UPDATE ad_sequence
 SET currentnext = (SELECT MAX(ad_sequence_id) + 1 FROM ad_sequence)
 WHERE name = 'AD_Sequence';
 
--- Insert the new values into ad_element
-INSERT INTO ad_element (ad_element_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, columnname, entitytype, name, printname, description, help, po_name, po_printname, po_description, po_help, ad_element_uu, placeholder) VALUES ((SELECT MAX(ad_element_id) + 1 FROM ad_element), 0, 0, 'Y', '2019-03-20 15:39:51.493000', 100, '2019-03-20 15:39:51.493000', 100, 'BH_DbrdBtnGrp_Trl_UU', 'U', 'BH_DbrdBtnGrp_Trl_UU', 'BH_DbrdBtnGrp_Trl_UU', null, null, null, null, null, null, 'ec3b4a4d-5026-4bdf-b7bd-ae756981ba2e', null) ON CONFLICT DO NOTHING;
-INSERT INTO ad_element (ad_element_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, columnname, entitytype, name, printname, description, help, po_name, po_printname, po_description, po_help, ad_element_uu, placeholder) VALUES ((SELECT MAX(ad_element_id) + 1 FROM ad_element), 0, 0, 'Y', '2019-03-20 15:39:53.192000', 100, '2019-03-20 15:39:53.192000', 100, 'BH_DbrdBtnGrp_Btn_Trl_UU', 'U', 'BH_DbrdBtnGrp_Btn_Trl_UU', 'BH_DbrdBtnGrp_Btn_Trl_UU', null, null, null, null, null, null, '1b62f6ad-569b-4bb3-b8eb-99ac7087fb5e', null) ON CONFLICT DO NOTHING;
-
 /**********************************************************************************************************/
 -- Insert translation data for the (former) home screen buttons
 /**********************************************************************************************************/
@@ -288,6 +284,78 @@ UPDATE bh_dbrdbtngrp_btn SET buttonhelptext = 'Receive My Products', buttontext 
 UPDATE bh_dbrdbtngrp_btn SET buttonhelptext = 'Enter vendors into the system', buttontext = 'My Suppliers', description = '/suppliers', isactive = 'Y', name = 'Suppliers' WHERE bh_dbrdbtngrp_btn_uu = '64746aed-41f0-4cef-a7d8-3c574d12639f';
 UPDATE bh_dbrdbtngrp_btn SET buttonhelptext = 'Enter patients into the system', buttontext = 'My Patients', description = '/patients', isactive = 'Y', name = 'Patients' WHERE bh_dbrdbtngrp_btn_uu = '4dd0e4df-20bc-48cd-9bb9-358af7954601';
 UPDATE bh_dbrdbtngrp_btn SET buttonhelptext = 'Track your expenses ', buttontext = 'Track My Expenses', description = '/expenses', isactive = 'Y', name = 'Track Expenses' WHERE bh_dbrdbtngrp_btn_uu = '2bd2f18b-7fe9-4079-b074-8dc113b98714';
+
+/**********************************************************************************************************/
+-- Add translation tables for the Tab Navigation Buttons
+/**********************************************************************************************************/
+create table if not exists bh_tabnavbtn_trl
+(
+	ad_client_id numeric(10) not null,
+	ad_language varchar(6) not null,
+	ad_org_id numeric(10) not null,
+	bh_tabnavbtn_id numeric(10) not null,
+	bh_tabnavbtn_trl_uu varchar(36),
+	buttonhelptext varchar(100),
+	buttontext varchar(100),
+	created timestamp default statement_timestamp() not null,
+	createdby numeric(10) not null,
+	description varchar(255),
+	help varchar(2000),
+	isactive char default 'Y'::bpchar not null,
+	istranslated char not null,
+	name varchar(60) not null,
+	updated timestamp default statement_timestamp() not null,
+	updatedby numeric(10) not null,
+	constraint pk_bh_tabnavbtn_trl
+		primary key (bh_tabnavbtn_id, ad_language),
+	constraint bh_tabnavbtn_trl_uu_idx
+		unique (bh_tabnavbtn_trl_uu),
+	constraint adlanguage_bhtabnavbtntrl
+		foreign key (ad_language) references ad_language,
+	constraint bhtabnavbtn_bhtabnavbtntrl
+		foreign key (bh_tabnavbtn_id) references bh_tabnavbtn,
+	constraint bh_tabnavbtn_trl_isactive_check
+		check (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar])),
+	constraint bh_tabnavbtn_trl_istranslated_check
+		check (istranslated = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))
+);
+
+create table if not exists bh_tabnavbtn_tab_trl
+(
+	ad_client_id numeric(10) not null,
+	ad_language varchar(6) not null,
+	ad_org_id numeric(10) not null,
+	bh_tabnavbtn_tab_id numeric(10) not null,
+	bh_tabnavbtn_tab_trl_uu varchar(36),
+	buttonhelptext varchar(100),
+	buttontext varchar(100),
+	created timestamp default statement_timestamp() not null,
+	createdby numeric(10) not null,
+	description varchar(255),
+	help varchar(2000),
+	isactive char default 'Y'::bpchar not null,
+	istranslated char not null,
+	name varchar(60) not null,
+	updated timestamp default statement_timestamp() not null,
+	updatedby numeric(10) not null,
+	constraint pk_bh_tabnavbtn_tab_trl
+		primary key (bh_tabnavbtn_tab_id, ad_language),
+	constraint bh_tabnavbtn_tab_trl_uu_idx
+		unique (bh_tabnavbtn_tab_trl_uu),
+	constraint adlanguage_bhtabnavbtntabtrl
+		foreign key (ad_language) references ad_language,
+	constraint bhtabnavbtntab_bhtabnavbtntabt
+		foreign key (bh_tabnavbtn_tab_id) references bh_tabnavbtn_tab,
+	constraint bh_tabnavbtn_tab_trl_isactive_check
+		check (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar])),
+	constraint bh_tabnavbtn_tab_trl_istranslated_check
+		check (istranslated = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))
+);
+
+/**********************************************************************************************************/
+-- Add translation data for the Tab Navigation Buttons
+/**********************************************************************************************************/
+
 
 /**********************************************************************************************************/
 -- Finish
