@@ -473,6 +473,28 @@ SET currentnext = (SELECT MAX(ad_element_id) + 1 FROM ad_element)
 WHERE name = 'AD_Column';
 
 /**********************************************************************************************************/
+-- Update the right translation columns
+/**********************************************************************************************************/
+UPDATE ad_column c
+SET istranslated = 'Y'
+FROM ad_table t
+WHERE t.ad_table_id = c.ad_table_id
+	AND t.tablename = 'BH_DbrdBtnGrp_Btn'
+	AND c.columnname IN ('ButtonHelpText','ButtonText','Name');
+UPDATE ad_column c
+SET istranslated = 'Y'
+FROM ad_table t
+WHERE t.ad_table_id = c.ad_table_id
+	AND t.tablename = 'BH_DbrdBtnGrp'
+	AND c.columnname IN ('Name');
+UPDATE ad_column c
+SET istranslated = 'Y'
+FROM ad_table t
+WHERE t.ad_table_id = c.ad_table_id
+	AND t.tablename like 'BH_TabNavBtn%'
+	AND c.columnname IN ('ButtonHelpText','ButtonText','Name');
+
+/**********************************************************************************************************/
 -- Finish
 /**********************************************************************************************************/
 SELECT register_migration_script('202011191559_GO-1446.sql') FROM dual;
