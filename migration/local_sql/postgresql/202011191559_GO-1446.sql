@@ -28,7 +28,7 @@ create table if not exists bh_uibutton
 );
 
 -- Insert a record into AD_Sequence
-INSERT INTO ad_sequence (ad_sequence_id, ad_client_id, ad_org_id, isactive, createdby, updatedby, name, description, vformat, isautosequence, incrementno, startno, currentnext, currentnextsys, isaudited, istableid, prefix, suffix, startnewyear, datecolumn, decimalpattern, ad_sequence_uu, startnewmonth, isorglevelsequence, orgcolumn) VALUES ((SELECT currentnext FROM ad_sequence WHERE name = 'AD_Sequence'), 0, 0, 'Y', 1001875, 1001875, 'BH_UIButton', 'Table BH_UIButton', null, 'Y', 1, 1000000, 1000014, 200000, 'N', 'Y', null, null, 'N', null, null, '96263e1e-b946-4eaa-b3f9-aab99db9f6b5', 'N', 'N', null)
+INSERT INTO ad_sequence (ad_sequence_id, ad_client_id, ad_org_id, isactive, createdby, updatedby, name, description, vformat, isautosequence, incrementno, startno, currentnext, currentnextsys, isaudited, istableid, prefix, suffix, startnewyear, datecolumn, decimalpattern, ad_sequence_uu, startnewmonth, isorglevelsequence, orgcolumn) VALUES ((SELECT currentnext FROM ad_sequence WHERE name = 'AD_Sequence'), 0, 0, 'Y', 100, 100, 'BH_UIButton', 'Table BH_UIButton', null, 'Y', 1, 1000000, 1000014, 200000, 'N', 'Y', null, null, 'N', null, null, '96263e1e-b946-4eaa-b3f9-aab99db9f6b5', 'N', 'N', null)
 ON CONFLICT DO NOTHING;
 
 /**********************************************************************************************************/
@@ -91,7 +91,7 @@ create table if not exists bh_uibutton_trl
 );
 
 -- Insert a record into AD_Sequence
-INSERT INTO ad_sequence (ad_sequence_id, ad_client_id, ad_org_id, isactive, createdby, updatedby, name, description, vformat, isautosequence, incrementno, startno, currentnext, currentnextsys, isaudited, istableid, prefix, suffix, startnewyear, datecolumn, decimalpattern, ad_sequence_uu, startnewmonth, isorglevelsequence, orgcolumn) VALUES ((SELECT currentnext FROM ad_sequence WHERE name = 'AD_Sequence'), 0, 0, 'Y', 1001875, 1001875, 'BH_UIButton_Trl', 'Table BH_UIButton_Trl', null, 'Y', 1, 1000000, 1000000, 200000, 'N', 'Y', null, null, 'N', null, null, 'd6bfb9f6-3cb3-4994-a8f1-193b2ac7d864', 'N', 'N', null)
+INSERT INTO ad_sequence (ad_sequence_id, ad_client_id, ad_org_id, isactive, createdby, updatedby, name, description, vformat, isautosequence, incrementno, startno, currentnext, currentnextsys, isaudited, istableid, prefix, suffix, startnewyear, datecolumn, decimalpattern, ad_sequence_uu, startnewmonth, isorglevelsequence, orgcolumn) VALUES ((SELECT currentnext FROM ad_sequence WHERE name = 'AD_Sequence'), 0, 0, 'Y', 100, 100, 'BH_UIButton_Trl', 'Table BH_UIButton_Trl', null, 'Y', 1, 1000000, 1000000, 200000, 'N', 'Y', null, null, 'N', null, null, 'd6bfb9f6-3cb3-4994-a8f1-193b2ac7d864', 'N', 'N', null)
 ON CONFLICT DO NOTHING;
 
 -- Insert data into the UI Buttons table
@@ -493,6 +493,1016 @@ FROM ad_table t
 WHERE t.ad_table_id = c.ad_table_id
 	AND t.tablename like 'BH_TabNavBtn%'
 	AND c.columnname IN ('ButtonHelpText','ButtonText','Name');
+
+/**********************************************************************************************************/
+-- Ensure the new dashboard is used
+/**********************************************************************************************************/
+UPDATE pa_dashboardcontent
+SET zulfilepath = '/zul/DashboardSideMenu.zul'
+WHERE zulfilepath = '/zul/DashboardMenu.zul';
+
+/**********************************************************************************************************/
+-- Add the BandaGO Admin role and include it in the Admin roles
+/**********************************************************************************************************/
+UPDATE ad_role
+SET name = 'BandaGo Admin', description = 'Give access to functionality provided in all the other sub roles  **(Has access to ALL menu items)**'
+WHERE ad_role_uu = '0520b255-2e55-41b7-b95c-4f6660e77625';
+
+INSERT INTO ad_role_included (ad_client_id, ad_org_id, ad_role_id, createdby, included_role_id, isactive, seqno, updatedby, ad_role_included_uu)
+SELECT r.ad_client_id, 0, r.ad_role_id, 100, admn.ad_role_id, 'Y', 10, 100, uuid_generate_v4()
+FROM ad_role r
+CROSS JOIN (SELECT ad_role_id FROM ad_role WHERE name = 'BandaGo Admin') admn
+WHERE r.ad_role_uu IN ('66cad621-be54-415b-9b2c-f3d0ca25db7e','11e24143-fb13-4fa9-b059-3d9ded76c24f','76fb16e6-a8ce-4d43-afbf-c4923569861a','ca79b28c-a637-42a3-92c3-1a7f4888a253','b4f7e813-6c92-4c56-89b8-16546fbab8d6','f09d551c-36de-4789-96b9-08f55ae1f9fe')
+ON CONFLICT DO NOTHING;
+
+/**********************************************************************************************************/
+-- For iDempiere 7.1, update the toolbar buttons
+/**********************************************************************************************************/
+UPDATE ad_toolbarbutton
+SET isshowmore = 'N'
+WHERE ad_toolbarbutton_uu IN ('e4f1785e-db0e-48de-a4af-ac21c647b7f9','85a6a115-51c2-4164-a96d-09bb6d5792da');
+
+/**********************************************************************************************************/
+-- Update the schema of the DB (to match what the 2-pack will create) so scripts needing specific DB values
+-- can be run before 2-packs
+/**********************************************************************************************************/
+
+-- 
+-- Below script was generated by Devart dbForge Schema Compare for PostgreSQL, Version 1.1.1.0
+-- Product Home Page: http://www.devart.com/dbforge/postgresql/schemacompare
+-- Script date 11/26/2020 11:37:51 AM
+-- 
+
+--
+-- Create procedure "adempiere"."pg_stat_statements_reset"
+--
+CREATE OR REPLACE PROCEDURE pg_stat_statements_reset ()
+LANGUAGE c
+SECURITY INVOKER
+AS $c$pg_stat_statements_reset$c$;
+
+--
+-- Create function "adempiere"."pg_stat_statements"
+--
+CREATE OR REPLACE FUNCTION pg_stat_statements ()
+RETURNS record
+LANGUAGE c
+VOLATILE
+AS $c$pg_stat_statements_1_3$c$;
+
+--
+-- Create view "adempiere"."pg_stat_statements"
+--
+CREATE OR REPLACE VIEW IF NOT EXISTS pg_stat_statements
+AS
+	SELECT pg_stat_statements.userid,
+    pg_stat_statements.dbid,
+    pg_stat_statements.queryid,
+    pg_stat_statements.query,
+    pg_stat_statements.calls,
+    pg_stat_statements.total_time,
+    pg_stat_statements.min_time,
+    pg_stat_statements.max_time,
+    pg_stat_statements.mean_time,
+    pg_stat_statements.stddev_time,
+    pg_stat_statements.rows,
+    pg_stat_statements.shared_blks_hit,
+    pg_stat_statements.shared_blks_read,
+    pg_stat_statements.shared_blks_dirtied,
+    pg_stat_statements.shared_blks_written,
+    pg_stat_statements.local_blks_hit,
+    pg_stat_statements.local_blks_read,
+    pg_stat_statements.local_blks_dirtied,
+    pg_stat_statements.local_blks_written,
+    pg_stat_statements.temp_blks_read,
+    pg_stat_statements.temp_blks_written,
+    pg_stat_statements.blk_read_time,
+    pg_stat_statements.blk_write_time
+   FROM adempiere.pg_stat_statements(true) pg_stat_statements(userid, dbid, queryid, query, calls, total_time, min_time, max_time, mean_time, stddev_time, rows, shared_blks_hit, shared_blks_read, shared_blks_dirtied, shared_blks_written, local_blks_hit, local_blks_read, local_blks_dirtied, local_blks_written, temp_blks_read, temp_blks_written, blk_read_time, blk_write_time);
+
+--
+-- Create table "adempiere"."bh_stockrevenue_view"
+--
+CREATE TABLE IF NOT EXISTS bh_stockrevenue_view(
+  name character varying(255) DEFAULT NULL::character varying,
+  quantity numeric(10, 0) DEFAULT NULL::numeric,
+  amount numeric(147455, 16383),
+  ad_client_id numeric(10, 0) DEFAULT NULL::numeric,
+  ad_org_id numeric(10, 0) DEFAULT NULL::numeric)
+;
+
+--
+-- Create table "adempiere"."bh_stock_mvt_v"
+--
+CREATE TABLE IF NOT EXISTS bh_stock_mvt_v(
+  name character varying(255) DEFAULT NULL::character varying,
+  beginning numeric(147455, 16383),
+  outgoing numeric(147455, 16383),
+  ending numeric(147455, 16383),
+  ad_client_id numeric(10, 0) DEFAULT NULL::numeric,
+  ad_org_id numeric(10, 0) DEFAULT NULL::numeric)
+;
+
+--
+-- Create table "adempiere"."bh_product_categorydefault"
+--
+CREATE TABLE IF NOT EXISTS bh_product_categorydefault(
+  bh_product_categorydefault_id numeric(10, 0) NOT NULL,
+  ad_client_id numeric(10, 0) NOT NULL,
+  ad_org_id numeric(10, 0) NOT NULL,
+  bh_product_categorydefault_uu character varying(36) DEFAULT NULL::character varying,
+  created timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
+  createdby numeric(10, 0) NOT NULL,
+  description character varying(255) DEFAULT NULL::character varying,
+  isactive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  name character varying(60) NOT NULL,
+  updated timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
+  updatedby numeric(10, 0) NOT NULL,
+  value character varying(40) NOT NULL,
+  bh_product_category_type character(1) NOT NULL,
+  PRIMARY KEY (bh_product_categorydefault_id),
+  CONSTRAINT bh_product_categorydefault_isactive_check CHECK (CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))),
+  CONSTRAINT bh_product_categorydefauluuidx UNIQUE(bh_product_categorydefault_uu),
+  CONSTRAINT adclient_bhproductcategorydefa FOREIGN KEY (ad_client_id)
+    REFERENCES ad_client(ad_client_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
+  CONSTRAINT adorg_bhproductcategorydefault FOREIGN KEY (ad_org_id)
+    REFERENCES ad_org(ad_org_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE
+);
+
+--
+-- Create table "adempiere"."bh_chargedefault"
+--
+CREATE TABLE IF NOT EXISTS bh_chargedefault(
+  bh_chargedefault_id numeric(10, 0) NOT NULL,
+  ad_client_id numeric(10, 0) NOT NULL,
+  ad_org_id numeric(10, 0) NOT NULL,
+  bh_chargedefault_uu character varying(36) DEFAULT NULL::character varying,
+  created timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
+  createdby numeric(10, 0) NOT NULL,
+  description character varying(255) DEFAULT NULL::character varying,
+  isactive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  name character varying(60) NOT NULL,
+  updated timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
+  updatedby numeric(10, 0) NOT NULL,
+  value character varying(40) NOT NULL,
+  PRIMARY KEY (bh_chargedefault_id),
+  CONSTRAINT bh_chargedefault_isactive_check CHECK (CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))),
+  CONSTRAINT bh_chargedefault_uu_idx UNIQUE(bh_chargedefault_uu),
+  CONSTRAINT adclient_bhchargedefault FOREIGN KEY (ad_client_id)
+    REFERENCES ad_client(ad_client_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
+  CONSTRAINT adorg_bhchargedefault FOREIGN KEY (ad_org_id)
+    REFERENCES ad_org(ad_org_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE
+);
+
+--
+-- Create column "isnewpatient" on table "adempiere"."c_bpartner"
+--
+ALTER TABLE c_bpartner 
+  ADD isnewpatient IF NOT EXISTS character(1) DEFAULT 'Y'::bpchar;
+
+--
+-- Create column "bh_nhif_type" on table "adempiere"."c_bpartner"
+--
+ALTER TABLE c_bpartner 
+  ADD bh_nhif_type IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_lastpatientid" on table "adempiere"."c_bpartner"
+--
+ALTER TABLE c_bpartner 
+  ADD bh_lastpatientid IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_local_patientid" on table "adempiere"."c_bpartner"
+--
+ALTER TABLE c_bpartner 
+  ADD bh_local_patientid IF NOT EXISTS character varying(100);
+
+--
+-- Create view "adempiere"."bh_patient_id_generator_v"
+--
+CREATE OR REPLACE VIEW bh_patient_id_generator_v
+AS
+	WITH clientids AS (
+         SELECT ad_client.ad_client_id
+           FROM adempiere.ad_client
+          WHERE (ad_client.isactive = 'Y'::bpchar)
+        ), patientids AS (
+         SELECT ci.ad_client_id,
+            COALESCE(max((c.bh_patientid)::text)) AS lastpatientid
+           FROM (adempiere.c_bpartner c
+             JOIN clientids ci ON ((c.ad_client_id = ci.ad_client_id)))
+          WHERE (c.bh_patientid IS NOT NULL)
+          GROUP BY ci.ad_client_id
+        )
+ SELECT l.ad_client_id,
+    l.lastpatientid,
+    (to_number(l.lastpatientid, '99999999'::text) + (1)::numeric) AS newpatientid
+   FROM patientids l;
+
+--
+-- Create view "adempiere"."bh_number_of_patients_v"
+--
+CREATE OR REPLACE VIEW bh_number_of_patients_v
+AS
+	SELECT count(c_bpartner.c_bpartner_id) AS number_of_patients,
+    c_bpartner.ad_client_id,
+    c_bpartner.ad_org_id
+   FROM adempiere.c_bpartner
+  WHERE ((c_bpartner.bh_ispatient = 'Y'::bpchar) AND (c_bpartner.isactive = 'Y'::bpchar))
+  GROUP BY c_bpartner.ad_client_id, c_bpartner.ad_org_id;
+
+--
+-- Create column "c_elementvalue_id" on table "adempiere"."c_charge"
+--
+ALTER TABLE c_charge 
+  ADD c_elementvalue_id IF NOT EXISTS numeric(10, 0) DEFAULT NULL::numeric;
+
+--
+-- Create column "bh_locked" on table "adempiere"."c_charge"
+--
+ALTER TABLE c_charge 
+  ADD bh_locked IF NOT EXISTS character(1) DEFAULT 'N'::bpchar;
+
+--
+-- Create table "adempiere"."bh_paymentref"
+--
+CREATE TABLE IF NOT EXISTS bh_paymentref(
+  bh_paymentref_id numeric(10, 0) NOT NULL,
+  ad_client_id numeric(10, 0) NOT NULL,
+  ad_org_id numeric(10, 0) NOT NULL,
+  bh_paymentref_uu character varying(36) DEFAULT NULL::character varying,
+  created timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
+  createdby numeric(10, 0) NOT NULL,
+  description character varying(255) DEFAULT NULL::character varying,
+  isactive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  name character varying(60) NOT NULL,
+  updated timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
+  updatedby numeric(10, 0) NOT NULL,
+  ad_reference_id numeric(10, 0) NOT NULL,
+  bh_paymentref_action character(1) DEFAULT NULL::bpchar,
+  PRIMARY KEY (bh_paymentref_id),
+  UNIQUE(bh_paymentref_uu),
+  CONSTRAINT bh_paymentref_isactive_check CHECK (CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))),
+  FOREIGN KEY (ad_client_id)
+    REFERENCES ad_client(ad_client_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
+  FOREIGN KEY (ad_org_id)
+    REFERENCES ad_org(ad_org_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
+  FOREIGN KEY (ad_reference_id)
+    REFERENCES ad_reference(ad_reference_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE
+);
+
+--
+-- Create table "adempiere"."bh_paymentref_bankacct"
+--
+CREATE TABLE IF NOT EXISTS bh_paymentref_bankacct(
+  bh_paymentref_bankacct_id numeric(10, 0) NOT NULL,
+  ad_client_id numeric(10, 0) NOT NULL,
+  ad_org_id numeric(10, 0) NOT NULL,
+  bh_paymentref_bankacct_uu character varying(36) DEFAULT NULL::character varying,
+  created timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
+  createdby numeric(10, 0) NOT NULL,
+  description character varying(255) DEFAULT NULL::character varying,
+  isactive character(1) NOT NULL DEFAULT 'Y'::bpchar,
+  name character varying(60) NOT NULL,
+  updated timestamp without time zone NOT NULL DEFAULT statement_timestamp(),
+  updatedby numeric(10, 0) NOT NULL,
+  ad_ref_list_id numeric(10, 0) DEFAULT NULL::numeric,
+  c_bankaccount_id numeric(10, 0) DEFAULT NULL::numeric,
+  bh_paymentref_id numeric(10, 0) NOT NULL,
+  bh_paymentreflist_value character varying(1) DEFAULT NULL::character varying,
+  PRIMARY KEY (bh_paymentref_bankacct_id),
+  UNIQUE(bh_paymentref_bankacct_uu),
+  CONSTRAINT bh_paymentref_bankacct_isactive_check CHECK (CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))),
+  FOREIGN KEY (ad_client_id)
+    REFERENCES ad_client(ad_client_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
+  FOREIGN KEY (ad_org_id)
+    REFERENCES ad_org(ad_org_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
+  FOREIGN KEY (bh_paymentref_id)
+    REFERENCES bh_paymentref(bh_paymentref_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
+  FOREIGN KEY (c_bankaccount_id)
+    REFERENCES c_bankaccount(c_bankaccount_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE
+);
+
+--
+-- Create view "adempiere"."bh_user_activity_v"
+--
+CREATE OR REPLACE VIEW bh_user_activity_v
+AS
+	SELECT c.ad_table_id,
+    t.name AS window_name,
+    client.name AS client_name,
+    (to_timestamp((c.created)::text, 'YYYY-MM-DD'::text))::timestamp without time zone AS created,
+    count(c.ad_changelog_id) AS count,
+    c.ad_client_id,
+    c.ad_org_id
+   FROM ((adempiere.ad_changelog c
+     JOIN adempiere.ad_table t ON ((c.ad_table_id = t.ad_table_id)))
+     JOIN adempiere.ad_client client ON ((c.ad_client_id = client.ad_client_id)))
+  WHERE ((c.ad_table_id = ANY (ARRAY[(208)::numeric, (291)::numeric, (259)::numeric])) AND (c.ad_org_id > (0)::numeric))
+  GROUP BY c.ad_table_id, t.name, client.name, ((to_timestamp((c.created)::text, 'YYYY-MM-DD'::text))::timestamp without time zone), c.ad_client_id, c.ad_org_id
+  ORDER BY ((to_timestamp((c.created)::text, 'YYYY-MM-DD'::text))::timestamp without time zone) DESC;
+
+--
+-- Create view "adempiere"."bh_system_usage_v"
+--
+CREATE OR REPLACE VIEW bh_system_usage_v
+AS
+	SELECT to_timestamp(to_char(ad_changelog.created, 'YYYY-MM-DD HH24:00:00'::text), 'YYYY-MM-DD HH24:00:00'::text) AS date,
+    count(ad_changelog.ad_changelog_id) AS occurences
+   FROM adempiere.ad_changelog
+  GROUP BY (to_timestamp(to_char(ad_changelog.created, 'YYYY-MM-DD HH24:00:00'::text), 'YYYY-MM-DD HH24:00:00'::text))
+  ORDER BY (to_timestamp(to_char(ad_changelog.created, 'YYYY-MM-DD HH24:00:00'::text), 'YYYY-MM-DD HH24:00:00'::text)) DESC;
+
+--
+-- Create view "adempiere"."bh_changelog_v"
+--
+CREATE OR REPLACE VIEW bh_changelog_v
+AS
+	SELECT ad_changelog.ad_table_id,
+    (to_timestamp((ad_changelog.created)::text, 'YYYY-MM-DD'::text))::timestamp without time zone AS created,
+    ad_changelog.eventchangelog,
+    count(ad_changelog.ad_changelog_id) AS count,
+    ad_changelog.createdby,
+    ad_changelog.ad_client_id,
+    ad_changelog.ad_org_id
+   FROM adempiere.ad_changelog
+  GROUP BY ad_changelog.ad_table_id, ad_changelog.eventchangelog, ((to_timestamp((ad_changelog.created)::text, 'YYYY-MM-DD'::text))::timestamp without time zone), ad_changelog.createdby, ad_changelog.ad_client_id, ad_changelog.ad_org_id;
+
+--
+-- Create view "adempiere"."bh_recent_windows_v"
+--
+CREATE OR REPLACE VIEW bh_recent_windows_v
+AS
+	SELECT r.created,
+    r.ad_org_id,
+    r.ad_client_id,
+    r.ad_window_id,
+    w.name AS window_name,
+    c.name AS client_name,
+    r.ad_recentitem_id
+   FROM ((adempiere.ad_recentitem r
+     JOIN adempiere.ad_window w ON ((r.ad_window_id = w.ad_window_id)))
+     JOIN adempiere.ad_client c ON ((r.ad_client_id = c.ad_client_id)))
+  WHERE (r.ad_org_id > (0)::numeric)
+  ORDER BY r.created DESC;
+
+--
+-- Create column "bh_pricemargin" on table "adempiere"."m_product"
+--
+ALTER TABLE m_product 
+  ADD bh_pricemargin IF NOT EXISTS numeric(147455, 16383);
+
+--
+-- Create column "bh_product_category_type" on table "adempiere"."m_product"
+--
+ALTER TABLE m_product 
+  ADD bh_product_category_type IF NOT EXISTS character(1) DEFAULT NULL::bpchar;
+
+--
+-- Create view "adempiere"."bh_stock_reorder_levels_v"
+--
+CREATE OR REPLACE VIEW bh_stock_reorder_levels_v
+AS
+	WITH quantitysums AS (
+         SELECT s_1.m_product_id,
+            sum(s_1.qtyonhand) AS quantity,
+            s_1.ad_client_id,
+            s_1.ad_org_id,
+            s_1.m_locator_id
+           FROM adempiere.m_storage s_1
+          GROUP BY s_1.m_product_id, s_1.ad_client_id, s_1.ad_org_id, s_1.m_locator_id
+        )
+ SELECT s.ad_org_id,
+    s.ad_client_id,
+    w.name AS store,
+    p.name AS product,
+    s.quantity AS existingquantity,
+    COALESCE(p.bh_reorder_level, (0)::numeric) AS reorderlevel,
+        CASE
+            WHEN ((s.quantity - COALESCE(p.bh_reorder_level, (0)::numeric)) > (0)::numeric) THEN false
+            ELSE true
+        END AS reorder,
+    p.bh_reorder_quantity AS reorderquantity
+   FROM (((quantitysums s
+     JOIN adempiere.m_locator l ON ((s.m_locator_id = l.m_locator_id)))
+     JOIN adempiere.m_product p ON ((s.m_product_id = p.m_product_id)))
+     JOIN adempiere.m_warehouse w ON ((l.m_warehouse_id = w.m_warehouse_id)))
+  ORDER BY s.quantity;
+
+--
+-- Create view "adempiere"."bh_reorder_inventory_v"
+--
+CREATE OR REPLACE VIEW bh_reorder_inventory_v
+AS
+	WITH quantitysums AS (
+         SELECT s_1.m_product_id,
+            sum(s_1.qtyonhand) AS quantity,
+            s_1.ad_client_id,
+            s_1.ad_org_id,
+            s_1.m_locator_id
+           FROM adempiere.m_storage s_1
+          GROUP BY s_1.m_product_id, s_1.ad_client_id, s_1.ad_org_id, s_1.m_locator_id
+        )
+ SELECT s.ad_org_id,
+    s.ad_client_id,
+    w.name AS store,
+    p.name AS product,
+    s.quantity AS existingquantity,
+    COALESCE(p.bh_reorder_level, (0)::numeric) AS reorderlevel,
+        CASE
+            WHEN ((s.quantity - COALESCE(p.bh_reorder_level, (0)::numeric)) > (0)::numeric) THEN false
+            ELSE true
+        END AS reorder
+   FROM (((quantitysums s
+     JOIN adempiere.m_locator l ON ((s.m_locator_id = l.m_locator_id)))
+     JOIN adempiere.m_product p ON ((s.m_product_id = p.m_product_id)))
+     JOIN adempiere.m_warehouse w ON ((l.m_warehouse_id = w.m_warehouse_id)))
+  ORDER BY s.quantity;
+
+--
+-- Create view "adempiere"."bh_current_inventory_v"
+--
+CREATE OR REPLACE VIEW bh_current_inventory_v
+AS
+	WITH inventory AS (
+         SELECT p.ad_org_id,
+            p.ad_client_id,
+            p.name,
+            sum(s.qtyonhand) AS qtyonhand,
+            i_1.guaranteedate
+           FROM ((adempiere.m_product p
+             JOIN adempiere.m_storage s ON ((p.m_product_id = s.m_product_id)))
+             JOIN adempiere.m_attributesetinstance i_1 ON ((s.m_attributesetinstance_id = i_1.m_attributesetinstance_id)))
+          GROUP BY p.m_product_id, i_1.guaranteedate
+          ORDER BY p.name, i_1.guaranteedate
+        )
+ SELECT i.ad_org_id,
+    i.ad_client_id,
+    i.name,
+    i.qtyonhand,
+    i.guaranteedate
+   FROM inventory i
+  ORDER BY i.qtyonhand DESC;
+
+--
+-- Create view "adempiere"."bh_stocktake_v"
+--
+CREATE OR REPLACE VIEW bh_stocktake_v
+AS
+	WITH quantitysums AS (
+         SELECT s_1.m_product_id,
+            sum(s_1.qtyonhand) AS quantity,
+            s_1.ad_client_id,
+            s_1.ad_org_id,
+            s_1.m_locator_id,
+            s_1.m_attributesetinstance_id,
+            asi_1.guaranteedate
+           FROM (adempiere.m_storage s_1
+             LEFT JOIN adempiere.m_attributesetinstance asi_1 ON ((s_1.m_attributesetinstance_id = asi_1.m_attributesetinstance_id)))
+          GROUP BY s_1.m_product_id, s_1.ad_client_id, s_1.ad_org_id, s_1.m_locator_id, asi_1.guaranteedate, s_1.m_attributesetinstance_id
+        )
+ SELECT s.m_product_id,
+    l.m_warehouse_id,
+    p.name AS product,
+    asi.description,
+    asi.guaranteedate AS expirationdate,
+    l.value AS location,
+    s.quantity,
+    adempiere.daysbetween((asi.guaranteedate)::timestamp with time zone, (('now'::text)::timestamp without time zone)::timestamp with time zone) AS shelflifedays,
+    s.ad_client_id,
+    s.ad_org_id,
+    attset.isinstanceattribute,
+    attset.created,
+    attset.createdby,
+    attset.updated,
+    attset.updatedby,
+    attset.isactive,
+    concat(s.m_product_id, l.m_warehouse_id) AS id,
+    st.bh_docaction,
+    st.processed,
+    asi.m_attributeset_id,
+    asi.m_attributesetinstance_id
+   FROM (((((quantitysums s
+     JOIN adempiere.m_locator l ON ((s.m_locator_id = l.m_locator_id)))
+     JOIN adempiere.m_product p ON ((s.m_product_id = p.m_product_id)))
+     LEFT JOIN adempiere.m_attributesetinstance asi ON ((s.m_attributesetinstance_id = asi.m_attributesetinstance_id)))
+     LEFT JOIN adempiere.m_attributeset attset ON ((asi.m_attributeset_id = attset.m_attributeset_id)))
+     LEFT JOIN adempiere.bh_stocktake st ON ((asi.m_attributesetinstance_id = st.m_attributesetinstance_id)))
+  WHERE ((attset.name)::text = 'BandaHealthProductAttributeSet'::text)
+  ORDER BY p.name;
+
+--
+-- Create column "description" on table "adempiere"."m_discountschemaline"
+--
+ALTER TABLE m_discountschemaline 
+  ADD description IF NOT EXISTS character varying(255) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_nhif_linda_mama" on table "adempiere"."c_payment"
+--
+ALTER TABLE c_payment 
+  ADD bh_nhif_linda_mama IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_nhif_type" on table "adempiere"."c_payment"
+--
+ALTER TABLE c_payment 
+  ADD bh_nhif_type IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_tender_amount" on table "adempiere"."c_payment"
+--
+ALTER TABLE c_payment 
+  ADD bh_tender_amount IF NOT EXISTS numeric(147455, 16383);
+
+--
+-- Create column "bh_isservicedebt" on table "adempiere"."c_payment"
+--
+ALTER TABLE c_payment 
+  ADD bh_isservicedebt IF NOT EXISTS character(1) DEFAULT NULL::bpchar;
+
+--
+-- Create column "bh_docaction" on table "adempiere"."c_invoice"
+--
+ALTER TABLE c_invoice 
+  ADD bh_docaction IF NOT EXISTS character(2) DEFAULT NULL::bpchar;
+
+--
+-- Create column "bh_navbuttons" on table "adempiere"."c_invoice"
+--
+ALTER TABLE c_invoice 
+  ADD bh_navbuttons IF NOT EXISTS character varying(36) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_isexpense" on table "adempiere"."c_invoice"
+--
+ALTER TABLE c_invoice 
+  ADD bh_isexpense IF NOT EXISTS character(1) DEFAULT 'N'::bpchar;
+
+--
+-- Create column "bh_processing" on table "adempiere"."c_invoice"
+--
+ALTER TABLE c_invoice 
+  ADD bh_processing IF NOT EXISTS character(1) DEFAULT 'N'::bpchar;
+
+--
+-- Create column "bh_docaction_2" on table "adempiere"."c_invoice"
+--
+ALTER TABLE c_invoice 
+  ADD bh_docaction_2 IF NOT EXISTS character(2) DEFAULT NULL::bpchar;
+
+--
+-- Create column "bh_referral" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_referral IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_newvisit" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_newvisit IF NOT EXISTS character(1) DEFAULT 'N'::bpchar;
+
+--
+-- Create column "bh_patienttype" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_patienttype IF NOT EXISTS character(1) DEFAULT 'O'::bpchar;
+
+--
+-- Create column "bh_lab_notes" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_lab_notes IF NOT EXISTS character varying(255) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_bloodpressure" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_bloodpressure IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_chiefcomplaint" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_chiefcomplaint IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_height" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_height IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_pulse" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_pulse IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_respiratoryrate" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_respiratoryrate IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_temperature" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_temperature IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create column "bh_weight" on table "adempiere"."c_order"
+--
+ALTER TABLE c_order 
+  ADD bh_weight IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+
+--
+-- Create view "adempiere"."bh_patients_seen_by_month_v"
+--
+CREATE OR REPLACE VIEW bh_patients_seen_by_month_v
+AS
+	WITH grouppatients AS (
+         SELECT c_bpartner.c_bpartner_id
+           FROM adempiere.c_bpartner
+          WHERE ((c_bpartner.isactive = 'Y'::bpchar) AND (c_bpartner.bh_ispatient = 'Y'::bpchar))
+          GROUP BY c_bpartner.c_bpartner_id
+        ), groupdates AS (
+         SELECT corder.ad_client_id,
+            corder.ad_org_id,
+            to_char(corder.created, 'YYYY-MM'::text) AS month,
+            count(grouppatients.c_bpartner_id) AS total_patients,
+            count(
+                CASE
+                    WHEN (to_char(bpartner.created, 'YYYY-MM'::text) = to_char(corder.created, 'YYYY-MM'::text)) THEN grouppatients.c_bpartner_id
+                    ELSE NULL::numeric
+                END) AS new_patients
+           FROM ((grouppatients
+             JOIN adempiere.c_order corder ON ((corder.c_bpartner_id = grouppatients.c_bpartner_id)))
+             JOIN adempiere.c_bpartner bpartner ON ((grouppatients.c_bpartner_id = bpartner.c_bpartner_id)))
+          WHERE ((corder.isactive = 'Y'::bpchar) AND (corder.docstatus = 'CO'::bpchar) AND (corder.processed = 'Y'::bpchar) AND (corder.issotrx = 'Y'::bpchar))
+          GROUP BY corder.ad_client_id, corder.ad_org_id, (to_char(corder.created, 'YYYY-MM'::text))
+          ORDER BY corder.ad_client_id
+        )
+ SELECT ((date_trunc('MONTH'::text, to_timestamp(concat(gd.month, '-', '01'), 'YYYY-MM-DD'::text)) + '1 mon -1 days'::interval))::timestamp without time zone AS end_month,
+    gd.ad_client_id,
+    gd.ad_org_id,
+    gd.total_patients,
+    gd.new_patients,
+    c.name AS client_name
+   FROM (groupdates gd
+     JOIN adempiere.ad_client c ON ((gd.ad_client_id = c.ad_client_id)));
+
+--
+-- Create view "adempiere"."bh_daily_orders_v"
+--
+CREATE OR REPLACE VIEW bh_daily_orders_v
+AS
+	SELECT c_order.dateordered,
+    c_order.c_bpartner_id,
+    c_order.docstatus,
+    c_order.docaction,
+    c_order.grandtotal,
+    c_order.ad_client_id,
+    c_order.ad_org_id,
+    c_order.issotrx AS purchasetransaction
+   FROM adempiere.c_order;
+
+--
+-- Create column "bh_instructions" on table "adempiere"."c_orderline"
+--
+ALTER TABLE c_orderline 
+  ADD bh_instructions IF NOT EXISTS character varying(255) DEFAULT NULL::character varying;]
+
+--
+-- Create view "adempiere"."bhcorderv"
+--
+CREATE OR REPLACE VIEW bhcorderv
+AS
+	WITH ordergrandtotals AS (
+         SELECT c_orderline.c_order_id,
+            COALESCE(sum(c_orderline.linenetamt), (0)::numeric) AS grandtotal
+           FROM adempiere.c_orderline
+          GROUP BY c_orderline.c_order_id
+        ), orderinvoicetotals AS (
+         SELECT ogt_1.c_order_id,
+            sum(pmt.payamt) AS paytotal
+           FROM ((ordergrandtotals ogt_1
+             LEFT JOIN adempiere.bh_c_order_payment_v opmt ON ((opmt.c_order_id = ogt_1.c_order_id)))
+             LEFT JOIN adempiere.c_payment pmt ON ((opmt.c_payment_id = pmt.c_payment_id)))
+          GROUP BY ogt_1.c_order_id
+        )
+ SELECT ogt.c_order_id,
+    ordr.c_bpartner_id,
+    ogt.grandtotal,
+    COALESCE(oit.paytotal, (0)::numeric) AS paytotal,
+    (ogt.grandtotal - COALESCE(oit.paytotal, (0)::numeric)) AS amtleft
+   FROM ((ordergrandtotals ogt
+     LEFT JOIN orderinvoicetotals oit ON ((ogt.c_order_id = oit.c_order_id)))
+     LEFT JOIN adempiere.c_order ordr ON ((ogt.c_order_id = ordr.c_order_id)));
+
+--
+-- Create view "adempiere"."bh_incomestatement_v"
+--
+CREATE OR REPLACE VIEW bh_incomestatement_v
+AS
+	SELECT client.name,
+    sum(
+        CASE
+            WHEN (corder.issotrx = 'Y'::bpchar) THEN corder.grandtotal
+            ELSE (0)::numeric
+        END) AS revenue,
+    sum(
+        CASE
+            WHEN (corder.issotrx = 'N'::bpchar) THEN corder.grandtotal
+            ELSE (0)::numeric
+        END) AS cost,
+    sum(bhcorderv.paytotal) AS payments,
+    sum(bhcorderv.amtleft) AS balances_due,
+    corder.created AS datecreated
+   FROM ((adempiere.c_order corder
+     JOIN adempiere.ad_client client ON ((corder.ad_client_id = client.ad_client_id)))
+     JOIN adempiere.bhcorderv ON ((bhcorderv.c_order_id = corder.c_order_id)))
+  WHERE (corder.docstatus = 'CO'::bpchar)
+  GROUP BY client.name, corder.created
+  ORDER BY corder.created DESC;
+
+--
+-- Create view "adempiere"."bh_patient_transactions_summary_v"
+--
+CREATE OR REPLACE VIEW bh_patient_transactions_summary_v
+AS
+	SELECT client.name AS clinicname,
+    corder.dateordered,
+    corder.c_order_id AS visitid,
+    clocation.address1 AS visitlocation,
+    bplocation.name AS patientlocation,
+    corder.description AS diagnosis,
+    p1.name AS drug,
+    cline1.priceactual AS salesprice,
+    s1.name AS service,
+    cline1.qtyordered AS quantityordered,
+    corder.grandtotal AS totalbilled,
+    inv.paytotal AS totalpaid
+   FROM ((((((((adempiere.c_order corder
+     JOIN adempiere.c_orderline cline1 ON ((corder.c_order_id = cline1.c_order_id)))
+     LEFT JOIN adempiere.m_product p1 ON (((cline1.m_product_id = p1.m_product_id) AND (p1.producttype = 'I'::bpchar))))
+     LEFT JOIN adempiere.m_product s1 ON (((cline1.m_product_id = s1.m_product_id) AND (s1.producttype = 'S'::bpchar))))
+     JOIN adempiere.c_bpartner_location bplocation ON ((corder.c_bpartner_location_id = bplocation.c_bpartner_location_id)))
+     JOIN adempiere.ad_orginfo org ON ((corder.ad_org_id = org.ad_org_id)))
+     JOIN adempiere.c_location clocation ON ((org.c_location_id = clocation.c_location_id)))
+     JOIN adempiere.ad_client client ON ((corder.ad_client_id = client.ad_client_id)))
+     JOIN adempiere.bh_c_order_v inv ON ((corder.c_order_id = inv.c_order_id)))
+  WHERE ((corder.issotrx = 'Y'::bpchar) AND (corder.docstatus = 'CO'::bpchar))
+  ORDER BY corder.dateordered DESC;
+
+--
+-- Create column "bh_navbuttons" on table "adempiere"."c_invoiceline"
+--
+ALTER TABLE c_invoiceline 
+  ADD bh_navbuttons IF NOT EXISTS character varying(36) DEFAULT NULL::character varying;
+
+--
+-- Create view "adempiere"."bh_patient_transactions_v"
+--
+CREATE OR REPLACE VIEW bh_patient_transactions_v
+AS
+	WITH corderline AS (
+         SELECT max(ol.c_orderline_id) AS c_orderline_id,
+            c.c_order_id
+           FROM (adempiere.c_order c
+             JOIN adempiere.c_orderline ol ON ((c.c_order_id = ol.c_order_id)))
+          GROUP BY c.c_order_id
+        ), invoiceline AS (
+         SELECT max(il.c_invoiceline_id) AS c_invoiceline_id,
+            il.c_orderline_id,
+            i.c_invoice_id
+           FROM (adempiere.c_invoice i
+             JOIN adempiere.c_invoiceline il ON ((i.c_invoice_id = il.c_invoice_id)))
+          GROUP BY i.c_invoice_id, il.c_orderline_id
+        ), payments AS (
+         SELECT sum(p.payamt) AS totalpayments,
+            p.c_invoice_id,
+            max(p.c_payment_id) AS c_payment_id,
+                CASE
+                    WHEN (p.tendertype = 'B'::bpchar) THEN 'Bill Waiver'::text
+                    WHEN (p.tendertype = 'M'::bpchar) THEN 'M-Pesa'::text
+                    WHEN (p.tendertype = 'F'::bpchar) THEN 'Donor Payments'::text
+                    WHEN (p.tendertype = 'i'::bpchar) THEN 'Linda Mama'::text
+                    WHEN (p.tendertype = 'N'::bpchar) THEN 'NHIF'::text
+                    ELSE 'Cash'::text
+                END AS tendertype
+           FROM (adempiere.c_payment p
+             JOIN adempiere.c_invoice i ON (((p.c_invoice_id = i.c_invoice_id) AND (p.oprocessing <> 'NULL'::bpchar))))
+          GROUP BY p.c_invoice_id, p.tendertype
+        ), patientsummary AS (
+         SELECT bp.name,
+            o.created,
+            o.grandtotal,
+            bp.totalopenbalance,
+            o.ad_client_id,
+            o.ad_org_id,
+            sum(p.totalpayments) AS totalpayments,
+            ol.c_orderline_id,
+            il.c_invoiceline_id,
+            ci.c_invoice_id,
+            p.c_payment_id,
+            client.name AS client_name,
+            p.tendertype
+           FROM ((((((adempiere.c_order o
+             JOIN adempiere.ad_client client ON ((o.ad_client_id = client.ad_client_id)))
+             LEFT JOIN adempiere.c_bpartner bp ON ((o.c_bpartner_id = bp.c_bpartner_id)))
+             LEFT JOIN corderline ol ON ((o.c_order_id = ol.c_order_id)))
+             LEFT JOIN invoiceline il ON ((ol.c_orderline_id = il.c_orderline_id)))
+             LEFT JOIN adempiere.c_invoice ci ON ((il.c_invoice_id = ci.c_invoice_id)))
+             LEFT JOIN payments p ON ((ci.c_invoice_id = p.c_invoice_id)))
+          WHERE ((o.issotrx = 'Y'::bpchar) AND (o.docstatus = 'CO'::bpchar))
+          GROUP BY bp.name, o.created, o.grandtotal, bp.totalopenbalance, o.ad_client_id, o.ad_org_id, ol.c_orderline_id, il.c_invoiceline_id, ci.c_invoice_id, p.c_payment_id, client.name, p.tendertype
+        )
+ SELECT patientsummary.name,
+    patientsummary.created,
+    patientsummary.grandtotal,
+    patientsummary.totalopenbalance,
+    patientsummary.ad_client_id,
+    patientsummary.ad_org_id,
+    patientsummary.totalpayments,
+    patientsummary.c_orderline_id,
+    patientsummary.c_invoiceline_id,
+    patientsummary.c_invoice_id,
+    patientsummary.c_payment_id,
+    patientsummary.client_name,
+    patientsummary.tendertype
+   FROM patientsummary
+  ORDER BY patientsummary.created DESC;
+
+--
+-- Create view "adempiere"."bh_visit_rate_v"
+--
+CREATE OR REPLACE VIEW bh_visit_rate_v
+AS
+	WITH dailyrate AS (
+         SELECT to_timestamp(to_char(bh_patient_transactions_v.created, 'YYYY-MM-DD'::text), 'YYYY-MM-DD'::text) AS created,
+            count(bh_patient_transactions_v.c_orderline_id) AS dailyvisits
+           FROM adempiere.bh_patient_transactions_v
+          WHERE ((bh_patient_transactions_v.client_name)::text <> ALL (ARRAY[('Banda Health'::character varying)::text, ('Banda Health Management'::character varying)::text, ('GardenWorld'::character varying)::text]))
+          GROUP BY (to_timestamp(to_char(bh_patient_transactions_v.created, 'YYYY-MM-DD'::text), 'YYYY-MM-DD'::text))
+          ORDER BY (to_timestamp(to_char(bh_patient_transactions_v.created, 'YYYY-MM-DD'::text), 'YYYY-MM-DD'::text))
+        ), monthlyrate AS (
+         SELECT dailyrate.created,
+            sum(dailyrate.dailyvisits) OVER (ORDER BY dailyrate.created ROWS BETWEEN 29 PRECEDING AND CURRENT ROW) AS monthlyvisits,
+            sum(dailyrate.dailyvisits) OVER (ORDER BY dailyrate.created ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS sumdailyvisits
+           FROM dailyrate
+          GROUP BY dailyrate.created, dailyrate.dailyvisits
+          ORDER BY dailyrate.created
+        ), annualrate AS (
+         SELECT monthlyrate.created,
+            ceil((monthlyrate.monthlyvisits * 12.017)) AS annualrate
+           FROM monthlyrate
+          GROUP BY monthlyrate.created, monthlyrate.monthlyvisits
+          ORDER BY monthlyrate.created
+        )
+ SELECT d.created AS transactiondate,
+    d.dailyvisits,
+    m.sumdailyvisits,
+    m.monthlyvisits,
+    a.annualrate
+   FROM ((dailyrate d
+     JOIN monthlyrate m ON ((d.created = m.created)))
+     JOIN annualrate a ON ((m.created = a.created)))
+  ORDER BY d.created;
+
+--
+-- Create view "adempiere"."bh_drug_profit_loss_v"
+--
+CREATE OR REPLACE VIEW bh_drug_profit_loss_v
+AS
+	WITH rg AS (
+         SELECT c_1.ad_client_id,
+            c_1.ad_org_id,
+            ln_1.m_product_id,
+            sum(ln_1.qtyordered) AS quantityreceived,
+            ln_1.priceactual AS pricebought,
+            ln_1.m_warehouse_id,
+            t_1.m_attributesetinstance_id
+           FROM (((adempiere.c_order c_1
+             JOIN adempiere.c_orderline ln_1 ON ((c_1.c_order_id = ln_1.c_order_id)))
+             JOIN adempiere.m_inoutline min_1 ON ((ln_1.c_orderline_id = min_1.c_orderline_id)))
+             JOIN adempiere.m_transaction t_1 ON (((min_1.m_inoutline_id = t_1.m_inoutline_id) AND (t_1.movementtype = 'V+'::bpchar))))
+          WHERE (c_1.issotrx = 'N'::bpchar)
+          GROUP BY ln_1.m_product_id, ln_1.priceactual, ln_1.m_warehouse_id, c_1.ad_client_id, c_1.ad_org_id, t_1.m_attributesetinstance_id
+        )
+ SELECT c.ad_client_id,
+    c.ad_org_id,
+    c.dateordered,
+    p.name,
+    ln.qtyordered,
+    rg.quantityreceived,
+    ln.priceactual AS pricesold,
+    rg.pricebought,
+    client.name AS client_name,
+    m.guaranteedate
+   FROM (((((((adempiere.c_order c
+     JOIN adempiere.c_orderline ln ON (((c.c_order_id = ln.c_order_id) AND (c.ad_client_id = ln.ad_client_id) AND (c.ad_org_id = ln.ad_org_id))))
+     JOIN adempiere.m_inoutline min ON ((ln.c_orderline_id = min.c_orderline_id)))
+     JOIN adempiere.m_transaction t ON (((min.m_inoutline_id = t.m_inoutline_id) AND (t.movementtype = 'C-'::bpchar))))
+     JOIN rg ON (((t.m_attributesetinstance_id = rg.m_attributesetinstance_id) AND (ln.m_product_id = rg.m_product_id) AND (rg.m_warehouse_id = ln.m_warehouse_id))))
+     JOIN adempiere.m_attributesetinstance m ON ((t.m_attributesetinstance_id = m.m_attributesetinstance_id)))
+     JOIN adempiere.m_product p ON ((ln.m_product_id = p.m_product_id)))
+     JOIN adempiere.ad_client client ON ((c.ad_client_id = client.ad_client_id)))
+  WHERE (c.issotrx = 'Y'::bpchar)
+  ORDER BY c.dateordered DESC;
+
+--
+-- Create view "adempiere"."bh_daily_sold_inventory_v"
+--
+CREATE OR REPLACE VIEW bh_daily_sold_inventory_v
+AS
+	WITH quantitysold AS (
+         SELECT t.ad_org_id,
+            t.ad_client_id,
+            (sum(t.movementqty) * ('-1'::integer)::numeric) AS qtyordered,
+            t.m_product_id,
+            t.m_locator_id,
+            to_char(t.updated, 'YYYY-MM-DD'::text) AS dateordered,
+            max(t.m_attributesetinstance_id) AS m_attributesetinstance_id
+           FROM adempiere.m_transaction t
+          WHERE ((t.movementtype = 'C-'::bpchar) AND (t.isactive = 'Y'::bpchar))
+          GROUP BY t.ad_org_id, t.ad_client_id, t.m_product_id, t.m_locator_id, (to_char(t.updated, 'YYYY-MM-DD'::text))
+          ORDER BY (sum(t.movementqty) * ('-1'::integer)::numeric) DESC
+        )
+ SELECT s.ad_org_id,
+    s.ad_client_id,
+    ms.updated AS dateordered,
+    p.name,
+    s.qtyordered,
+    ms.qtyonhand,
+    m.m_warehouse_id,
+    s.m_attributesetinstance_id
+   FROM ((((quantitysold s
+     JOIN adempiere.m_product p ON ((s.m_product_id = p.m_product_id)))
+     JOIN adempiere.m_storage ms ON (((s.dateordered = to_char(ms.updated, 'YYYY-MM-DD'::text)) AND (s.m_product_id = ms.m_product_id) AND (s.m_locator_id = ms.m_locator_id) AND (s.ad_org_id = ms.ad_org_id) AND (s.ad_client_id = ms.ad_client_id) AND (s.m_attributesetinstance_id = ms.m_attributesetinstance_id))))
+     JOIN adempiere.m_locator l ON ((ms.m_locator_id = l.m_locator_id)))
+     JOIN adempiere.m_warehouse m ON ((l.m_warehouse_id = m.m_warehouse_id)));
+
+/**********************************************************************************************************/
+-- Updates to get 2-packs to work
+/**********************************************************************************************************/
+UPDATE ad_element
+SET ad_element_uu = '96647eda-8470-4b0b-a798-2e9b881888ea'
+WHERE ad_element_uu = '4e740dec-ba2b-4a31-8cba-b3c3518b4718';
+
+UPDATE ad_column
+SET ad_column_uu = '6c46f8d0-d406-4b56-bd49-ede41cca0de6'
+WHERE ad_column_uu = 'a8827c9e-5232-4be3-9f40-c90eafcd1fbf';
+
+UPDATE ad_element
+SET columnname = 'NationalID'
+WHERE ad_element_uu = 'beb0c8dd-181b-4c79-b79a-b7847bf87e7b';
+UPDATE ad_column
+SET columnname = 'NationalID'
+WHERE ad_column_uu = 'ede93a0b-4901-4d49-8ef3-d315adfd031d';
+
+-- Handle a new reference that was added
+INSERT INTO ad_reference (ad_reference_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, name, description, help, validationtype, vformat, entitytype, isorderbyvalue, ad_reference_uu, ad_element_id) VALUES ((SELECT MAX(ad_reference_id) + 1 FROM ad_reference), 0, 0, 'Y', '2018-07-19 14:47:46.579000', 100, '2018-07-19 14:47:46.579000', 100, 'BH_Table_Name', null, null, 'T', null, 'U', 'N', 'd2872478-6a24-4261-8178-bd71bce3f177', null)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_ref_table (ad_reference_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, ad_table_id, ad_key, ad_display, isvaluedisplayed, whereclause, orderbyclause, entitytype, ad_window_id, ad_ref_table_uu, ad_infowindow_id) VALUES ((SELECT ad_reference_id FROM ad_reference WHERE ad_reference_uu = 'd2872478-6a24-4261-8178-bd71bce3f177'), 0, 0, 'Y', '2018-07-19 14:47:46.593000', 100, '2018-07-19 14:47:46.593000', 100, 100, 100, 102, 'N', null, null, 'U', null, 'cc157355-30d5-4c0f-b5e9-5008e523ad31', null)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_table (ad_table_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, name, description, help, tablename, isview, accesslevel, entitytype, ad_window_id, ad_val_rule_id, loadseq, issecurityenabled, isdeleteable, ishighvolume, importtable, ischangelog, replicationtype, po_window_id, copycolumnsfromtable, iscentrallymaintained, ad_table_uu, processing, databaseviewdrop, copycomponentsfromview, createwindowfromtable) VALUES ((SELECT MAX(ad_table_id) + 1 FROM ad_table), 0, 0, 'Y', '2018-07-05 11:47:43.615000', 100, '2018-07-19 15:32:15.127000', 100, 'bh_changelog_v', null, null, 'bh_changelog_v', 'Y', '3', 'U', null, null, 0, 'N', 'N', 'N', 'N', 'Y', 'L', null, 'N', 'Y', 'c1a566ff-922b-4214-8908-7f1a2897dedc', 'N', 'N', 'N', null)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_element (ad_element_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, columnname, entitytype, name, printname, description, help, po_name, po_printname, po_description, po_help, ad_element_uu, placeholder) VALUES ((SELECT MAX(ad_element_id) + 1 FROM ad_element), 0, 0, 'Y', '2018-07-05 11:47:43.764000', 100, '2018-07-05 11:47:43.764000', 100, 'count', 'U', 'count', 'count', null, null, null, null, null, null, 'ff43b6fc-d986-4167-9d28-a6e96abe950d', null)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_column (ad_column_id, ad_client_id, ad_org_id, isactive, created, updated, createdby, updatedby, name, description, help, version, entitytype, columnname, ad_table_id, ad_reference_id, ad_reference_value_id, ad_val_rule_id, fieldlength, defaultvalue, iskey, isparent, ismandatory, isupdateable, readonlylogic, isidentifier, seqno, istranslated, isencrypted, callout, vformat, valuemin, valuemax, isselectioncolumn, ad_element_id, ad_process_id, issyncdatabase, isalwaysupdateable, columnsql, mandatorylogic, infofactoryclass, isautocomplete, isallowlogging, formatpattern, ad_column_uu, isallowcopy, seqnoselection, istoolbarbutton, issecure, ad_chart_id, fkconstraintname, fkconstrainttype, pa_dashboardcontent_id, placeholder, ishtml) VALUES ((SELECT MAX(ad_column_id) + 1 FROM ad_column), 0, 0, 'Y', '2018-07-05 11:47:43.739000', '2018-07-05 11:47:43.739000', 100, 100, 'Event Change Log', 'Type of Event in Change Log', null, 0, 'U', 'EventChangeLog', (SELECT ad_table_id FROM ad_table WHERE ad_table_uu = 'c1a566ff-922b-4214-8908-7f1a2897dedc'), 17, 53238, null, 1, null, 'N', 'N', 'N', 'Y', null, 'N', 0, 'N', 'N', null, null, null, null, 'N', 53345, null, 'Y', 'N', null, null, null, 'N', 'Y', null, '52410848-1195-427b-80ec-1a06d5b6ce18', 'Y', 0, 'N', 'N', null, null, 'N', null, null, 'N') ON CONFLICT DO NOTHING;
+INSERT INTO ad_column (ad_column_id, ad_client_id, ad_org_id, isactive, created, updated, createdby, updatedby, name, description, help, version, entitytype, columnname, ad_table_id, ad_reference_id, ad_reference_value_id, ad_val_rule_id, fieldlength, defaultvalue, iskey, isparent, ismandatory, isupdateable, readonlylogic, isidentifier, seqno, istranslated, isencrypted, callout, vformat, valuemin, valuemax, isselectioncolumn, ad_element_id, ad_process_id, issyncdatabase, isalwaysupdateable, columnsql, mandatorylogic, infofactoryclass, isautocomplete, isallowlogging, formatpattern, ad_column_uu, isallowcopy, seqnoselection, istoolbarbutton, issecure, ad_chart_id, fkconstraintname, fkconstrainttype, pa_dashboardcontent_id, placeholder, ishtml) VALUES ((SELECT MAX(ad_column_id) + 1 FROM ad_column), 0, 0, 'Y', '2018-07-05 11:47:43.816000', '2018-07-05 11:47:43.816000', 100, 100, 'Created By', 'User who created this records', 'The Created By field indicates the user who created this record.', 0, 'U', 'CreatedBy', (SELECT ad_table_id FROM ad_table WHERE ad_table_uu = 'c1a566ff-922b-4214-8908-7f1a2897dedc'), 18, 110, null, 22, null, 'N', 'N', 'N', 'N', null, 'N', 0, 'N', 'N', null, null, null, null, 'N', 246, null, 'Y', 'N', null, null, null, 'N', 'Y', null, 'e8ac1556-b625-4b60-9cff-27d6c92e6676', 'N', 0, 'N', 'N', null, null, 'D', null, null, 'N') ON CONFLICT DO NOTHING;
+INSERT INTO ad_column (ad_column_id, ad_client_id, ad_org_id, isactive, created, updated, createdby, updatedby, name, description, help, version, entitytype, columnname, ad_table_id, ad_reference_id, ad_reference_value_id, ad_val_rule_id, fieldlength, defaultvalue, iskey, isparent, ismandatory, isupdateable, readonlylogic, isidentifier, seqno, istranslated, isencrypted, callout, vformat, valuemin, valuemax, isselectioncolumn, ad_element_id, ad_process_id, issyncdatabase, isalwaysupdateable, columnsql, mandatorylogic, infofactoryclass, isautocomplete, isallowlogging, formatpattern, ad_column_uu, isallowcopy, seqnoselection, istoolbarbutton, issecure, ad_chart_id, fkconstraintname, fkconstrainttype, pa_dashboardcontent_id, placeholder, ishtml) VALUES ((SELECT MAX(ad_column_id) + 1 FROM ad_column), 0, 0, 'Y', '2018-07-05 11:47:43.842000', '2018-07-05 11:47:43.842000', 100, 100, 'Client', 'Client/Tenant for this installation.', 'A Client is a company or a legal entity. You cannot share data between Clients. Tenant is a synonym for Client.', 0, 'U', 'AD_Client_ID', (SELECT ad_table_id FROM ad_table WHERE ad_table_uu = 'c1a566ff-922b-4214-8908-7f1a2897dedc'), 19, null, 129, 22, null, 'N', 'N', 'N', 'N', null, 'N', 0, 'N', 'N', null, null, null, null, 'N', 102, null, 'Y', 'N', null, null, null, 'N', 'Y', null, '56fd3d50-3756-4103-b844-c28d99e08025', 'N', 0, 'N', 'N', null, null, 'D', null, null, 'N') ON CONFLICT DO NOTHING;
+INSERT INTO ad_column (ad_column_id, ad_client_id, ad_org_id, isactive, created, updated, createdby, updatedby, name, description, help, version, entitytype, columnname, ad_table_id, ad_reference_id, ad_reference_value_id, ad_val_rule_id, fieldlength, defaultvalue, iskey, isparent, ismandatory, isupdateable, readonlylogic, isidentifier, seqno, istranslated, isencrypted, callout, vformat, valuemin, valuemax, isselectioncolumn, ad_element_id, ad_process_id, issyncdatabase, isalwaysupdateable, columnsql, mandatorylogic, infofactoryclass, isautocomplete, isallowlogging, formatpattern, ad_column_uu, isallowcopy, seqnoselection, istoolbarbutton, issecure, ad_chart_id, fkconstraintname, fkconstrainttype, pa_dashboardcontent_id, placeholder, ishtml) VALUES ((SELECT MAX(ad_column_id) + 1 FROM ad_column), 0, 0, 'Y', '2018-07-05 11:47:43.870000', '2018-07-05 11:47:43.870000', 100, 100, 'Organization', 'Organizational entity within client', 'An organization is a unit of your client or legal entity - examples are store, department. You can share data between organizations.', 0, 'U', 'AD_Org_ID', (SELECT ad_table_id FROM ad_table WHERE ad_table_uu = 'c1a566ff-922b-4214-8908-7f1a2897dedc'), 19, null, 104, 22, null, 'N', 'N', 'N', 'N', null, 'N', 0, 'N', 'N', null, null, null, null, 'N', 113, null, 'Y', 'N', null, null, null, 'N', 'Y', null, 'b4b9e7f6-3c62-47ac-a811-3fae05527f8c', 'N', 0, 'N', 'N', null, null, 'D', null, null, 'N') ON CONFLICT DO NOTHING;
+INSERT INTO ad_column (ad_column_id, ad_client_id, ad_org_id, isactive, created, updated, createdby, updatedby, name, description, help, version, entitytype, columnname, ad_table_id, ad_reference_id, ad_reference_value_id, ad_val_rule_id, fieldlength, defaultvalue, iskey, isparent, ismandatory, isupdateable, readonlylogic, isidentifier, seqno, istranslated, isencrypted, callout, vformat, valuemin, valuemax, isselectioncolumn, ad_element_id, ad_process_id, issyncdatabase, isalwaysupdateable, columnsql, mandatorylogic, infofactoryclass, isautocomplete, isallowlogging, formatpattern, ad_column_uu, isallowcopy, seqnoselection, istoolbarbutton, issecure, ad_chart_id, fkconstraintname, fkconstrainttype, pa_dashboardcontent_id, placeholder, ishtml) VALUES ((SELECT MAX(ad_column_id) + 1 FROM ad_column), 0, 0, 'Y', '2018-07-05 11:47:43.670000', '2018-07-19 15:32:15.190000', 100, 100, 'Table', 'Database Table information', 'The Database Table provides the information of the table definition', 0, 'U', 'AD_Table_ID', (SELECT ad_table_id FROM ad_table WHERE ad_table_uu = 'c1a566ff-922b-4214-8908-7f1a2897dedc'), 18, (SELECT ad_reference_id FROM ad_reference WHERE ad_reference_uu = 'd2872478-6a24-4261-8178-bd71bce3f177'), null, 10, null, 'N', 'N', 'N', 'Y', null, 'N', 0, 'N', 'N', null, null, null, null, 'N', 126, null, 'Y', 'N', null, null, null, 'N', 'Y', null, 'd1e54149-6b7c-483a-83c2-716c2d10aab9', 'Y', 0, 'N', 'N', null, null, null, null, null, 'N') ON CONFLICT DO NOTHING;
+INSERT INTO ad_column (ad_column_id, ad_client_id, ad_org_id, isactive, created, updated, createdby, updatedby, name, description, help, version, entitytype, columnname, ad_table_id, ad_reference_id, ad_reference_value_id, ad_val_rule_id, fieldlength, defaultvalue, iskey, isparent, ismandatory, isupdateable, readonlylogic, isidentifier, seqno, istranslated, isencrypted, callout, vformat, valuemin, valuemax, isselectioncolumn, ad_element_id, ad_process_id, issyncdatabase, isalwaysupdateable, columnsql, mandatorylogic, infofactoryclass, isautocomplete, isallowlogging, formatpattern, ad_column_uu, isallowcopy, seqnoselection, istoolbarbutton, issecure, ad_chart_id, fkconstraintname, fkconstrainttype, pa_dashboardcontent_id, placeholder, ishtml) VALUES ((SELECT MAX(ad_column_id) + 1 FROM ad_column), 0, 0, 'Y', '2018-07-05 11:47:43.788000', '2020-04-22 05:28:18.121177', 100, 100, 'count', null, null, 0, 'U', 'count', (SELECT ad_table_id FROM ad_table WHERE ad_table_uu = 'c1a566ff-922b-4214-8908-7f1a2897dedc'), 11, null, null, 14, null, 'N', 'N', 'N', 'Y', null, 'N', 0, 'N', 'N', null, null, null, null, 'N', (SELECT ad_element_id FROM ad_element WHERE ad_element_uu = 'ff43b6fc-d986-4167-9d28-a6e96abe950d'), null, 'Y', 'N', null, null, null, 'N', 'Y', null, '5858cb67-dda1-479d-b051-0bbda5ef9654', 'Y', 0, 'N', 'N', null, null, 'N', null, null, 'N') ON CONFLICT DO NOTHING;
+INSERT INTO ad_column (ad_column_id, ad_client_id, ad_org_id, isactive, created, updated, createdby, updatedby, name, description, help, version, entitytype, columnname, ad_table_id, ad_reference_id, ad_reference_value_id, ad_val_rule_id, fieldlength, defaultvalue, iskey, isparent, ismandatory, isupdateable, readonlylogic, isidentifier, seqno, istranslated, isencrypted, callout, vformat, valuemin, valuemax, isselectioncolumn, ad_element_id, ad_process_id, issyncdatabase, isalwaysupdateable, columnsql, mandatorylogic, infofactoryclass, isautocomplete, isallowlogging, formatpattern, ad_column_uu, isallowcopy, seqnoselection, istoolbarbutton, issecure, ad_chart_id, fkconstraintname, fkconstrainttype, pa_dashboardcontent_id, placeholder, ishtml) VALUES ((SELECT MAX(ad_column_id) + 1 FROM ad_column), 0, 0, 'Y', '2018-07-05 11:47:43.711000', '2018-07-05 11:47:43.711000', 100, 100, 'Created', 'Date this record was created', 'The Created field indicates the date that this record was created.', 0, 'U', 'Created', (SELECT ad_table_id FROM ad_table WHERE ad_table_uu = 'c1a566ff-922b-4214-8908-7f1a2897dedc'), 16, null, null, 7, null, 'N', 'N', 'N', 'N', null, 'N', 0, 'N', 'N', null, null, null, null, 'N', 245, null, 'Y', 'N', null, null, null, 'N', 'Y', 'MMM dd, yyyy', '0108921f-b3b3-4bbc-a1f6-9dbf64601235', 'N', 0, 'N', 'N', null, null, 'N', null, null, 'N') ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_reportview (ad_reportview_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, name, description, ad_table_id, whereclause, orderbyclause, entitytype, ad_reportview_uu) VALUES ((SELECT MAX(ad_reportview_id) + 1 FROM ad_reportview), 0, 0, 'Y', '2018-07-05 11:47:43.906000', 100, '2018-10-08 15:20:28.076000', 100, 'bh_changelogs_v', null, (SELECT ad_table_id FROM ad_table WHERE ad_table_uu = 'c1a566ff-922b-4214-8908-7f1a2897dedc'), null, null, 'U', '644323a3-340b-4af4-a53f-5965dc7b9fea')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, value, name, description, help, accesslevel, entitytype, procedurename, isreport, isdirectprint, ad_reportview_id, classname, statistic_count, statistic_seconds, ad_printformat_id, workflowvalue, ad_workflow_id, isbetafunctionality, isserverprocess, showhelp, jasperreport, ad_form_id, copyfromprocess, ad_process_uu, ad_ctxhelp_id, executiontype, allowmultipleexecution) VALUES ((SELECT MAX(ad_process_id) + 1 FROM ad_process), 0, 0, 'Y', '2018-07-05 11:47:44.080000', 100, '2018-07-31 15:18:37.868000', 100, '10000005', 'BH Daily Activities', null, null, '3', 'U', null, 'Y', 'N', (SELECT ad_reportview_id FROM ad_reportview WHERE ad_reportview_uu = '644323a3-340b-4af4-a53f-5965dc7b9fea'), null, 0, 0, null, null, null, 'N', 'N', 'Y', null, null, 'N', '97256934-cced-48fa-9cc6-5170e2a772a7', null, null, 'P')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_menu (ad_menu_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, name, updatedby, description, issummary, issotrx, isreadonly, action, ad_window_id, ad_workflow_id, ad_task_id, ad_process_id, ad_form_id, ad_workbench_id, entitytype, iscentrallymaintained, ad_menu_uu, ad_infowindow_id) VALUES ((SELECT MAX(ad_menu_id) + 1 FROM ad_menu), 0, 0, 'Y', '2018-07-05 11:47:44.237000', 100, '2018-07-31 15:18:37.873000', 'BH Daily Activities', 100, null, 'N', 'N', 'N', 'R', null, null, null, (SELECT ad_process_id FROM ad_process WHERE ad_process_uu = '97256934-cced-48fa-9cc6-5170e2a772a7'), null, null, 'U', 'Y', '6491bbbc-8bb1-47d5-9019-622f38b51be7', null)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, value, name, description, help, accesslevel, entitytype, procedurename, isreport, isdirectprint, ad_reportview_id, classname, statistic_count, statistic_seconds, ad_printformat_id, workflowvalue, ad_workflow_id, isbetafunctionality, isserverprocess, showhelp, jasperreport, ad_form_id, copyfromprocess, ad_process_uu, ad_ctxhelp_id, executiontype, allowmultipleexecution) VALUES ((SELECT MAX(ad_process_id) + 1 FROM ad_process), 0, 0, 'Y', '2019-08-16 16:26:15.164000', 100, '2019-08-22 10:50:24.509000', 100, 'BH Stock Re-order levels', 'Stock to be Ordered', 'Generate List of stock that need to be ordered', null, '3', 'U', null, 'Y', 'N', null, null, 0, 0, null, null, null, 'N', 'N', 'Y', 'reorderStock.jasper', null, 'N', 'd42deea6-c650-42b4-a21c-90b3ef0fa99f', null, null, 'P') ON CONFLICT DO NOTHING;
+INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, value, name, description, help, accesslevel, entitytype, procedurename, isreport, isdirectprint, ad_reportview_id, classname, statistic_count, statistic_seconds, ad_printformat_id, workflowvalue, ad_workflow_id, isbetafunctionality, isserverprocess, showhelp, jasperreport, ad_form_id, copyfromprocess, ad_process_uu, ad_ctxhelp_id, executiontype, allowmultipleexecution) VALUES ((SELECT MAX(ad_process_id) + 1 FROM ad_process), 0, 0, 'Y', '2018-06-27 12:56:49.484000', 100, '2018-06-27 12:56:49.484000', 100, '10000002', 'Revenue Breakdown', null, null, '3', 'U', null, 'Y', 'N', null, null, 0, 0, null, null, null, 'N', 'N', 'Y', 'DepartmentCollections.jasper', null, 'N', '27dbc237-256c-4b96-a164-dc9bcd4ad3a7', null, null, 'P') ON CONFLICT DO NOTHING;
+INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, value, name, description, help, accesslevel, entitytype, procedurename, isreport, isdirectprint, ad_reportview_id, classname, statistic_count, statistic_seconds, ad_printformat_id, workflowvalue, ad_workflow_id, isbetafunctionality, isserverprocess, showhelp, jasperreport, ad_form_id, copyfromprocess, ad_process_uu, ad_ctxhelp_id, executiontype, allowmultipleexecution) VALUES ((SELECT MAX(ad_process_id) + 1 FROM ad_process), 0, 0, 'Y', '2018-06-27 13:08:07.312000', 100, '2018-06-27 13:08:07.312000', 100, '10000003', 'Revenue Detailed', null, null, '3', 'U', null, 'Y', 'N', null, null, 0, 0, null, null, null, 'N', 'N', 'Y', 'DepartmentCollections.jasper', null, 'N', 'db969c7f-36f8-4f35-b9cb-d26528d95034', null, null, 'P') ON CONFLICT DO NOTHING;
+INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, value, name, description, help, accesslevel, entitytype, procedurename, isreport, isdirectprint, ad_reportview_id, classname, statistic_count, statistic_seconds, ad_printformat_id, workflowvalue, ad_workflow_id, isbetafunctionality, isserverprocess, showhelp, jasperreport, ad_form_id, copyfromprocess, ad_process_uu, ad_ctxhelp_id, executiontype, allowmultipleexecution) VALUES ((SELECT MAX(ad_process_id) + 1 FROM ad_process), 0, 0, 'Y', '2018-06-25 09:16:26.229000', 100, '2018-06-27 09:44:34.670000', 100, '10000001', 'Department Revenue', 'Report shows the breakdown of how much the departments contributed to the total revenue', null, '3', 'U', null, 'Y', 'N', null, null, 1, 6, null, null, null, 'N', 'N', 'Y', 'Department Revenue.jasper', null, 'N', 'd48c66ff-c448-40fd-ab26-8fceb64f250c', null, null, 'P') ON CONFLICT DO NOTHING;
+INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, value, name, description, help, accesslevel, entitytype, procedurename, isreport, isdirectprint, ad_reportview_id, classname, statistic_count, statistic_seconds, ad_printformat_id, workflowvalue, ad_workflow_id, isbetafunctionality, isserverprocess, showhelp, jasperreport, ad_form_id, copyfromprocess, ad_process_uu, ad_ctxhelp_id, executiontype, allowmultipleexecution) VALUES ((SELECT MAX(ad_process_id) + 1 FROM ad_process), 0, 0, 'Y', '2018-09-20 12:20:13.747000', 100, '2018-09-20 12:32:40.402000', 100, '10000004', 'Income & Expenses', 'Summary report on income and expenses for a specified period', null, '3', 'U', null, 'Y', 'N', null, null, 6, 12, null, null, null, 'N', 'N', 'Y', 'IncomeStatement.jasper', null, 'N', 'f777f042-3907-4293-94c4-49fe6eb58780', null, null, 'P') ON CONFLICT DO NOTHING;
+INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, value, name, description, help, accesslevel, entitytype, procedurename, isreport, isdirectprint, ad_reportview_id, classname, statistic_count, statistic_seconds, ad_printformat_id, workflowvalue, ad_workflow_id, isbetafunctionality, isserverprocess, showhelp, jasperreport, ad_form_id, copyfromprocess, ad_process_uu, ad_ctxhelp_id, executiontype, allowmultipleexecution) VALUES ((SELECT MAX(ad_process_id) + 1 FROM ad_process), 0, 0, 'Y', '2018-09-20 13:39:38.591000', 100, '2018-09-20 13:40:31.929000', 100, '10000005', 'Pending Patient Bills', 'Patient bills not yet completed', null, '3', 'U', null, 'Y', 'N', null, null, 6, 31, null, null, null, 'N', 'N', 'Y', 'BillsInDraftState.jasper', null, 'N', 'b2e3cbd1-1f23-449c-beb1-ed898fa77097', null, null, 'P') ON CONFLICT DO NOTHING;
+INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, value, name, description, help, accesslevel, entitytype, procedurename, isreport, isdirectprint, ad_reportview_id, classname, statistic_count, statistic_seconds, ad_printformat_id, workflowvalue, ad_workflow_id, isbetafunctionality, isserverprocess, showhelp, jasperreport, ad_form_id, copyfromprocess, ad_process_uu, ad_ctxhelp_id, executiontype, allowmultipleexecution) VALUES ((SELECT MAX(ad_process_id) + 1 FROM ad_process), 0, 0, 'Y', '2019-05-13 15:56:10.685000', 100, '2019-05-13 15:56:10.685000', 100, '10000006', 'Products and Prices', 'Your Products and their Prices', 'Generate a list of your products and their prices', '3', 'U', null, 'Y', 'N', null, null, 7, 7, null, null, null, 'N', 'N', 'Y', 'productsAndPrices.jasper', null, 'N', '3edf67b9-ee3d-4b73-a02e-deb1c1811db5', null, null, 'P') ON CONFLICT DO NOTHING;
+
+INSERT INTO ad_window (ad_window_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, name, description, help, windowtype, issotrx, entitytype, processing, ad_image_id, ad_color_id, isdefault, winheight, winwidth, isbetafunctionality, ad_window_uu, titlelogic) VALUES ((SELECT MAX(ad_window_id) + 1 FROM ad_window), 0, 0, 'Y', '2018-07-12 11:30:25.932000', 100, '2018-07-12 11:30:25.932000', 100, 'BH Metrics', 'BH Metrics', null, 'Q', 'N', 'U', 'N', null, null, 'N', 1000, 2000, 'N', 'e1814cba-b1d8-42f4-96dd-ffb4ec6da44f', null)
+ON CONFLICT DO NOTHING;
 
 /**********************************************************************************************************/
 -- Finish
