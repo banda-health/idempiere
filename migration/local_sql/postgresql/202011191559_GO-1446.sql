@@ -1504,6 +1504,14 @@ INSERT INTO ad_process (ad_process_id, ad_client_id, ad_org_id, isactive, create
 INSERT INTO ad_window (ad_window_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, name, description, help, windowtype, issotrx, entitytype, processing, ad_image_id, ad_color_id, isdefault, winheight, winwidth, isbetafunctionality, ad_window_uu, titlelogic) VALUES ((SELECT MAX(ad_window_id) + 1 FROM ad_window), 0, 0, 'Y', '2018-07-12 11:30:25.932000', 100, '2018-07-12 11:30:25.932000', 100, 'BH Metrics', 'BH Metrics', null, 'Q', 'N', 'U', 'N', null, null, 'N', 1000, 2000, 'N', 'e1814cba-b1d8-42f4-96dd-ffb4ec6da44f', null)
 ON CONFLICT DO NOTHING;
 
+UPDATE ad_field
+SET ad_field_uu = 'b867d85a-c7e8-40e5-b3d9-08f8ac42b981'
+WHERE ad_field_uu = '56de4716-17f3-43a2-9984-7f62c9cf9d4e';
+
+UPDATE bh_dbrdbtngrp
+SET bh_dbrdbtngrp_uu = '9b44ce0e-3113-4690-ad0b-92b95b34c741'
+WHERE bh_dbrdbtngrp_uu = 'e7db1391-816c-499a-8634-32b6d7298d0a';
+
 /**********************************************************************************************************/
 -- Finish
 /**********************************************************************************************************/
