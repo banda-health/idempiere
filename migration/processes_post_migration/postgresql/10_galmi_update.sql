@@ -20,12 +20,15 @@ BEGIN
 		-- PRODUCTS
 		UPDATE ad_field
 		SET name = 'Buying Price'
-		WHERE ad_field_uu = 'a787d166-b3ef-4dcd-8fda-77bbbe7e3d9b';
+		WHERE ad_field_uu = '3c59e4c0-d68d-4ddc-8f43-2ef75858dbd5';
 		UPDATE ad_field
 		SET name = 'Selling Price'
 		WHERE ad_field_uu = '1b3da64b-69e0-41bc-9078-a5f6eaf4a9e9';
 
 		-- SERVICES
+		UPDATE ad_field
+		SET name = 'Buying Price'
+		WHERE ad_field_uu = 'a787d166-b3ef-4dcd-8fda-77bbbe7e3d9b';
 		UPDATE ad_field
 		SET name = 'Selling Price'
 		WHERE ad_field_uu = '9f081fd6-94e7-4e49-810a-3a1793f04d3c';
@@ -73,6 +76,15 @@ BEGIN
 		UPDATE ad_field
 		SET name = 'Product'
 		WHERE ad_field_uu = '42874f5f-f9a4-4f6a-8b4c-d009dcb08733';
+		UPDATE ad_field
+		SET name = 'Stock Room'
+		WHERE ad_field_uu = '29857ed5-6e74-4f74-b985-f53ddb396068';
+		UPDATE ad_field
+		SET name = 'Transaction Status'
+		WHERE ad_field_uu = '787b3eed-a2db-46bc-b4a8-cb985224f5c3';
+		UPDATE ad_field
+		SET name = 'Supplier'
+		WHERE ad_field_uu = '4691cd13-aa0f-4eb4-a5b7-c856fcb38343';
 
 		/**********************************************************************************************************/
 		-- Inactivate some payment types that aren't needed
@@ -81,6 +93,21 @@ BEGIN
 		SET isactive = 'N'
 		WHERE ad_reference_id = 214
 			AND Value != 'X';
+
+		/**********************************************************************************************************/
+		-- Inactivate reports that aren't needed
+		/**********************************************************************************************************/
+		UPDATE bh_dbrdbtngrp_btn
+		SET isactive = 'N'
+		WHERE bh_dbrdbtngrp_btn_uu NOT IN ('975bcaac-67df-475c-9488-0cf4dbb4ee45','65b00651-9de0-4821-9dec-4334ebe63bab')
+			AND bh_dbrdbtngrp_id = (SELECT bh_dbrdbtngrp_id FROM bh_dbrdbtngrp WHERE bh_dbrdbtngrp_uu = '9b44ce0e-3113-4690-ad0b-92b95b34c741');
+		
+		/**********************************************************************************************************/
+		-- Inactivate NHIF buttons that aren't needed
+		/**********************************************************************************************************/
+		UPDATE bh_tabnavbtn
+		SET isactive = 'N'
+		WHERE bh_tabnavbtn_uu IN ('127fb899-61a7-4e55-a421-a5032f5998ce','81089221-596a-4ce2-a2ea-19c9a92d6837');
 	END IF;
 
 END $$ language plpgsql;
