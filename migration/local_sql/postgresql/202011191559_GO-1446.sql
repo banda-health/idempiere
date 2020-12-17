@@ -150,7 +150,10 @@ ALTER TABLE IF EXISTS bh_hmscrn_buttongroup RENAME TO bh_dbrdbtngrp;
 -- Don't forget to update ad_sequence
 UPDATE ad_sequence
 SET name = 'BH_DbrdBtnGrp', description = 'Table BH_DbrdBtnGrp'
-WHERE name = 'BH_HmScrn_ButtonGroup';
+WHERE name = 'BH_HmScrn_ButtonGroup'
+  AND ad_client_id NOT IN (SELECT ad_client_id FROM ad_sequence WHERE name = 'BH_DbrdBtnGrp');
+
+DELETE FROM ad_sequence WHERE name = 'BH_HmScrn_ButtonGroup';
 
 -- Also, ad_table and ad_column need to be fixed as well
 UPDATE ad_table
@@ -172,7 +175,10 @@ ALTER TABLE IF EXISTS bh_hmscrn_buttongroupline RENAME TO bh_dbrdbtngrp_btn;
 -- Don't forget to update ad_sequence
 UPDATE ad_sequence
 SET name = 'BH_DbrdBtnGrp_Btn', description = 'Table BH_DbrdBtnGrp_Btn'
-WHERE name = 'BH_HmScrn_ButtonGroupLine';
+WHERE name = 'BH_HmScrn_ButtonGroupLine'
+  AND ad_client_id NOT IN (SELECT ad_client_id FROM ad_sequence WHERE name = 'BH_DbrdBtnGrp_Btn');
+
+DELETE FROM ad_sequence WHERE name = 'BH_HmScrn_ButtonGroupLine';
 
 -- Also, ad_table and ad_column need to be fixed as well
 UPDATE ad_table
@@ -534,59 +540,12 @@ WHERE ad_toolbarbutton_uu IN ('e4f1785e-db0e-48de-a4af-ac21c647b7f9','85a6a115-5
 -- 
 
 --
--- Create procedure "adempiere"."pg_stat_statements_reset"
---
-CREATE OR REPLACE PROCEDURE pg_stat_statements_reset ()
-LANGUAGE c
-SECURITY INVOKER
-AS $c$pg_stat_statements_reset$c$;
-
---
--- Create function "adempiere"."pg_stat_statements"
---
-CREATE OR REPLACE FUNCTION pg_stat_statements ()
-RETURNS record
-LANGUAGE c
-VOLATILE
-AS $c$pg_stat_statements_1_3$c$;
-
---
--- Create view "adempiere"."pg_stat_statements"
---
-CREATE OR REPLACE VIEW IF NOT EXISTS pg_stat_statements
-AS
-	SELECT pg_stat_statements.userid,
-    pg_stat_statements.dbid,
-    pg_stat_statements.queryid,
-    pg_stat_statements.query,
-    pg_stat_statements.calls,
-    pg_stat_statements.total_time,
-    pg_stat_statements.min_time,
-    pg_stat_statements.max_time,
-    pg_stat_statements.mean_time,
-    pg_stat_statements.stddev_time,
-    pg_stat_statements.rows,
-    pg_stat_statements.shared_blks_hit,
-    pg_stat_statements.shared_blks_read,
-    pg_stat_statements.shared_blks_dirtied,
-    pg_stat_statements.shared_blks_written,
-    pg_stat_statements.local_blks_hit,
-    pg_stat_statements.local_blks_read,
-    pg_stat_statements.local_blks_dirtied,
-    pg_stat_statements.local_blks_written,
-    pg_stat_statements.temp_blks_read,
-    pg_stat_statements.temp_blks_written,
-    pg_stat_statements.blk_read_time,
-    pg_stat_statements.blk_write_time
-   FROM adempiere.pg_stat_statements(true) pg_stat_statements(userid, dbid, queryid, query, calls, total_time, min_time, max_time, mean_time, stddev_time, rows, shared_blks_hit, shared_blks_read, shared_blks_dirtied, shared_blks_written, local_blks_hit, local_blks_read, local_blks_dirtied, local_blks_written, temp_blks_read, temp_blks_written, blk_read_time, blk_write_time);
-
---
 -- Create table "adempiere"."bh_stockrevenue_view"
 --
 CREATE TABLE IF NOT EXISTS bh_stockrevenue_view(
   name character varying(255) DEFAULT NULL::character varying,
   quantity numeric(10, 0) DEFAULT NULL::numeric,
-  amount numeric(147455, 16383),
+  amount numeric,
   ad_client_id numeric(10, 0) DEFAULT NULL::numeric,
   ad_org_id numeric(10, 0) DEFAULT NULL::numeric)
 ;
@@ -596,9 +555,9 @@ CREATE TABLE IF NOT EXISTS bh_stockrevenue_view(
 --
 CREATE TABLE IF NOT EXISTS bh_stock_mvt_v(
   name character varying(255) DEFAULT NULL::character varying,
-  beginning numeric(147455, 16383),
-  outgoing numeric(147455, 16383),
-  ending numeric(147455, 16383),
+  beginning numeric,
+  outgoing numeric,
+  ending numeric,
   ad_client_id numeric(10, 0) DEFAULT NULL::numeric,
   ad_org_id numeric(10, 0) DEFAULT NULL::numeric)
 ;
@@ -621,7 +580,7 @@ CREATE TABLE IF NOT EXISTS bh_product_categorydefault(
   value character varying(40) NOT NULL,
   bh_product_category_type character(1) NOT NULL,
   PRIMARY KEY (bh_product_categorydefault_id),
-  CONSTRAINT bh_product_categorydefault_isactive_check CHECK (CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))),
+  CONSTRAINT bh_product_categorydefault_isactive_check CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar])),
   CONSTRAINT bh_product_categorydefauluuidx UNIQUE(bh_product_categorydefault_uu),
   CONSTRAINT adclient_bhproductcategorydefa FOREIGN KEY (ad_client_id)
     REFERENCES ad_client(ad_client_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
@@ -646,7 +605,7 @@ CREATE TABLE IF NOT EXISTS bh_chargedefault(
   updatedby numeric(10, 0) NOT NULL,
   value character varying(40) NOT NULL,
   PRIMARY KEY (bh_chargedefault_id),
-  CONSTRAINT bh_chargedefault_isactive_check CHECK (CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))),
+  CONSTRAINT bh_chargedefault_isactive_check CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar])),
   CONSTRAINT bh_chargedefault_uu_idx UNIQUE(bh_chargedefault_uu),
   CONSTRAINT adclient_bhchargedefault FOREIGN KEY (ad_client_id)
     REFERENCES ad_client(ad_client_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
@@ -658,25 +617,25 @@ CREATE TABLE IF NOT EXISTS bh_chargedefault(
 -- Create column "isnewpatient" on table "adempiere"."c_bpartner"
 --
 ALTER TABLE c_bpartner 
-  ADD isnewpatient IF NOT EXISTS character(1) DEFAULT 'Y'::bpchar;
+  ADD IF NOT EXISTS isnewpatient character(1) DEFAULT 'Y'::bpchar;
 
 --
 -- Create column "bh_nhif_type" on table "adempiere"."c_bpartner"
 --
 ALTER TABLE c_bpartner 
-  ADD bh_nhif_type IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_nhif_type character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_lastpatientid" on table "adempiere"."c_bpartner"
 --
 ALTER TABLE c_bpartner 
-  ADD bh_lastpatientid IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_lastpatientid character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_local_patientid" on table "adempiere"."c_bpartner"
 --
 ALTER TABLE c_bpartner 
-  ADD bh_local_patientid IF NOT EXISTS character varying(100);
+  ADD IF NOT EXISTS bh_local_patientid character varying(100);
 
 --
 -- Create view "adempiere"."bh_patient_id_generator_v"
@@ -716,13 +675,13 @@ AS
 -- Create column "c_elementvalue_id" on table "adempiere"."c_charge"
 --
 ALTER TABLE c_charge 
-  ADD c_elementvalue_id IF NOT EXISTS numeric(10, 0) DEFAULT NULL::numeric;
+  ADD IF NOT EXISTS c_elementvalue_id numeric(10, 0) DEFAULT NULL::numeric;
 
 --
 -- Create column "bh_locked" on table "adempiere"."c_charge"
 --
 ALTER TABLE c_charge 
-  ADD bh_locked IF NOT EXISTS character(1) DEFAULT 'N'::bpchar;
+  ADD IF NOT EXISTS bh_locked character(1) DEFAULT 'N'::bpchar;
 
 --
 -- Create table "adempiere"."bh_paymentref"
@@ -743,7 +702,7 @@ CREATE TABLE IF NOT EXISTS bh_paymentref(
   bh_paymentref_action character(1) DEFAULT NULL::bpchar,
   PRIMARY KEY (bh_paymentref_id),
   UNIQUE(bh_paymentref_uu),
-  CONSTRAINT bh_paymentref_isactive_check CHECK (CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))),
+  CONSTRAINT bh_paymentref_isactive_check CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar])),
   FOREIGN KEY (ad_client_id)
     REFERENCES ad_client(ad_client_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
   FOREIGN KEY (ad_org_id)
@@ -773,7 +732,7 @@ CREATE TABLE IF NOT EXISTS bh_paymentref_bankacct(
   bh_paymentreflist_value character varying(1) DEFAULT NULL::character varying,
   PRIMARY KEY (bh_paymentref_bankacct_id),
   UNIQUE(bh_paymentref_bankacct_uu),
-  CONSTRAINT bh_paymentref_bankacct_isactive_check CHECK (CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar]))),
+  CONSTRAINT bh_paymentref_bankacct_isactive_check CHECK (isactive = ANY (ARRAY['Y'::bpchar, 'N'::bpchar])),
   FOREIGN KEY (ad_client_id)
     REFERENCES ad_client(ad_client_id) ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE,
   FOREIGN KEY (ad_org_id)
@@ -851,13 +810,13 @@ AS
 -- Create column "bh_pricemargin" on table "adempiere"."m_product"
 --
 ALTER TABLE m_product 
-  ADD bh_pricemargin IF NOT EXISTS numeric(147455, 16383);
+  ADD IF NOT EXISTS bh_pricemargin numeric;
 
 --
 -- Create column "bh_product_category_type" on table "adempiere"."m_product"
 --
 ALTER TABLE m_product 
-  ADD bh_product_category_type IF NOT EXISTS character(1) DEFAULT NULL::bpchar;
+  ADD IF NOT EXISTS bh_product_category_type character(1) DEFAULT NULL::bpchar;
 
 --
 -- Create view "adempiere"."bh_stock_reorder_levels_v"
@@ -948,6 +907,7 @@ AS
 --
 -- Create view "adempiere"."bh_stocktake_v"
 --
+DROP VIEW IF EXISTS bh_stocktake_v;
 CREATE OR REPLACE VIEW bh_stocktake_v
 AS
 	WITH quantitysums AS (
@@ -996,127 +956,127 @@ AS
 -- Create column "description" on table "adempiere"."m_discountschemaline"
 --
 ALTER TABLE m_discountschemaline 
-  ADD description IF NOT EXISTS character varying(255) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS description character varying(255) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_nhif_linda_mama" on table "adempiere"."c_payment"
 --
 ALTER TABLE c_payment 
-  ADD bh_nhif_linda_mama IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_nhif_linda_mama character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_nhif_type" on table "adempiere"."c_payment"
 --
 ALTER TABLE c_payment 
-  ADD bh_nhif_type IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_nhif_type character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_tender_amount" on table "adempiere"."c_payment"
 --
 ALTER TABLE c_payment 
-  ADD bh_tender_amount IF NOT EXISTS numeric(147455, 16383);
+  ADD IF NOT EXISTS bh_tender_amount numeric;
 
 --
 -- Create column "bh_isservicedebt" on table "adempiere"."c_payment"
 --
 ALTER TABLE c_payment 
-  ADD bh_isservicedebt IF NOT EXISTS character(1) DEFAULT NULL::bpchar;
+  ADD IF NOT EXISTS bh_isservicedebt character(1) DEFAULT NULL::bpchar;
 
 --
 -- Create column "bh_docaction" on table "adempiere"."c_invoice"
 --
 ALTER TABLE c_invoice 
-  ADD bh_docaction IF NOT EXISTS character(2) DEFAULT NULL::bpchar;
+  ADD IF NOT EXISTS bh_docaction character(2) DEFAULT NULL::bpchar;
 
 --
 -- Create column "bh_navbuttons" on table "adempiere"."c_invoice"
 --
 ALTER TABLE c_invoice 
-  ADD bh_navbuttons IF NOT EXISTS character varying(36) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_navbuttons character varying(36) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_isexpense" on table "adempiere"."c_invoice"
 --
 ALTER TABLE c_invoice 
-  ADD bh_isexpense IF NOT EXISTS character(1) DEFAULT 'N'::bpchar;
+  ADD IF NOT EXISTS bh_isexpense character(1) DEFAULT 'N'::bpchar;
 
 --
 -- Create column "bh_processing" on table "adempiere"."c_invoice"
 --
 ALTER TABLE c_invoice 
-  ADD bh_processing IF NOT EXISTS character(1) DEFAULT 'N'::bpchar;
+  ADD IF NOT EXISTS bh_processing character(1) DEFAULT 'N'::bpchar;
 
 --
 -- Create column "bh_docaction_2" on table "adempiere"."c_invoice"
 --
 ALTER TABLE c_invoice 
-  ADD bh_docaction_2 IF NOT EXISTS character(2) DEFAULT NULL::bpchar;
+  ADD IF NOT EXISTS bh_docaction_2 character(2) DEFAULT NULL::bpchar;
 
 --
 -- Create column "bh_referral" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_referral IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_referral character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_newvisit" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_newvisit IF NOT EXISTS character(1) DEFAULT 'N'::bpchar;
+  ADD IF NOT EXISTS bh_newvisit character(1) DEFAULT 'N'::bpchar;
 
 --
 -- Create column "bh_patienttype" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_patienttype IF NOT EXISTS character(1) DEFAULT 'O'::bpchar;
+  ADD IF NOT EXISTS bh_patienttype character(1) DEFAULT 'O'::bpchar;
 
 --
 -- Create column "bh_lab_notes" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_lab_notes IF NOT EXISTS character varying(255) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_lab_notes character varying(255) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_bloodpressure" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_bloodpressure IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_bloodpressure character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_chiefcomplaint" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_chiefcomplaint IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_chiefcomplaint character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_height" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_height IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_height character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_pulse" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_pulse IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_pulse character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_respiratoryrate" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_respiratoryrate IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_respiratoryrate character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_temperature" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_temperature IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_temperature character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create column "bh_weight" on table "adempiere"."c_order"
 --
 ALTER TABLE c_order 
-  ADD bh_weight IF NOT EXISTS character varying(100) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_weight character varying(100) DEFAULT NULL::character varying;
 
 --
 -- Create view "adempiere"."bh_patients_seen_by_month_v"
@@ -1173,7 +1133,7 @@ AS
 -- Create column "bh_instructions" on table "adempiere"."c_orderline"
 --
 ALTER TABLE c_orderline 
-  ADD bh_instructions IF NOT EXISTS character varying(255) DEFAULT NULL::character varying;]
+  ADD IF NOT EXISTS bh_instructions character varying(255) DEFAULT NULL::character varying;
 
 --
 -- Create view "adempiere"."bhcorderv"
@@ -1261,7 +1221,7 @@ AS
 -- Create column "bh_navbuttons" on table "adempiere"."c_invoiceline"
 --
 ALTER TABLE c_invoiceline 
-  ADD bh_navbuttons IF NOT EXISTS character varying(36) DEFAULT NULL::character varying;
+  ADD IF NOT EXISTS bh_navbuttons character varying(36) DEFAULT NULL::character varying;
 
 --
 -- Create view "adempiere"."bh_patient_transactions_v"
@@ -1472,7 +1432,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO ad_ref_table (ad_reference_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, ad_table_id, ad_key, ad_display, isvaluedisplayed, whereclause, orderbyclause, entitytype, ad_window_id, ad_ref_table_uu, ad_infowindow_id) VALUES ((SELECT ad_reference_id FROM ad_reference WHERE ad_reference_uu = 'd2872478-6a24-4261-8178-bd71bce3f177'), 0, 0, 'Y', '2018-07-19 14:47:46.593000', 100, '2018-07-19 14:47:46.593000', 100, 100, 100, 102, 'N', null, null, 'U', null, 'cc157355-30d5-4c0f-b5e9-5008e523ad31', null)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO ad_table (ad_table_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, name, description, help, tablename, isview, accesslevel, entitytype, ad_window_id, ad_val_rule_id, loadseq, issecurityenabled, isdeleteable, ishighvolume, importtable, ischangelog, replicationtype, po_window_id, copycolumnsfromtable, iscentrallymaintained, ad_table_uu, processing, databaseviewdrop, copycomponentsfromview, createwindowfromtable) VALUES ((SELECT MAX(ad_table_id) + 1 FROM ad_table), 0, 0, 'Y', '2018-07-05 11:47:43.615000', 100, '2018-07-19 15:32:15.127000', 100, 'bh_changelog_v', null, null, 'bh_changelog_v', 'Y', '3', 'U', null, null, 0, 'N', 'N', 'N', 'N', 'Y', 'L', null, 'N', 'Y', 'c1a566ff-922b-4214-8908-7f1a2897dedc', 'N', 'N', 'N', null)
+INSERT INTO ad_table (ad_table_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, name, description, help, tablename, isview, accesslevel, entitytype, ad_window_id, ad_val_rule_id, loadseq, issecurityenabled, isdeleteable, ishighvolume, importtable, ischangelog, replicationtype, po_window_id, copycolumnsfromtable, iscentrallymaintained, ad_table_uu, processing, databaseviewdrop, copycomponentsfromview) VALUES ((SELECT MAX(ad_table_id) + 1 FROM ad_table), 0, 0, 'Y', '2018-07-05 11:47:43.615000', 100, '2018-07-19 15:32:15.127000', 100, 'bh_changelog_v', null, null, 'bh_changelog_v', 'Y', '3', 'U', null, null, 0, 'N', 'N', 'N', 'N', 'Y', 'L', null, 'N', 'Y', 'c1a566ff-922b-4214-8908-7f1a2897dedc', 'N', 'N', 'N')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO ad_element (ad_element_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, columnname, entitytype, name, printname, description, help, po_name, po_printname, po_description, po_help, ad_element_uu, placeholder) VALUES ((SELECT MAX(ad_element_id) + 1 FROM ad_element), 0, 0, 'Y', '2018-07-05 11:47:43.764000', 100, '2018-07-05 11:47:43.764000', 100, 'count', 'U', 'count', 'count', null, null, null, null, null, null, 'ff43b6fc-d986-4167-9d28-a6e96abe950d', null)
