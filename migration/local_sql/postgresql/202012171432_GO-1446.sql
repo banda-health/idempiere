@@ -1423,7 +1423,13 @@ UPDATE ad_column
 SET columnname = 'NationalID'
 WHERE ad_column_uu = 'ede93a0b-4901-4d49-8ef3-d315adfd031d';
 
-ALTER TABLE c_bpartner RENAME COLUMN national_id TO nationalid;
+DO $$
+BEGIN
+  IF EXISTS(SELECT * FROM information_schema.columns WHERE table_name='c_bpartner' and column_name='national_id')
+  THEN
+    ALTER TABLE c_bpartner RENAME COLUMN national_id TO nationalid;
+  END IF;
+END $$;
 
 -- Handle a new reference that was added
 INSERT INTO ad_reference (ad_reference_id, ad_client_id, ad_org_id, isactive, created, createdby, updated, updatedby, name, description, help, validationtype, vformat, entitytype, isorderbyvalue, ad_reference_uu, ad_element_id) VALUES ((SELECT MAX(ad_reference_id) + 1 FROM ad_reference), 0, 0, 'Y', '2018-07-19 14:47:46.579000', 100, '2018-07-19 14:47:46.579000', 100, 'BH_Table_Name', null, null, 'T', null, 'U', 'N', 'd2872478-6a24-4261-8178-bd71bce3f177', null)
