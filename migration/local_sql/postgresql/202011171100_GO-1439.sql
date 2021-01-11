@@ -22,4 +22,4 @@ WITH orderpayment AS (
      LEFT JOIN c_payment reverse ON pmt.c_payment_id = reverse.reversal_id
   WHERE pmt.reversal_id IS NULL AND pmt.docstatus <> 'RE'::bpchar AND reverse.c_payment_id IS NULL;
 
-SELECT register_migration_script('202011171100_GO_1439.sql') FROM dual;
+SELECT register_migration_script('202011171100_GO-1439.sql') FROM dual;
