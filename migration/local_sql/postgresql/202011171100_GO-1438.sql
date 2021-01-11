@@ -13,4 +13,4 @@ WITH payments AS (
    FROM c_order c
      LEFT JOIN payments p ON c.c_order_id = p.c_order_id;
 
-SELECT register_migration_script('202011171100_GO-1438.sql') FROM dual;
+SELECT register_migration_script('202011171100_GO_1438.sql') FROM dual;
