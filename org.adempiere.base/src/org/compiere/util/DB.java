@@ -1105,6 +1105,7 @@ public final class DB
 			throw new IllegalArgumentException("Required parameter missing - " + sql);
 		//
 		verifyTrx(trxName, sql);
+		log.warning(sql);
 		int no = -1;
 		CPreparedStatement cs = ProxyFactory.newCPreparedStatement(ResultSet.TYPE_FORWARD_ONLY,
 			ResultSet.CONCUR_UPDATABLE, sql, trxName);	//	converted in call
