@@ -1481,6 +1481,16 @@ SET bh_dbrdbtngrp_uu = '9b44ce0e-3113-4690-ad0b-92b95b34c741'
 WHERE bh_dbrdbtngrp_uu = 'e7db1391-816c-499a-8634-32b6d7298d0a';
 
 /**********************************************************************************************************/
+-- Fix problems with payment bank accounts 2-pack
+/**********************************************************************************************************/
+-- Add the table with its index
+ALTER TABLE BH_PaymentRef DROP CONSTRAINT IF EXISTS bh_paymentref_ad_client_id_fkey;
+ALTER TABLE BH_PaymentRef ADD CONSTRAINT ADClient_BHPaymentRef FOREIGN KEY (AD_Client_ID) REFERENCES ad_client(ad_client_id) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE BH_PaymentRef DROP CONSTRAINT IF EXISTS bh_paymentref_ad_reference_id_fkey;
+ALTER TABLE BH_PaymentRef DROP CONSTRAINT IF EXISTS bh_paymentref_ad_org_id_fkey;
+ALTER TABLE BH_PaymentRef ADD CONSTRAINT ADOrg_BHPaymentRef FOREIGN KEY (AD_Org_ID) REFERENCES ad_org(ad_org_id) DEFERRABLE INITIALLY DEFERRED;
+
+/**********************************************************************************************************/
 -- Finish
 /**********************************************************************************************************/
 SELECT register_migration_script('202012171432_GO-1446.sql') FROM dual;
