@@ -1,4 +1,4 @@
-# iDempiere. Community Powered Enterprise
+# iDempiere. Community Powered Enterprise ![TeamCity build status](https://teamcity.bandahealth.org/app/rest/builds/buildType:id:BHGO_Idempiere_Build/statusIcon.svg)
 
 iDempiere Business Suite ERP/CRM/SCM done the community way.  Focus is on the Community that includes Subject Matter Specialists, Implementors and End-Users.
 
