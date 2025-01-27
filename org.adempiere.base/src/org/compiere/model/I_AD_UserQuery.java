@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_UserQuery
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_UserQuery 
 {
@@ -44,8 +44,8 @@ public interface I_AD_UserQuery
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_AD_UserQuery
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -107,21 +107,6 @@ public interface I_AD_UserQuery
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
-    /** Column name AD_User_ID */
-    public static final String COLUMNNAME_AD_User_ID = "AD_User_ID";
-
-	/** Set User/Contact.
-	  * User within the system - Internal or Business Partner Contact
-	  */
-	public void setAD_User_ID (int AD_User_ID);
-
-	/** Get User/Contact.
-	  * User within the system - Internal or Business Partner Contact
-	  */
-	public int getAD_User_ID();
-
-	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
-
     /** Column name AD_UserQuery_ID */
     public static final String COLUMNNAME_AD_UserQuery_ID = "AD_UserQuery_ID";
 
@@ -143,6 +128,21 @@ public interface I_AD_UserQuery
 
 	/** Get AD_UserQuery_UU	  */
 	public String getAD_UserQuery_UU();
+
+    /** Column name AD_User_ID */
+    public static final String COLUMNNAME_AD_User_ID = "AD_User_ID";
+
+	/** Set User/Contact.
+	  * User within the system - Internal or Business Partner Contact
+	  */
+	public void setAD_User_ID (int AD_User_ID);
+
+	/** Get User/Contact.
+	  * User within the system - Internal or Business Partner Contact
+	  */
+	public int getAD_User_ID();
+
+	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
 
     /** Column name AD_Window_ID */
     public static final String COLUMNNAME_AD_Window_ID = "AD_Window_ID";

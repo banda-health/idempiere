@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_RMALine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_RMALine 
 {
@@ -44,8 +44,8 @@ public interface I_M_RMALine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_RMALine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -90,6 +90,21 @@ public interface I_M_RMALine
 
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException;
 
+    /** Column name C_Tax_ID */
+    public static final String COLUMNNAME_C_Tax_ID = "C_Tax_ID";
+
+	/** Set Tax.
+	  * Tax identifier
+	  */
+	public void setC_Tax_ID (int C_Tax_ID);
+
+	/** Get Tax.
+	  * Tax identifier
+	  */
+	public int getC_Tax_ID();
+
+	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -105,21 +120,6 @@ public interface I_M_RMALine
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_Tax_ID */
-    public static final String COLUMNNAME_C_Tax_ID = "C_Tax_ID";
-
-	/** Set Tax.
-	  * Tax identifier
-	  */
-	public void setC_Tax_ID (int C_Tax_ID);
-
-	/** Get Tax.
-	  * Tax identifier
-	  */
-	public int getC_Tax_ID();
-
-	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -203,21 +203,6 @@ public interface I_M_RMALine
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
 
-    /** Column name M_RMA_ID */
-    public static final String COLUMNNAME_M_RMA_ID = "M_RMA_ID";
-
-	/** Set RMA.
-	  * Return Material Authorization
-	  */
-	public void setM_RMA_ID (int M_RMA_ID);
-
-	/** Get RMA.
-	  * Return Material Authorization
-	  */
-	public int getM_RMA_ID();
-
-	public org.compiere.model.I_M_RMA getM_RMA() throws RuntimeException;
-
     /** Column name M_RMALine_ID */
     public static final String COLUMNNAME_M_RMALine_ID = "M_RMALine_ID";
 
@@ -239,6 +224,21 @@ public interface I_M_RMALine
 
 	/** Get M_RMALine_UU	  */
 	public String getM_RMALine_UU();
+
+    /** Column name M_RMA_ID */
+    public static final String COLUMNNAME_M_RMA_ID = "M_RMA_ID";
+
+	/** Set RMA.
+	  * Return Material Authorization
+	  */
+	public void setM_RMA_ID (int M_RMA_ID);
+
+	/** Get RMA.
+	  * Return Material Authorization
+	  */
+	public int getM_RMA_ID();
+
+	public org.compiere.model.I_M_RMA getM_RMA() throws RuntimeException;
 
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";

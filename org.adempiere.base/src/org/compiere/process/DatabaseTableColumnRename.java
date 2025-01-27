@@ -22,18 +22,20 @@
  * Contributors:                                                       *
  * - Carlos Ruiz - globalqss                                           *
  **********************************************************************/
-
 package org.compiere.process;
-
-import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MColumn;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.M_Element;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+/**
+ * Process to change AD_Element_ID of a AD_Column record.<br/>
+ * Since ColumnName of AD_Column comes from AD_Element, this will trigger the rename of DB column.
+ */
 @org.adempiere.base.annotation.Process
 public class DatabaseTableColumnRename extends SvrProcess {
 
@@ -49,8 +51,7 @@ public class DatabaseTableColumnRename extends SvrProcess {
 			if ("AD_Element_ID".equals(name)) {
 				p_AD_Element_ID = para.getParameterAsInt();
 			} else {
-				if (log.isLoggable(Level.INFO))
-					log.log(Level.INFO, "Custom Parameter: " + name + "=" + para.getInfo());
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para);
 			}
 		}
 		p_AD_Column_ID = getRecord_ID();

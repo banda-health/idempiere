@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_ProductionLineMA
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_ProductionLineMA 
 {
@@ -44,8 +44,8 @@ public interface I_M_ProductionLineMA
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_ProductionLineMA
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -119,18 +119,14 @@ public interface I_M_ProductionLineMA
 
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException;
 
-    /** Column name MovementQty */
-    public static final String COLUMNNAME_MovementQty = "MovementQty";
+    /** Column name M_ProductionLineMA_UU */
+    public static final String COLUMNNAME_M_ProductionLineMA_UU = "M_ProductionLineMA_UU";
 
-	/** Set Movement Quantity.
-	  * Quantity of a product moved.
-	  */
-	public void setMovementQty (BigDecimal MovementQty);
+	/** Set M_ProductionLineMA_UU	  */
+	public void setM_ProductionLineMA_UU (String M_ProductionLineMA_UU);
 
-	/** Get Movement Quantity.
-	  * Quantity of a product moved.
-	  */
-	public BigDecimal getMovementQty();
+	/** Get M_ProductionLineMA_UU	  */
+	public String getM_ProductionLineMA_UU();
 
     /** Column name M_ProductionLine_ID */
     public static final String COLUMNNAME_M_ProductionLine_ID = "M_ProductionLine_ID";
@@ -147,14 +143,18 @@ public interface I_M_ProductionLineMA
 
 	public org.compiere.model.I_M_ProductionLine getM_ProductionLine() throws RuntimeException;
 
-    /** Column name M_ProductionLineMA_UU */
-    public static final String COLUMNNAME_M_ProductionLineMA_UU = "M_ProductionLineMA_UU";
+    /** Column name MovementQty */
+    public static final String COLUMNNAME_MovementQty = "MovementQty";
 
-	/** Set M_ProductionLineMA_UU	  */
-	public void setM_ProductionLineMA_UU (String M_ProductionLineMA_UU);
+	/** Set Movement Quantity.
+	  * Quantity of a product moved.
+	  */
+	public void setMovementQty (BigDecimal MovementQty);
 
-	/** Get M_ProductionLineMA_UU	  */
-	public String getM_ProductionLineMA_UU();
+	/** Get Movement Quantity.
+	  * Quantity of a product moved.
+	  */
+	public BigDecimal getMovementQty();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

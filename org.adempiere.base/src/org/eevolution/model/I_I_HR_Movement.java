@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_HR_Movement
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_I_HR_Movement 
@@ -46,8 +46,8 @@ public interface I_I_HR_Movement
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_I_HR_Movement
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -237,6 +237,19 @@ public interface I_I_HR_Movement
 	  */
 	public boolean isActive();
 
+    /** Column name ProcessName */
+    public static final String COLUMNNAME_ProcessName = "ProcessName";
+
+	/** Set Process Name.
+	  * Name of the Process
+	  */
+	public void setProcessName (String ProcessName);
+
+	/** Get Process Name.
+	  * Name of the Process
+	  */
+	public String getProcessName();
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -258,19 +271,6 @@ public interface I_I_HR_Movement
 
 	/** Get Process Now	  */
 	public boolean isProcessing();
-
-    /** Column name ProcessName */
-    public static final String COLUMNNAME_ProcessName = "ProcessName";
-
-	/** Set Process Name.
-	  * Name of the Process
-	  */
-	public void setProcessName (String ProcessName);
-
-	/** Get Process Name.
-	  * Name of the Process
-	  */
-	public String getProcessName();
 
     /** Column name Qty */
     public static final String COLUMNNAME_Qty = "Qty";

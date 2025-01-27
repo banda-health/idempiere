@@ -33,11 +33,12 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.IMFAMechanism;
 import org.compiere.model.MMFAMethod;
 import org.compiere.model.MMFARegistration;
+import org.compiere.model.MProcessPara;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
- *	IDEMPIERE-4782
+ *	IDEMPIERE-4782 Multi-factor authentication
  * 	@author Carlos Ruiz - globalqss - BX Service
  */
 @org.adempiere.base.annotation.Process
@@ -61,8 +62,7 @@ public class MFACompleteRegistration extends SvrProcess {
 			case "Name": p_Name = para.getParameterAsString(); break;
 			case "IsUserMFAPreferred": p_IsUserMFAPreferred = para.getParameterAsBoolean(); break;
 			default:
-				if (log.isLoggable(Level.INFO))
-					log.log(Level.INFO, "Custom Parameter: " + name + "=" + para.getInfo());
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para);
 				break;
 			}
 		}

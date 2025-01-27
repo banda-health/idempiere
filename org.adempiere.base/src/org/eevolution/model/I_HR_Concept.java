@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for HR_Concept
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_HR_Concept 
@@ -43,24 +43,11 @@ public interface I_HR_Concept
 
     /** Load Meta Data */
 
-    /** Column name AccountSign */
-    public static final String COLUMNNAME_AccountSign = "AccountSign";
-
-	/** Set Account Sign.
-	  * Indicates the Natural Sign of the Account as a Debit or Credit
-	  */
-	public void setAccountSign (String AccountSign);
-
-	/** Get Account Sign.
-	  * Indicates the Natural Sign of the Account as a Debit or Credit
-	  */
-	public String getAccountSign();
-
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -68,12 +55,12 @@ public interface I_HR_Concept
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -91,6 +78,19 @@ public interface I_HR_Concept
 	public int getAD_Reference_ID();
 
 	public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException;
+
+    /** Column name AccountSign */
+    public static final String COLUMNNAME_AccountSign = "AccountSign";
+
+	/** Set Account Sign.
+	  * Indicates the Natural Sign of the Account as a Debit or Credit
+	  */
+	public void setAccountSign (String AccountSign);
+
+	/** Get Account Sign.
+	  * Indicates the Natural Sign of the Account as a Debit or Credit
+	  */
+	public String getAccountSign();
 
     /** Column name ColumnType */
     public static final String COLUMNNAME_ColumnType = "ColumnType";
@@ -235,12 +235,12 @@ public interface I_HR_Concept
     public static final String COLUMNNAME_IsPaid = "IsPaid";
 
 	/** Set Paid.
-	  * The document is paid
+	  * The document is fully paid
 	  */
 	public void setIsPaid (boolean IsPaid);
 
 	/** Get Paid.
-	  * The document is paid
+	  * The document is fully paid
 	  */
 	public boolean isPaid();
 

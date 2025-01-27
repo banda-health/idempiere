@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE zk>
 
 	<!--
 		zk.xml Copyright (C) 2006 Potix Corporation. All Rights Reserved.
@@ -24,7 +23,7 @@
 	</listener -->
 
 	<listener>
-		<description>[Optional] Mointor the statistic</description>
+		<description>[Optional] Monitor the statistic</description>
 		<listener-class>org.adempiere.webui.util.Statistic</listener-class>
 	</listener>
 
@@ -135,4 +134,12 @@
     	<name>org.zkoss.zk.ui.WebApp.name</name>
     	<value>iDempiere</value>
 	</preference>
+    <library-property>
+        <name>org.zkoss.zk.ui.uuidRecycle.disabled</name>
+        <value>true</value>
+    </library-property>
+    <library-property>
+    	<name>org.zkoss.zul.Filedownload.contentTypeAsIs</name>
+    	<value>true</value>
+    </library-property>
 </zk>

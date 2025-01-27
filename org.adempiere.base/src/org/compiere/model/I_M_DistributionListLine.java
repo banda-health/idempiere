@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_DistributionListLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_DistributionListLine 
 {
@@ -44,8 +44,8 @@ public interface I_M_DistributionListLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_DistributionListLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -134,21 +134,6 @@ public interface I_M_DistributionListLine
 	  */
 	public boolean isActive();
 
-    /** Column name M_DistributionList_ID */
-    public static final String COLUMNNAME_M_DistributionList_ID = "M_DistributionList_ID";
-
-	/** Set Distribution List.
-	  * Distribution Lists allow to distribute products to a selected list of partners
-	  */
-	public void setM_DistributionList_ID (int M_DistributionList_ID);
-
-	/** Get Distribution List.
-	  * Distribution Lists allow to distribute products to a selected list of partners
-	  */
-	public int getM_DistributionList_ID();
-
-	public org.compiere.model.I_M_DistributionList getM_DistributionList() throws RuntimeException;
-
     /** Column name M_DistributionListLine_ID */
     public static final String COLUMNNAME_M_DistributionListLine_ID = "M_DistributionListLine_ID";
 
@@ -170,6 +155,21 @@ public interface I_M_DistributionListLine
 
 	/** Get M_DistributionListLine_UU	  */
 	public String getM_DistributionListLine_UU();
+
+    /** Column name M_DistributionList_ID */
+    public static final String COLUMNNAME_M_DistributionList_ID = "M_DistributionList_ID";
+
+	/** Set Distribution List.
+	  * Distribution Lists allow to distribute products to a selected list of partners
+	  */
+	public void setM_DistributionList_ID (int M_DistributionList_ID);
+
+	/** Get Distribution List.
+	  * Distribution Lists allow to distribute products to a selected list of partners
+	  */
+	public int getM_DistributionList_ID();
+
+	public org.compiere.model.I_M_DistributionList getM_DistributionList() throws RuntimeException;
 
     /** Column name MinQty */
     public static final String COLUMNNAME_MinQty = "MinQty";

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_CostDetail
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_CostDetail 
 {
@@ -44,8 +44,8 @@ public interface I_M_CostDetail
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_CostDetail
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -74,6 +74,19 @@ public interface I_M_CostDetail
 	  * Amount
 	  */
 	public BigDecimal getAmt();
+
+    /** Column name BackDateProcessedOn */
+    public static final String COLUMNNAME_BackDateProcessedOn = "BackDateProcessedOn";
+
+	/** Set Back-Date Processed On.
+	  * The date+time (expressed in decimal format) when the document has been processed
+	  */
+	public void setBackDateProcessedOn (Timestamp BackDateProcessedOn);
+
+	/** Get Back-Date Processed On.
+	  * The date+time (expressed in decimal format) when the document has been processed
+	  */
+	public Timestamp getBackDateProcessedOn();
 
     /** Column name C_AcctSchema_ID */
     public static final String COLUMNNAME_C_AcctSchema_ID = "C_AcctSchema_ID";
@@ -203,6 +216,19 @@ public interface I_M_CostDetail
 	  */
 	public BigDecimal getCurrentQty();
 
+    /** Column name DateAcct */
+    public static final String COLUMNNAME_DateAcct = "DateAcct";
+
+	/** Set Account Date.
+	  * Accounting Date
+	  */
+	public void setDateAcct (Timestamp DateAcct);
+
+	/** Get Account Date.
+	  * Accounting Date
+	  */
+	public Timestamp getDateAcct();
+
     /** Column name DeltaAmt */
     public static final String COLUMNNAME_DeltaAmt = "DeltaAmt";
 
@@ -254,6 +280,15 @@ public interface I_M_CostDetail
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name IsBackDate */
+    public static final String COLUMNNAME_IsBackDate = "IsBackDate";
+
+	/** Set Back-Date	  */
+	public void setIsBackDate (boolean IsBackDate);
+
+	/** Get Back-Date	  */
+	public boolean isBackDate();
 
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
@@ -459,6 +494,15 @@ public interface I_M_CostDetail
 	  * Quantity
 	  */
 	public BigDecimal getQty();
+
+    /** Column name Ref_CostDetail_ID */
+    public static final String COLUMNNAME_Ref_CostDetail_ID = "Ref_CostDetail_ID";
+
+	/** Set Referenced Cost Detail	  */
+	public void setRef_CostDetail_ID (int Ref_CostDetail_ID);
+
+	/** Get Referenced Cost Detail	  */
+	public int getRef_CostDetail_ID();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

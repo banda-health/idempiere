@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_ServiceLevelLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_ServiceLevelLine 
 {
@@ -44,8 +44,8 @@ public interface I_C_ServiceLevelLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,45 +53,14 @@ public interface I_C_ServiceLevelLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name Created */
-    public static final String COLUMNNAME_Created = "Created";
-
-	/** Get Created.
-	  * Date this record was created
-	  */
-	public Timestamp getCreated();
-
-    /** Column name CreatedBy */
-    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
-
-	/** Get Created By.
-	  * User who created this records
-	  */
-	public int getCreatedBy();
-
-    /** Column name C_ServiceLevel_ID */
-    public static final String COLUMNNAME_C_ServiceLevel_ID = "C_ServiceLevel_ID";
-
-	/** Set Service Level.
-	  * Product Revenue Recognition Service Level 
-	  */
-	public void setC_ServiceLevel_ID (int C_ServiceLevel_ID);
-
-	/** Get Service Level.
-	  * Product Revenue Recognition Service Level 
-	  */
-	public int getC_ServiceLevel_ID();
-
-	public org.compiere.model.I_C_ServiceLevel getC_ServiceLevel() throws RuntimeException;
 
     /** Column name C_ServiceLevelLine_ID */
     public static final String COLUMNNAME_C_ServiceLevelLine_ID = "C_ServiceLevelLine_ID";
@@ -114,6 +83,37 @@ public interface I_C_ServiceLevelLine
 
 	/** Get C_ServiceLevelLine_UU	  */
 	public String getC_ServiceLevelLine_UU();
+
+    /** Column name C_ServiceLevel_ID */
+    public static final String COLUMNNAME_C_ServiceLevel_ID = "C_ServiceLevel_ID";
+
+	/** Set Service Level.
+	  * Product Revenue Recognition Service Level 
+	  */
+	public void setC_ServiceLevel_ID (int C_ServiceLevel_ID);
+
+	/** Get Service Level.
+	  * Product Revenue Recognition Service Level 
+	  */
+	public int getC_ServiceLevel_ID();
+
+	public org.compiere.model.I_C_ServiceLevel getC_ServiceLevel() throws RuntimeException;
+
+    /** Column name Created */
+    public static final String COLUMNNAME_Created = "Created";
+
+	/** Get Created.
+	  * Date this record was created
+	  */
+	public Timestamp getCreated();
+
+    /** Column name CreatedBy */
+    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
+
+	/** Get Created By.
+	  * User who created this records
+	  */
+	public int getCreatedBy();
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";

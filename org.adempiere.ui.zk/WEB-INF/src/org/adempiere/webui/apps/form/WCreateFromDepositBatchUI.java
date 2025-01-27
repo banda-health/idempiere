@@ -38,15 +38,18 @@ import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WStringEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.grid.CreateFromDepositBatch;
 import org.compiere.model.GridTab;
 import org.compiere.model.MBankStatement;
 import org.compiere.model.MColumn;
+import org.compiere.model.MCurrency;
 import org.compiere.model.MDepositBatch;
+import org.compiere.model.MDepositBatchLine;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MPayment;
+import org.compiere.model.SystemIDs;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -59,18 +62,21 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Hbox;
 
 /**
- * 
+ * Form to create Deposit Batch ({@link MDepositBatch} and {@link MDepositBatchLine}) from payment transactions.
  * @author Elaine
- *
  */
 public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements EventListener<Event>
 {
+	/** UI form instance */
 	private WCreateFromWindow window;
 	
+	/**
+	 * @param tab
+	 */
 	public WCreateFromDepositBatchUI(GridTab tab) 
 	{
 		super(tab);
-		log.info(getGridTab().toString());
+		if (log.isLoggable(Level.INFO)) log.info(getGridTab().toString());
 		
 		window = new WCreateFromWindow(this, getGridTab().getWindowNo());
 		
@@ -91,14 +97,19 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		AEnv.showWindow(window);
 	}
 	
-	/** Window No               */
+	/** Window No */
 	private int p_WindowNo;
 
-	/**	Logger			*/
+	/**	Logger */
 	private static final CLogger log = CLogger.getCLogger(WCreateFromDepositBatchUI.class);
+	
+	/** form parameters for loading of payment transactions ({@link #loadBankAccount}) */
 	
 	protected Label bankAccountLabel = new Label();
 	protected WTableDirEditor bankAccountField;
+	
+	protected Label currencyLabel = new Label(Msg.translate(Env.getCtx(), "C_Currency_ID"));
+	protected WTableDirEditor currencyField;
 	
 	protected Label documentNoLabel = new Label(Msg.translate(Env.getCtx(), "DocumentNo"));
 	protected WStringEditor documentNoField = new WStringEditor();
@@ -114,6 +125,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 	
 	protected Label amtFromLabel = new Label(Msg.translate(Env.getCtx(), "PayAmt"));
 	protected WNumberEditor amtFromField = new WNumberEditor("AmtFrom", false, false, true, DisplayType.Amount, Msg.translate(Env.getCtx(), "AmtFrom"));
+	
 	protected Label amtToLabel = new Label("-");
 	protected WNumberEditor amtToField = new WNumberEditor("AmtTo", false, false, true, DisplayType.Amount, Msg.translate(Env.getCtx(), "AmtTo"));
 	
@@ -122,17 +134,14 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 
 	protected Label dateFromLabel = new Label(Msg.translate(Env.getCtx(), "DateTrx"));
 	protected WDateEditor dateFromField = new WDateEditor("DateFrom", false, false, true, Msg.translate(Env.getCtx(), "DateFrom"));
+	
 	protected Label dateToLabel = new Label("-");
 	protected WDateEditor dateToField = new WDateEditor("DateTo", false, false, true, Msg.translate(Env.getCtx(), "DateTo"));
 
-	/**
-	 *  Dynamic Init
-	 *  @throws Exception if Lookups cannot be initialized
-	 *  @return true if initialized
-	 */
-	public boolean dynInit() throws Exception
+	@Override
+	protected boolean dynInit() throws Exception
 	{
-		log.config("");
+		if (log.isLoggable(Level.CONFIG)) log.config("");
 		
 		super.dynInit();
 		
@@ -143,7 +152,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 				
 		if (getGridTab().getValue("C_DepositBatch_ID") == null)
 		{
-			FDialog.error(0, window, "SaveErrorRowNotFound");
+			Dialog.error(0, "SaveErrorRowNotFound");
 			return false;
 		}
 		
@@ -155,21 +164,27 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		//  Set Default
 		int C_BankAccount_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BankAccount_ID");
 		bankAccountField.setValue(Integer.valueOf(C_BankAccount_ID));
+		bankAccountField.setReadWrite(false);
+		
+		lookup = MLookupFactory.get(Env.getCtx(), p_WindowNo, 0, MColumn.getColumn_ID(MCurrency.Table_Name, MCurrency.COLUMNNAME_C_Currency_ID), DisplayType.TableDir);
+		currencyField = new WTableDirEditor(MCurrency.COLUMNNAME_C_Currency_ID, false, false, true, lookup);
+		int C_Currency_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_Currency_ID");
+		currencyField.setValue(C_Currency_ID);
+		currencyField.setReadWrite(false);
+		
 		//  initial Loading
 		authorizationField = new WStringEditor ("authorization", false, false, true, 10, 30, null, null);
-//		authorizationField.getComponent().addEventListener(Events.ON_CHANGE, this);
 
 		lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, MColumn.getColumn_ID(MPayment.Table_Name, MPayment.COLUMNNAME_C_DocType_ID), DisplayType.TableDir);
 		documentTypeField = new WTableDirEditor (MPayment.COLUMNNAME_C_DocType_ID,false,false,true,lookup);
 		int C_DocType_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_DocType_ID");
 		documentTypeField.setValue(Integer.valueOf(C_DocType_ID));
-//		documentTypeField.getComponent().addEventListener(Events.ON_CHANGE, this);
+		documentTypeField.setReadWrite(false);
 		
 		lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, MColumn.getColumn_ID(MPayment.Table_Name, MPayment.COLUMNNAME_TenderType), DisplayType.List);
 		tenderTypeField = new WTableDirEditor (MPayment.COLUMNNAME_TenderType,false,false,true,lookup);
-//		tenderTypeField.getComponent().addEventListener(Events.ON_CHANGE, this);
 		
-		lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, 3499, DisplayType.Search);
+		lookup = MLookupFactory.get (Env.getCtx(), p_WindowNo, 0, SystemIDs.COLUMN_C_INVOICE_C_BPARTNER_ID, DisplayType.Search);
 		bPartnerLookup = new WSearchEditor ("C_BPartner_ID", false, false, true, lookup);
 		
 		Timestamp date = null;
@@ -187,8 +202,13 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		return true;
 	}   //  dynInit
 	
+	/**
+	 * Layout {@link #window}
+	 * @throws Exception
+	 */
 	protected void zkInit() throws Exception
 	{
+    	ZKUpdateUtil.setWindowWidthX(window, 1100);
 		bankAccountLabel.setText(Msg.translate(Env.getCtx(), "C_BankAccount_ID"));
     	authorizationLabel.setText(Msg.translate(Env.getCtx(), "R_AuthCode"));
     	
@@ -202,7 +222,7 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
     	amtToField.getComponent().setTooltiptext(Msg.translate(Env.getCtx(), "AmtTo"));
     	
     	Borderlayout parameterLayout = new Borderlayout();
-    	ZKUpdateUtil.setHeight(parameterLayout, "130px");
+    	ZKUpdateUtil.setHeight(parameterLayout, "120px");
 		ZKUpdateUtil.setWidth(parameterLayout, "100%");
     	Panel parameterPanel = window.getParameterPanel();
 		parameterPanel.appendChild(parameterLayout);
@@ -220,45 +240,51 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		Column column = new Column();
 		columns.appendChild(column);		
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "15%");
+		ZKUpdateUtil.setWidth(column, "12%");
 		columns.appendChild(column);
-		ZKUpdateUtil.setWidth(column, "35%");
+		ZKUpdateUtil.setWidth(column, "19%");
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "15%");
+		ZKUpdateUtil.setWidth(column, "12%");
 		columns.appendChild(column);
 		column = new Column();
-		ZKUpdateUtil.setWidth(column, "35%");
+		ZKUpdateUtil.setWidth(column, "22%");
+		columns.appendChild(column);
+		column = new Column();
+		ZKUpdateUtil.setWidth(column, "12%");
+		columns.appendChild(column);
+		column = new Column();
+		ZKUpdateUtil.setWidth(column, "23%");
 		columns.appendChild(column);
 		
 		Rows rows = (Rows) parameterBankLayout.newRows();
 		Row row = rows.newRow();
 		row.appendChild(bankAccountLabel.rightAlign());
 		row.appendChild(bankAccountField.getComponent());
-		row.appendChild(documentNoLabel.rightAlign());
-		row.appendChild(documentNoField.getComponent());
-		
-		row = rows.newRow();
 		row.appendChild(documentTypeLabel.rightAlign());
 		row.appendChild(documentTypeField.getComponent());
+		row.appendChild(currencyLabel.rightAlign());
+		row.appendChild(currencyField.getComponent());
+		
+		
+		row = rows.newRow();
+		row.appendChild(documentNoLabel.rightAlign());
+		row.appendChild(documentNoField.getComponent());
+		row.appendChild(BPartner_idLabel.rightAlign());
+		row.appendChild(bPartnerLookup.getComponent());
 		row.appendChild(authorizationLabel.rightAlign());
 		row.appendChild(authorizationField.getComponent());
+
 		
 		row = rows.newRow();
 		row.appendChild(tenderTypeLabel.rightAlign());
 		row.appendChild(tenderTypeField.getComponent());
-
 		row.appendChild(amtFromLabel.rightAlign());
 		Hbox hbox = new Hbox();
 		hbox.appendChild(amtFromField.getComponent());
 		hbox.appendChild(amtToLabel.rightAlign());
 		hbox.appendChild(amtToField.getComponent());
 		row.appendChild(hbox);
-		
-		row = rows.newRow();
-		row.appendChild(BPartner_idLabel.rightAlign());
-		row.appendChild(bPartnerLookup.getComponent());
 		row.appendChild(dateFromLabel.rightAlign());
-		
 		hbox = new Hbox();
 		hbox.appendChild(dateFromField.getComponent());
 		hbox.appendChild(dateToLabel.rightAlign());
@@ -267,10 +293,11 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 	}
 
 	/**
-	 *  Action Listener
+	 *  Event Listener
 	 *  @param e event
-	 * @throws Exception 
+	 *  @throws Exception 
 	 */
+	@Override
 	public void onEvent(Event e) throws Exception
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("Action=" + e.getTarget().getId());
@@ -281,14 +308,21 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		}
 	}
 	
+	/**
+	 * load payments for selected bank account
+	 */
 	protected void loadBankAccount()
 	{
-		loadTableOIS(getBankAccountData(bankAccountField.getValue(), bPartnerLookup.getValue(), 
+		loadTableOIS(getBankAccountData((Integer)bankAccountField.getValue(), (Integer)bPartnerLookup.getValue(), 
 				documentNoField.getValue().toString(), dateFromField.getValue(), dateToField.getValue(),
 				amtFromField.getValue(), amtToField.getValue(), 
-				documentTypeField.getValue(), tenderTypeField.getValue(), authorizationField.getValue().toString()));
+				(Integer)documentTypeField.getValue(), (String)tenderTypeField.getValue(), authorizationField.getValue().toString(), (Integer)currencyField.getValue()));
 	}
 	
+	/**
+	 * load data into list box
+	 * @param data
+	 */
 	protected void loadTableOIS (Vector<?> data)
 	{
 		window.getWListbox().clear();
@@ -304,11 +338,13 @@ public class WCreateFromDepositBatchUI extends CreateFromDepositBatch implements
 		configureMiniTable(window.getWListbox());
 	}
 	
+	@Override
 	public void showWindow()
 	{
 		window.setVisible(true);
 	}
 	
+	@Override
 	public void closeWindow()
 	{
 		window.dispose();

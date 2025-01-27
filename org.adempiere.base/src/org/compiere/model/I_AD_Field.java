@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Field
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_Field 
 {
@@ -41,11 +41,22 @@ public interface I_AD_Field
 
     /** Load Meta Data */
 
+    /** Column name AD_Chart_ID */
+    public static final String COLUMNNAME_AD_Chart_ID = "AD_Chart_ID";
+
+	/** Set Chart	  */
+	public void setAD_Chart_ID (int AD_Chart_ID);
+
+	/** Get Chart	  */
+	public int getAD_Chart_ID();
+
+	public org.compiere.model.I_AD_Chart getAD_Chart() throws RuntimeException;
+
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -79,19 +90,6 @@ public interface I_AD_Field
 
 	public org.compiere.model.I_AD_FieldGroup getAD_FieldGroup() throws RuntimeException;
 
-    /** Column name AD_Field_ID */
-    public static final String COLUMNNAME_AD_Field_ID = "AD_Field_ID";
-
-	/** Set Field.
-	  * Field on a database table
-	  */
-	public void setAD_Field_ID (int AD_Field_ID);
-
-	/** Get Field.
-	  * Field on a database table
-	  */
-	public int getAD_Field_ID();
-
     /** Column name AD_FieldStyle_ID */
     public static final String COLUMNNAME_AD_FieldStyle_ID = "AD_FieldStyle_ID";
 
@@ -106,6 +104,19 @@ public interface I_AD_Field
 	public int getAD_FieldStyle_ID();
 
 	public org.compiere.model.I_AD_Style getAD_FieldStyle() throws RuntimeException;
+
+    /** Column name AD_Field_ID */
+    public static final String COLUMNNAME_AD_Field_ID = "AD_Field_ID";
+
+	/** Set Field.
+	  * Field on a database table
+	  */
+	public void setAD_Field_ID (int AD_Field_ID);
+
+	/** Get Field.
+	  * Field on a database table
+	  */
+	public int getAD_Field_ID();
 
     /** Column name AD_Field_UU */
     public static final String COLUMNNAME_AD_Field_UU = "AD_Field_UU";
@@ -135,12 +146,12 @@ public interface I_AD_Field
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -219,18 +230,20 @@ public interface I_AD_Field
 
 	public org.compiere.model.I_AD_Val_Rule getAD_Val_Rule_Lookup() throws RuntimeException;
 
-    /** Column name ColumnSpan */
-    public static final String COLUMNNAME_ColumnSpan = "ColumnSpan";
+    /** Column name AlwaysUpdatableLogic */
+    public static final String COLUMNNAME_AlwaysUpdatableLogic = "AlwaysUpdatableLogic";
 
-	/** Set Column Span.
-	  * Number of column for a box of field
+	/** Set Always Updatable Logic.
+	  * Logic to determine if field is Updatable irrespective if record&#039;
+s active status or processed status. This logic Applicable only if Always Updatable is N.
 	  */
-	public void setColumnSpan (int ColumnSpan);
+	public void setAlwaysUpdatableLogic (String AlwaysUpdatableLogic);
 
-	/** Get Column Span.
-	  * Number of column for a box of field
+	/** Get Always Updatable Logic.
+	  * Logic to determine if field is Updatable irrespective if record&#039;
+s active status or processed status. This logic Applicable only if Always Updatable is N.
 	  */
-	public int getColumnSpan();
+	public String getAlwaysUpdatableLogic();
 
     /** Column name ColumnSQL */
     public static final String COLUMNNAME_ColumnSQL = "ColumnSQL";
@@ -244,6 +257,19 @@ public interface I_AD_Field
 	  * Virtual Column (r/o)
 	  */
 	public String getColumnSQL();
+
+    /** Column name ColumnSpan */
+    public static final String COLUMNNAME_ColumnSpan = "ColumnSpan";
+
+	/** Set Column Span.
+	  * Number of column for a box of field
+	  */
+	public void setColumnSpan (int ColumnSpan);
+
+	/** Get Column Span.
+	  * Number of column for a box of field
+	  */
+	public int getColumnSpan();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -489,6 +515,19 @@ public interface I_AD_Field
 	  */
 	public boolean isHeading();
 
+    /** Column name IsHtml */
+    public static final String COLUMNNAME_IsHtml = "IsHtml";
+
+	/** Set HTML.
+	  * Text has HTML tags
+	  */
+	public void setIsHtml (String IsHtml);
+
+	/** Get HTML.
+	  * Text has HTML tags
+	  */
+	public String getIsHtml();
+
     /** Column name IsMandatory */
     public static final String COLUMNNAME_IsMandatory = "IsMandatory";
 
@@ -719,7 +758,7 @@ public interface I_AD_Field
 	  * Format of the value;
  Can contain fixed format elements, Variables: &quot;
 _lLoOaAcCa09&quot;
-
+, or ~regex
 	  */
 	public void setVFormat (String VFormat);
 
@@ -727,7 +766,7 @@ _lLoOaAcCa09&quot;
 	  * Format of the value;
  Can contain fixed format elements, Variables: &quot;
 _lLoOaAcCa09&quot;
-
+, or ~regex
 	  */
 	public String getVFormat();
 

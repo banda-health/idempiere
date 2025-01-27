@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for HR_List
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_HR_List 
@@ -46,8 +46,8 @@ public interface I_HR_List
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_HR_List
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -115,15 +115,6 @@ public interface I_HR_List
 
 	public org.eevolution.model.I_HR_Employee getHR_Employee() throws RuntimeException;
 
-    /** Column name HR_List_ID */
-    public static final String COLUMNNAME_HR_List_ID = "HR_List_ID";
-
-	/** Set Payroll List	  */
-	public void setHR_List_ID (int HR_List_ID);
-
-	/** Get Payroll List	  */
-	public int getHR_List_ID();
-
     /** Column name HR_ListType_ID */
     public static final String COLUMNNAME_HR_ListType_ID = "HR_ListType_ID";
 
@@ -134,6 +125,15 @@ public interface I_HR_List
 	public int getHR_ListType_ID();
 
 	public org.eevolution.model.I_HR_ListType getHR_ListType() throws RuntimeException;
+
+    /** Column name HR_List_ID */
+    public static final String COLUMNNAME_HR_List_ID = "HR_List_ID";
+
+	/** Set Payroll List	  */
+	public void setHR_List_ID (int HR_List_ID);
+
+	/** Get Payroll List	  */
+	public int getHR_List_ID();
 
     /** Column name HR_List_UU */
     public static final String COLUMNNAME_HR_List_UU = "HR_List_UU";

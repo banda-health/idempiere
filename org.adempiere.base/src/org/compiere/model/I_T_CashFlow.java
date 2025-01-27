@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for T_CashFlow
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_T_CashFlow 
 {
@@ -44,8 +44,8 @@ public interface I_T_CashFlow
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_T_CashFlow
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -106,24 +106,6 @@ public interface I_T_CashFlow
 	public int getC_Activity_ID();
 
 	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException;
-
-    /** Column name CashFlowSource */
-    public static final String COLUMNNAME_CashFlowSource = "CashFlowSource";
-
-	/** Set Cash Flow Source	  */
-	public void setCashFlowSource (String CashFlowSource);
-
-	/** Get Cash Flow Source	  */
-	public String getCashFlowSource();
-
-    /** Column name CashFlowType */
-    public static final String COLUMNNAME_CashFlowType = "CashFlowType";
-
-	/** Set Cash Flow Type	  */
-	public void setCashFlowType (String CashFlowType);
-
-	/** Get Cash Flow Type	  */
-	public String getCashFlowType();
 
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
@@ -240,6 +222,24 @@ public interface I_T_CashFlow
 	public int getC_Project_ID();
 
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
+
+    /** Column name CashFlowSource */
+    public static final String COLUMNNAME_CashFlowSource = "CashFlowSource";
+
+	/** Set Cash Flow Source	  */
+	public void setCashFlowSource (String CashFlowSource);
+
+	/** Get Cash Flow Source	  */
+	public String getCashFlowSource();
+
+    /** Column name CashFlowType */
+    public static final String COLUMNNAME_CashFlowType = "CashFlowType";
+
+	/** Set Cash Flow Type	  */
+	public void setCashFlowType (String CashFlowType);
+
+	/** Get Cash Flow Type	  */
+	public String getCashFlowType();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

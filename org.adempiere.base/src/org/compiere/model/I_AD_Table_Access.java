@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Table_Access
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_Table_Access 
 {
@@ -41,24 +41,11 @@ public interface I_AD_Table_Access
 
     /** Load Meta Data */
 
-    /** Column name AccessTypeRule */
-    public static final String COLUMNNAME_AccessTypeRule = "AccessTypeRule";
-
-	/** Set Access Type.
-	  * The type of access for this rule
-	  */
-	public void setAccessTypeRule (String AccessTypeRule);
-
-	/** Get Access Type.
-	  * The type of access for this rule
-	  */
-	public String getAccessTypeRule();
-
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -66,12 +53,12 @@ public interface I_AD_Table_Access
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -113,6 +100,19 @@ public interface I_AD_Table_Access
 	public int getAD_Table_ID();
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
+
+    /** Column name AccessTypeRule */
+    public static final String COLUMNNAME_AccessTypeRule = "AccessTypeRule";
+
+	/** Set Access Type.
+	  * The type of access for this rule
+	  */
+	public void setAccessTypeRule (String AccessTypeRule);
+
+	/** Get Access Type.
+	  * The type of access for this rule
+	  */
+	public String getAccessTypeRule();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

@@ -26,7 +26,6 @@
 * - Murilo Ht                                                         *
 * - Carlos Ruiz                                                       *
 **********************************************************************/
-
 package org.compiere.model;
 
 import java.sql.ResultSet;
@@ -36,20 +35,100 @@ import java.util.Properties;
 
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.idempiere.cache.ImmutableIntPOCache;
+import org.idempiere.cache.ImmutablePOSupport;
 
-public class MDocumentStatus extends X_PA_DocumentStatus {
+/**
+ * Named status of records in a table via SQL criteria
+ */
+public class MDocumentStatus extends X_PA_DocumentStatus implements ImmutablePOSupport {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 4028519324986534673L;
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param PA_DocumentStatus_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MDocumentStatus(Properties ctx, String PA_DocumentStatus_UU, String trxName) {
+        super(ctx, PA_DocumentStatus_UU, trxName);
+    }
+
+    /**
+     * @param ctx
+     * @param PA_DocumentStatus_ID
+     * @param trxName
+     */
 	public MDocumentStatus(Properties ctx, int PA_DocumentStatus_ID, String trxName) {
 		super(ctx, PA_DocumentStatus_ID, trxName);
 	}
 	
+	/**
+	 * @param ctx
+	 * @param rs
+	 * @param trxName
+	 */
 	public MDocumentStatus(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
+
+	/**
+	 * Copy constructor
+	 * @param copy
+	 */
+	public MDocumentStatus(MDocumentStatus copy) 
+	{
+		this(Env.getCtx(), copy);
+	}
+
+	/**
+	 * Copy constructor
+	 * @param ctx
+	 * @param copy
+	 */
+	public MDocumentStatus(Properties ctx, MDocumentStatus copy) 
+	{
+		this(ctx, copy, (String) null);
+	}
+
+	/**
+	 * Copy constructor
+	 * @param ctx
+	 * @param copy
+	 * @param trxName
+	 */
+	public MDocumentStatus(Properties ctx, MDocumentStatus copy, String trxName) 
+	{
+		this(ctx, 0, trxName);
+		copyPO(copy);
+	}
+	
+	/**	MDocumentStatus Cache				*/
+	private static ImmutableIntPOCache<Integer,MDocumentStatus>	s_cache = new ImmutableIntPOCache<Integer,MDocumentStatus>(Table_Name, 20);
+	
+	/**
+	 * 	Get from Cache (immutable)
+	 *	@param ctx context
+	 *	@param PA_DocumentStatus_ID id
+	 *	@return document status
+	 */
+	public static MDocumentStatus get (Properties ctx, int PA_DocumentStatus_ID)
+	{
+		Integer ii = Integer.valueOf(PA_DocumentStatus_ID);
+		MDocumentStatus retValue = s_cache.get(ctx, ii, e -> new MDocumentStatus(ctx, e));
+		if (retValue != null)
+			return retValue;
+		retValue = new MDocumentStatus (ctx, PA_DocumentStatus_ID, (String)null);
+		if (retValue.get_ID () == PA_DocumentStatus_ID)
+		{
+			s_cache.put (PA_DocumentStatus_ID, retValue, e -> new MDocumentStatus(Env.getCtx(), e));
+			return retValue;
+		}
+		return null;
+	}	//	get
 
 	/**
 	 * 	Get Document Status Indicators
@@ -105,6 +184,10 @@ public class MDocumentStatus extends X_PA_DocumentStatus {
 		return retValue;
 	}	//	getDocumentStatusIndicators
 
+	/**
+	 * @param documentStatus
+	 * @return number of matching records
+	 */
 	public static int evaluate(MDocumentStatus documentStatus) {
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ");
 		String tableName = MTable.getTableName(Env.getCtx(), documentStatus.getAD_Table_ID());
@@ -116,6 +199,10 @@ public class MDocumentStatus extends X_PA_DocumentStatus {
 		return DB.getSQLValue(null, sqlS);
 	}
 
+	/**
+	 * @param documentStatus
+	 * @return where clause to find matching records
+	 */
 	public static String getWhereClause(MDocumentStatus documentStatus) {
 		String tableName = MTable.getTableName(Env.getCtx(), documentStatus.getAD_Table_ID());
 		StringBuilder where = new StringBuilder(" ").append(tableName).append(".AD_Client_ID=" + Env.getAD_Client_ID(Env.getCtx()) );
@@ -163,12 +250,20 @@ public class MDocumentStatus extends X_PA_DocumentStatus {
 			 * but as they are the administrators is not a problem
 			 */
 			if (   (access.getAD_Role_ID() == roleId && access.getAD_User_ID() == userId)
-				|| (access.getAD_Role_ID() == roleId && access.getAD_User_ID() == 0     )
-				|| (access.getAD_Role_ID() == 0      && access.getAD_User_ID() == userId) )
+				|| (access.getAD_Role_ID() == roleId && access.getAD_User_ID() == 0     )   // user not set
+				|| (access.getAD_Role_ID() == 0      && access.getAD_User_ID() == userId) ) // role not set
 				return true;
 		}
 
 		return false;
 	}
 
+	@Override
+	public PO markImmutable() {
+		if (is_Immutable())
+			return this;
+
+		makeImmutable();
+		return this;
+	}
 }

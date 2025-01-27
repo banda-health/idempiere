@@ -22,15 +22,30 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.compiere.model.MColumn;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_Wlistbox_Customization;
+import org.compiere.util.Util;
 
+/**
+ * Extended model class for AD_Wlistbox_Customization
+ */
 public class MWlistboxCustomization extends X_AD_Wlistbox_Customization {
 
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = -3220641197739038436L;
+	private static final long serialVersionUID = -493650011622455985L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_Wlistbox_Customization_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MWlistboxCustomization(Properties ctx, String AD_Wlistbox_Customization_UU, String trxName) {
+        super(ctx, AD_Wlistbox_Customization_UU, trxName);
+    }
 
 	/**
 	 * @param ctx
@@ -66,7 +81,11 @@ public class MWlistboxCustomization extends X_AD_Wlistbox_Customization {
 		return query.setClient_ID().setOnlyActiveRecords(true).setParameters(new Object[] { AD_User_ID, AD_WListboxName}).first();
 	}
 
-
+	/**
+	 * For each string element, remove the part starting from '='
+	 * @param CustomizationNew
+	 * @return modify list of string
+	 */
 	private static List<String> cleanCustomization (String[] CustomizationNew)
 	{
 		for (int i = 0; i < CustomizationNew.length; i++ )
@@ -76,6 +95,11 @@ public class MWlistboxCustomization extends X_AD_Wlistbox_Customization {
 		return Arrays.asList(CustomizationNew); 
 	}	
 
+	/**
+	 * @param searchColumnName
+	 * @param columnList
+	 * @return matched index in columnList or -1 if no match found
+	 */
 	private static int columnIndex(String 				searchColumnName, 
 								   List<String> 	    columnList)
 	{
@@ -86,11 +110,11 @@ public class MWlistboxCustomization extends X_AD_Wlistbox_Customization {
 				return i;
 			}
 		}
-	return -1;
+		return -1;
 	}
 
 	/**
-	 * Save the columnWidth of the columns of the WListBox 
+	 * Save columnWidth of WListBox columns to AD_Wlistbox_Customization  
 	 * @param ctx
 	 * @param AD_WListboxName
 	 * @param AD_User_ID
@@ -133,16 +157,27 @@ public class MWlistboxCustomization extends X_AD_Wlistbox_Customization {
 				{
 					orgColumnList.addAll(addColumn);
 				}
-				WlistBoxCust.setCustom(orgColumnList.toString().substring(1, orgColumnList.toString().length() -1).replaceAll("\\s", "") );
+
+				int maxLength = MColumn.get(ctx, Table_Name, COLUMNNAME_Custom).getFieldLength();
+				String custom = orgColumnList.toString().substring(1, orgColumnList.toString().length() -1).replaceAll("\\s", "");
+
+				if (custom.length() > maxLength) {
+					while (custom.length() > maxLength)
+						custom = custom.substring(0, custom.lastIndexOf(","));
+				}
+
+				WlistBoxCust.setCustom(custom);
 			}
 		}
-		else
+		else if (!Util.isEmpty(Custom))
 		{
 			WlistBoxCust = new MWlistboxCustomization(ctx, 0, trxName); 
 			WlistBoxCust.setWlistboxName(AD_WListboxName);
-			WlistBoxCust.setAD_User_ID(AD_User_ID);
+			WlistBoxCust.set_ValueNoCheck(COLUMNNAME_AD_User_ID, AD_User_ID);
 			WlistBoxCust.setCustom(Custom);
 		}
-		WlistBoxCust.saveEx();
+
+		if (WlistBoxCust != null)
+			WlistBoxCust.saveEx();
 	}  // saveData
 }

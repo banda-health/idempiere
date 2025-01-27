@@ -14,13 +14,11 @@
  * ComPiere, Inc., 2620 Augustine Dr. #245, Santa Clara, CA 95054, USA        *
  * or via info@compiere.org or http://www.compiere.org/license.html           *
  *****************************************************************************/
-
 package org.globalqss.process;
-
-import java.util.logging.Level;
 
 import org.compiere.model.MCashPlan;
 import org.compiere.model.MCashPlanLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.PO;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -28,6 +26,9 @@ import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 
+/**
+ * Process to copy cash plan lines from another cash plan
+ */
 @org.adempiere.base.annotation.Process
 public class CopyFromCashPlan  extends SvrProcess {
 
@@ -37,6 +38,7 @@ public class CopyFromCashPlan  extends SvrProcess {
 	/**	Logger							*/
 	CLogger log = CLogger.getCLogger (getClass());
 
+	@Override
 	protected void prepare()
 	{
 		ProcessInfoParameter[] para = getParameter();
@@ -45,11 +47,12 @@ public class CopyFromCashPlan  extends SvrProcess {
 			if (name.equals("C_CashPlan_ID"))
 				p_C_CashPlanSource_ID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		p_C_CashPlanTarget_ID = getRecord_ID();
 	}
 
+	@Override
 	protected String doIt() throws Exception
 	{
     	MCashPlan cptarget = new MCashPlan(getCtx(), p_C_CashPlanTarget_ID, get_TrxName());

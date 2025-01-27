@@ -19,16 +19,18 @@ import org.adempiere.apps.graph.GraphColumn;
 import org.compiere.model.MGoal;
 
 /**
- * 
+ * Model for performance graph (PA_Goal)
  * @author hengsin
- *
  */
 public class GoalModel {
 	public MGoal goal;
+	/** X_PA_Goal.CHARTTYPE_* (AreaChart, BarChart, etc) */
 	public String chartType;
+	/** true to show chart title, false otherwise */
 	public boolean showTitle;
 	public List<GraphColumn> columnList;
 	public String xAxisLabel;
 	public String yAxisLabel;
+	/** not use in billboard implementation */
 	public int zoomFactor;
 }

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for S_ResourceUnAvailable
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_S_ResourceUnAvailable 
 {
@@ -44,8 +44,8 @@ public interface I_S_ResourceUnAvailable
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_S_ResourceUnAvailable
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -130,21 +130,6 @@ public interface I_S_ResourceUnAvailable
 	  */
 	public boolean isActive();
 
-    /** Column name S_Resource_ID */
-    public static final String COLUMNNAME_S_Resource_ID = "S_Resource_ID";
-
-	/** Set Resource.
-	  * Resource
-	  */
-	public void setS_Resource_ID (int S_Resource_ID);
-
-	/** Get Resource.
-	  * Resource
-	  */
-	public int getS_Resource_ID();
-
-	public org.compiere.model.I_S_Resource getS_Resource() throws RuntimeException;
-
     /** Column name S_ResourceUnAvailable_ID */
     public static final String COLUMNNAME_S_ResourceUnAvailable_ID = "S_ResourceUnAvailable_ID";
 
@@ -162,6 +147,21 @@ public interface I_S_ResourceUnAvailable
 
 	/** Get S_ResourceUnAvailable_UU	  */
 	public String getS_ResourceUnAvailable_UU();
+
+    /** Column name S_Resource_ID */
+    public static final String COLUMNNAME_S_Resource_ID = "S_Resource_ID";
+
+	/** Set Resource.
+	  * Resource
+	  */
+	public void setS_Resource_ID (int S_Resource_ID);
+
+	/** Get Resource.
+	  * Resource
+	  */
+	public int getS_Resource_ID();
+
+	public org.compiere.model.I_S_Resource getS_Resource() throws RuntimeException;
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

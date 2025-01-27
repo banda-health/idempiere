@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for R_GroupUpdates
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_R_GroupUpdates 
 {
@@ -44,8 +44,8 @@ public interface I_R_GroupUpdates
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_R_GroupUpdates
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -119,6 +119,15 @@ public interface I_R_GroupUpdates
 	  */
 	public boolean isSelfService();
 
+    /** Column name R_GroupUpdates_UU */
+    public static final String COLUMNNAME_R_GroupUpdates_UU = "R_GroupUpdates_UU";
+
+	/** Set R_GroupUpdates_UU	  */
+	public void setR_GroupUpdates_UU (String R_GroupUpdates_UU);
+
+	/** Get R_GroupUpdates_UU	  */
+	public String getR_GroupUpdates_UU();
+
     /** Column name R_Group_ID */
     public static final String COLUMNNAME_R_Group_ID = "R_Group_ID";
 
@@ -133,15 +142,6 @@ public interface I_R_GroupUpdates
 	public int getR_Group_ID();
 
 	public org.compiere.model.I_R_Group getR_Group() throws RuntimeException;
-
-    /** Column name R_GroupUpdates_UU */
-    public static final String COLUMNNAME_R_GroupUpdates_UU = "R_GroupUpdates_UU";
-
-	/** Set R_GroupUpdates_UU	  */
-	public void setR_GroupUpdates_UU (String R_GroupUpdates_UU);
-
-	/** Get R_GroupUpdates_UU	  */
-	public String getR_GroupUpdates_UU();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

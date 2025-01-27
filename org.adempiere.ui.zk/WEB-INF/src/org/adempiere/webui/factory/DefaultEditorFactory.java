@@ -21,6 +21,7 @@ import org.adempiere.webui.editor.WButtonEditor;
 import org.adempiere.webui.editor.WChartEditor;
 import org.adempiere.webui.editor.WChosenboxListEditor;
 import org.adempiere.webui.editor.WChosenboxSearchEditor;
+import org.adempiere.webui.editor.WColorEditor;
 import org.adempiere.webui.editor.WDashboardContentEditor;
 import org.adempiere.webui.editor.WDateEditor;
 import org.adempiere.webui.editor.WDatetimeEditor;
@@ -29,6 +30,8 @@ import org.adempiere.webui.editor.WFileDirectoryEditor;
 import org.adempiere.webui.editor.WFilenameEditor;
 import org.adempiere.webui.editor.WHtmlEditor;
 import org.adempiere.webui.editor.WImageEditor;
+import org.adempiere.webui.editor.WImageURLEditor;
+import org.adempiere.webui.editor.WJsonEditor;
 import org.adempiere.webui.editor.WLocationEditor;
 import org.adempiere.webui.editor.WLocatorEditor;
 import org.adempiere.webui.editor.WNumberEditor;
@@ -36,10 +39,13 @@ import org.adempiere.webui.editor.WPAttributeEditor;
 import org.adempiere.webui.editor.WPasswordEditor;
 import org.adempiere.webui.editor.WPaymentEditor;
 import org.adempiere.webui.editor.WRadioGroupEditor;
+import org.adempiere.webui.editor.WRecordIDEditor;
+import org.adempiere.webui.editor.WRecordUUIDEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WStringEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.editor.WTimeEditor;
+import org.adempiere.webui.editor.WTimeZoneEditor;
 import org.adempiere.webui.editor.WUnknownEditor;
 import org.adempiere.webui.editor.WUrlEditor;
 import org.adempiere.webui.editor.WYesNoEditor;
@@ -50,7 +56,7 @@ import org.compiere.model.GridTab;
 import org.compiere.util.DisplayType;
 
 /**
- *
+ * Default implementation of {@link IEditorFactory}
  * @author hengsin
  *
  */
@@ -80,8 +86,7 @@ public class DefaultEditorFactory implements IEditorFactory {
         }
 
         /** String (clear/password) */
-        if (displayType == DisplayType.String
-            || displayType == DisplayType.PrinterName || displayType == DisplayType.Color
+        if (displayType == DisplayType.String || displayType == DisplayType.PrinterName
             || displayType == DisplayType.Text || displayType == DisplayType.TextLong
             || displayType == DisplayType.Memo)
         {
@@ -96,10 +101,12 @@ public class DefaultEditorFactory implements IEditorFactory {
             	else
             		editor = new WStringEditor(gridField, tableEditor, editorConfiguration);
             }
-            //enable html5 color input type
-            if (displayType == DisplayType.Color)
-            	((WStringEditor)editor).getComponent().setClientAttribute("type", "color");
         }
+        /** Color */
+        else if (displayType == DisplayType.Color) {
+        	editor = new WColorEditor(gridField, tableEditor, editorConfiguration);
+        }
+        
         /** File */
         else if (displayType == DisplayType.FileName)
         {
@@ -129,7 +136,7 @@ public class DefaultEditorFactory implements IEditorFactory {
         {
         	if (displayType == DisplayType.Time)
         		editor = new WTimeEditor(gridField, tableEditor, editorConfiguration);
-        	else if (displayType == DisplayType.DateTime)
+        	else if (displayType == DisplayType.DateTime || displayType == DisplayType.TimestampWithTimeZone)
         		editor = new WDatetimeEditor(gridField, tableEditor, editorConfiguration);
         	else
         		editor = new WDateEditor(gridField, tableEditor, editorConfiguration);
@@ -154,8 +161,9 @@ public class DefaultEditorFactory implements IEditorFactory {
         }
 
         /** Table Direct */
-        else if (displayType == DisplayType.TableDir ||
-                displayType == DisplayType.Table || displayType == DisplayType.List)
+        else if (displayType == DisplayType.TableDir || displayType == DisplayType.TableDirUU ||
+                displayType == DisplayType.Table || displayType == DisplayType.TableUU ||
+                displayType == DisplayType.List)
         {
             editor = new WTableDirEditor(gridField, tableEditor, editorConfiguration);
         }
@@ -170,7 +178,7 @@ public class DefaultEditorFactory implements IEditorFactory {
         	editor = new WUrlEditor(gridField, tableEditor, editorConfiguration);
         }
 
-        else if (displayType == DisplayType.Search)
+        else if (displayType == DisplayType.Search || displayType == DisplayType.SearchUU)
         {
         	editor = new WSearchEditor(gridField, tableEditor, editorConfiguration);
         }
@@ -190,6 +198,10 @@ public class DefaultEditorFactory implements IEditorFactory {
         else if (displayType == DisplayType.Image)
         {
         	editor = new WImageEditor(gridField, tableEditor, editorConfiguration);
+        }
+        else if (displayType == DisplayType.ImageURL)
+        {
+        	editor = new WImageURLEditor(gridField, tableEditor, editorConfiguration);
         }
         else if (displayType == DisplayType.Binary)
         {
@@ -222,6 +234,22 @@ public class DefaultEditorFactory implements IEditorFactory {
         else if (displayType == DisplayType.RadiogroupList)
         {
         	editor = new WRadioGroupEditor(gridField, tableEditor, editorConfiguration);
+        }
+        else if (displayType == DisplayType.TimeZoneId)
+        {
+        	editor = new WTimeZoneEditor(gridField, tableEditor);
+        }
+		else if (displayType == DisplayType.RecordID)
+        {
+        	editor = new WRecordIDEditor(gridField, tableEditor, editorConfiguration);
+        }
+		else if (displayType == DisplayType.RecordUU)
+        {
+        	editor = new WRecordUUIDEditor(gridField, tableEditor, editorConfiguration);
+        }
+		else if (displayType == DisplayType.JSON)
+        {
+        	editor = new WJsonEditor(gridField, tableEditor, editorConfiguration);
         }
         else
         {

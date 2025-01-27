@@ -22,6 +22,7 @@ import javax.servlet.ServletRequest;
 import org.adempiere.webui.part.AbstractUIPart;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.window.LoginWindow;
+import org.compiere.model.MSysConfig;
 import org.zkoss.web.servlet.Servlets;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -34,25 +35,36 @@ import org.zkoss.zul.West;
 import org.zkoss.zul.Window;
 
 /**
- *
+ * Manage login window for login and role selection
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @author  Low Heng Sin
  * @date    Mar 3, 2007
- * @version $Revision: 0.10 $
  */
 public class WLogin extends AbstractUIPart
 {
-
+	/** IWebClient instance ({@link AdempiereWebUI}) */
 	private IWebClient app;
+	/** Main layout */
 	private Borderlayout layout;
+	@Deprecated(forRemoval = true, since = "11")
 	private Window browserWarningWindow;
+	/** embedded window for login and role selection */
 	private LoginWindow loginWindow;
 
+	/**
+	 * @param app
+	 */
     public WLogin(IWebClient app)
     {
         this.app = app;
     }
 
+    /**
+     * Create UI from login.zul file. <br/> 
+     * The main layout component ("layout") must be instance of {@link Borderlayout}. <br/>
+     * Get {@link #loginWindow} reference from zul using id "loginWindow".
+     */
+    @Override
     protected Component doCreatePart(Component parent)
     {
     	PageDefinition pageDefintion = Executions.getCurrent().getPageDefinition(ThemeManager.getThemeResource("zul/login/login.zul"));
@@ -72,12 +84,16 @@ public class WLogin extends AbstractUIPart
 			if (ua.contains("ipad") || ua.contains("iphone") || ua.contains("android"))
 				mobile = true;
 		}
+
+		var leftPanelConfig =  MSysConfig.getValue(MSysConfig.APPLICATION_LOGIN_LEFT_PANEL_SHOWN, "Y");
     	
         West west = layout.getWest();
         if (west.getFirstChild() != null && west.getFirstChild().getFirstChild() != null) {
     		west.setCollapsible(true);
     		west.setSplittable(true);
-        	if (mobile) {    		
+    		if(leftPanelConfig.equals("I")) {
+    			west.setVisible(false);
+    		}else if (mobile || leftPanelConfig.equals("H")) {    		
         		west.setOpen(false);
         	}
         } else {
@@ -107,6 +123,9 @@ public class WLogin extends AbstractUIPart
         return layout;
     }
 
+    /**
+     * detach/dispose window content
+     */
 	public void detach() {
 		layout.detach();
 		layout = null;
@@ -114,12 +133,15 @@ public class WLogin extends AbstractUIPart
 			browserWarningWindow.detach();
 	}
 
+	/**
+	 * @return {@link Component}
+	 */
 	public Component getComponent() {
 		return layout;
 	}
 
 	/**
-	 * Show change role window
+	 * Show change role panel in {@link #loginWindow}
 	 * @param locale
 	 * @param properties env context
 	 */

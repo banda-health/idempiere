@@ -13,7 +13,6 @@
  *****************************************************************************/
 package org.adempiere.webui.adwindow;
 
-
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.component.SimpleTreeModel;
 import org.adempiere.webui.component.ToolBarButton;
@@ -34,30 +33,39 @@ import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Tree;
 
 /**
- * 
+ * Tree panel for AD_Tab with HasTree=Y
  * @author hengsin
- *
  */
 public class ADTreePanel extends Panel implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 2718257463734592729L;
+	/** event to expand/collapse all tree nodes **/
 	private static final String ON_EXPAND_MENU_EVENT = "onExpandMenu";
+	/** search/lookup panel for tree **/
 	private TreeSearchPanel pnlSearch;
     private Tree tree;
     
+    /** ToolBarButton to expand or collapse all tree nodes **/
     private ToolBarButton expandToggle; // Elaine 2009/02/27 - expand tree
 	private int m_windowno = -1;
 	private int m_tabno = -1;
 	private int AD_Tree_ID = -1;
     	
+	/**
+	 * default constructor
+	 */
     public ADTreePanel()
     {
         init();        
     }
     
+    /**
+     * @param windowno
+     * @param tabno
+     */
     public ADTreePanel(int windowno, int tabno)
     {
     	m_windowno = windowno;
@@ -66,6 +74,7 @@ public class ADTreePanel extends Panel implements EventListener<Event>
     }
     
     /**
+     * Delegate to {@link #initTree(int, int, String, int)}
      * @param AD_Tree_ID
      * @param windowNo
      */
@@ -74,6 +83,14 @@ public class ADTreePanel extends Panel implements EventListener<Event>
     	return initTree(AD_Tree_ID, windowNo, null, 0);
     }
 
+    /**
+     * Init and load tree
+     * @param AD_Tree_ID
+     * @param windowNo
+     * @param linkColName
+     * @param linkID
+     * @return true if a new tree have been created and loaded, false if AD_Tree_ID have already been loaded
+     */
     public boolean initTree(int AD_Tree_ID, int windowNo, String linkColName, int linkID) 
     {
     	if (this.AD_Tree_ID != AD_Tree_ID)
@@ -89,9 +106,12 @@ public class ADTreePanel extends Panel implements EventListener<Event>
     	return false;
     }
     
+    /**
+     * Layout panel
+     */
     private void init()
     {
-    	setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "treepanel");
+    	setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "treepanel");
     	ZKUpdateUtil.setWidth(this, "100%");
     	ZKUpdateUtil.setHeight(this, "100%");
     	
@@ -114,7 +134,7 @@ public class ADTreePanel extends Panel implements EventListener<Event>
         this.appendChild(pc);
         pc.appendChild(tree);  
         
-        // Elaine 2009/02/27 - expand tree
+        // Expand tree
         toolbar = new Toolbar();
         toolbar.setMold("panel");
         expandToggle = new ToolBarButton();
@@ -127,15 +147,11 @@ public class ADTreePanel extends Panel implements EventListener<Event>
         this.addEventListener(ON_EXPAND_MENU_EVENT, this);
     }
     
-    /**
-     * @param event
-     * @see EventListener#onEvent(Event)
-     */
+    @Override
     public void onEvent(Event event)
     {
         String eventName = event.getName();
         
-        // Elaine 2009/02/27 - expand tree
         if (eventName.equals(Events.ON_CHECK) && event.getTarget() == expandToggle)
         {
         	Clients.showBusy(null);
@@ -146,10 +162,10 @@ public class ADTreePanel extends Panel implements EventListener<Event>
         	expandOnCheck();
         	Clients.clearBusy();
         }
-        //
     }
     
     /**
+     * Get tree component
      * @return tree
      */
 	public Tree getTree() 
@@ -158,7 +174,7 @@ public class ADTreePanel extends Panel implements EventListener<Event>
 	}
 	
 	/**
-	* expand all node
+	* Expand all node
 	*/
 	public void expandAll()
 	{
@@ -169,7 +185,7 @@ public class ADTreePanel extends Panel implements EventListener<Event>
 	}
 	
 	/**
-	 * collapse all node
+	 * Collapse all node
 	 */
 	public void collapseAll()
 	{
@@ -189,8 +205,10 @@ public class ADTreePanel extends Panel implements EventListener<Event>
 		else
 			collapseAll();
 	}
-	//	
 
+	/**
+	 * Reset AD_Tree_ID to create a new Tree in next {@link #initTree(int, int, String, int)} call
+	 */
 	public void prepareForRefresh() {
 		this.AD_Tree_ID = -1;
 	}

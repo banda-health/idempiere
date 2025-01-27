@@ -24,6 +24,8 @@
  **********************************************************************/
 package org.compiere.model;
 
+import static org.compiere.model.SystemIDs.OAUTH2_AUTHORIZATION_PROVIDER_MICROSOFT;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -35,6 +37,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
+import org.compiere.util.EMail;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -53,9 +56,19 @@ import com.google.api.client.json.gson.GsonFactory;
  */
 public class MAuthorizationCredential extends X_AD_AuthorizationCredential {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -5410915257751308490L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_AuthorizationCredential_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MAuthorizationCredential(Properties ctx, String AD_AuthorizationCredential_UU, String trxName) {
+        super(ctx, AD_AuthorizationCredential_UU, trxName);
+    }
 
 	/**
 	 * Create empty Authorization Credential
@@ -83,7 +96,7 @@ public class MAuthorizationCredential extends X_AD_AuthorizationCredential {
 	 * Create or Update an Account based on the token received
 	 * @param code
 	 * @param pinstance 
-	 * @return String message indicating success
+	 * @return error message or null
 	 */
 	public String processToken(String code, MPInstance pinstance) {
 		String msg = null;
@@ -124,7 +137,7 @@ public class MAuthorizationCredential extends X_AD_AuthorizationCredential {
 	 * @param code
 	 * @param paramScope
 	 * @param pilog       MPInstanceLog to set the log message and record_ID, it is not saved, the caller must save it
-	 * @return String message indicating success
+	 * @return error message or null
 	 */
 	public String processToken(Properties ctx, String code, String paramScope, MPInstanceLog pilog) {
 		String msg = null;
@@ -150,6 +163,30 @@ public class MAuthorizationCredential extends X_AD_AuthorizationCredential {
 				return msg;
 			}
 
+			String preferred_username = null;
+			if (   ap.getAD_AuthorizationProvider_ID() == OAUTH2_AUTHORIZATION_PROVIDER_MICROSOFT
+				&& MSysConfig.getBooleanValue(MSysConfig.OAUTH2_USE_ID_TOKEN_PREF_USERNAME_ON_MS_PROVIDER, true)) {
+				/* Microsoft send the user email information in the id_token in preferred_username field in some cases */
+				if (id_token != null && id_token instanceof String) {
+					IdToken idtoken = IdToken.parse(tokenResponse.getFactory(), (String) tokenResponse.get("id_token"));
+					preferred_username = (String) idtoken.getPayload().get("preferred_username");
+				}
+			}
+			if (   preferred_username == null
+				&& ap.getAD_AuthorizationProvider_ID() == OAUTH2_AUTHORIZATION_PROVIDER_MICROSOFT
+				&& MSysConfig.getBooleanValue(MSysConfig.OAUTH2_USE_ACCESS_TOKEN_UPN_ON_MICROSOFT_PROVIDER, true)) {
+				/* Microsoft send the user email information in the access_token in upn field in some cases */
+				Object access_token = tokenResponse.get("access_token");
+				if (access_token != null && access_token instanceof String) {
+					try {
+						IdToken accesstoken = IdToken.parse(tokenResponse.getFactory(), (String) tokenResponse.get("access_token"));
+						preferred_username = (String) accesstoken.getPayload().get("upn");
+					} catch (Exception ex) {
+						// accesstoken not valid ... simply ignore
+					}
+				}
+			}
+
 			boolean newAccount = false;
 			MAuthorizationAccount account = null;
 			Query query = new Query(ctx, MAuthorizationAccount.Table_Name, "AD_Client_ID=? AND AD_User_ID=? AND EMail=? AND AD_AuthorizationCredential_ID=?", get_TrxName());
@@ -158,6 +195,9 @@ public class MAuthorizationCredential extends X_AD_AuthorizationCredential {
 			if (account == null) {
 				account = new MAuthorizationAccount(ctx, 0, get_TrxName());
 				account.setEMail(email);
+				if (preferred_username != null && ! email.toLowerCase().equals(preferred_username.toLowerCase()) && EMail.validate(preferred_username)) {
+					account.setPreferred_UserName(preferred_username);
+				}
 				account.setAD_AuthorizationCredential_ID(getAD_AuthorizationCredential_ID());
 				account.setAD_User_ID(Env.getAD_User_ID(ctx));
 				newAccount = true;
@@ -241,7 +281,7 @@ public class MAuthorizationCredential extends X_AD_AuthorizationCredential {
 	/**
 	 * Get the scope URL for the authorization provider
 	 * @param scopes
-	 * @return scope url
+	 * @return scope urls (separated by space)
 	 */
 	private String findScopeUrl(String scopes) {
 		StringBuilder urlBuilder = new StringBuilder();

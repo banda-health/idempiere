@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for HR_Process
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_HR_Process 
@@ -46,8 +46,8 @@ public interface I_HR_Process
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_HR_Process
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -124,21 +124,6 @@ public interface I_HR_Process
 
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException;
 
-    /** Column name C_DocType_ID */
-    public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
-
-	/** Set Document Type.
-	  * Document type or rules
-	  */
-	public void setC_DocType_ID (int C_DocType_ID);
-
-	/** Get Document Type.
-	  * Document type or rules
-	  */
-	public int getC_DocType_ID();
-
-	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
-
     /** Column name C_DocTypeTarget_ID */
     public static final String COLUMNNAME_C_DocTypeTarget_ID = "C_DocTypeTarget_ID";
 
@@ -154,18 +139,20 @@ public interface I_HR_Process
 
 	public org.compiere.model.I_C_DocType getC_DocTypeTarget() throws RuntimeException;
 
-    /** Column name ColumnSQL */
-    public static final String COLUMNNAME_ColumnSQL = "ColumnSQL";
+    /** Column name C_DocType_ID */
+    public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
 
-	/** Set Column SQL.
-	  * Virtual Column (r/o)
+	/** Set Document Type.
+	  * Document type or rules
 	  */
-	public void setColumnSQL (String ColumnSQL);
+	public void setC_DocType_ID (int C_DocType_ID);
 
-	/** Get Column SQL.
-	  * Virtual Column (r/o)
+	/** Get Document Type.
+	  * Document type or rules
 	  */
-	public String getColumnSQL();
+	public int getC_DocType_ID();
+
+	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
 
     /** Column name C_PaySelection_ID */
     public static final String COLUMNNAME_C_PaySelection_ID = "C_PaySelection_ID";
@@ -181,6 +168,19 @@ public interface I_HR_Process
 	public int getC_PaySelection_ID();
 
 	public org.compiere.model.I_C_PaySelection getC_PaySelection() throws RuntimeException;
+
+    /** Column name ColumnSQL */
+    public static final String COLUMNNAME_ColumnSQL = "ColumnSQL";
+
+	/** Set Column SQL.
+	  * Virtual Column (r/o)
+	  */
+	public void setColumnSQL (String ColumnSQL);
+
+	/** Get Column SQL.
+	  * Virtual Column (r/o)
+	  */
+	public String getColumnSQL();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

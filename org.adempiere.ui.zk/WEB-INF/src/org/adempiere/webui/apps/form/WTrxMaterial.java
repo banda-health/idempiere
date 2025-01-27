@@ -43,6 +43,7 @@ import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.panel.StatusBarPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.DateRangeButton;
 import org.compiere.apps.form.TrxMaterial;
 import org.compiere.model.MLocatorLookup;
 import org.compiere.model.MLookup;
@@ -54,28 +55,32 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
+import org.zkoss.zul.Hbox;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 
 /**
- * Material Transaction History
- *
- * @author Jorg Janke
- * @version $Id: VTrxMaterial.java,v 1.3 2006/07/30 00:51:28 jjanke Exp $
+ * Form to view Material Transaction History.
  */
 @org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VTrxMaterial")
 public class WTrxMaterial extends TrxMaterial
 	implements IFormController, EventListener<Event>, ValueChangeListener
 {
+	/** Custom form/window UI instance */
 	private CustomForm form = new CustomForm();	
 
-	/** GridController          */
+	/** Center of {@link #mainLayout} */
 	private ADTabpanel  m_gridController = null;
 
-	//
+	/** Main panel of {@link #form} */
 	private Panel mainPanel = new Panel();
+	/** Layout of {@link #mainPanel} */
 	private Borderlayout mainLayout = new Borderlayout();
+	
+	/** North of {@link #mainLayout}. Form parameters panel */
 	private Panel parameterPanel = new Panel();
+	/** Layout of {@link #parameterPanel} */
+	private Grid parameterLayout = GridFactory.newGridLayout();
 	private Label orgLabel = new Label();
 	private WTableDirEditor orgField;
 	private Label locatorLabel = new Label();
@@ -88,20 +93,23 @@ public class WTrxMaterial extends TrxMaterial
 	private WDateEditor dateTField;
 	private Label mtypeLabel = new Label();
 	private WTableDirEditor mtypeField;
-	private Grid parameterLayout = GridFactory.newGridLayout();
+	
+	/** South of {@link #mainLayout} */
 	private Panel southPanel = new Panel();
+	/** Action buttons panel. Child of {@link #southPanel} */
 	private ConfirmPanel confirmPanel = new ConfirmPanel(true, true, false, false, false, true, false);
+	/** Status bar */
 	private StatusBarPanel statusBar = new StatusBarPanel();
 
+	/** Number of columns for {@link #parameterLayout} */
 	private int noOfColumns;
 
-
 	/**
-	 *	Initialize Panel
+	 * Default constructor
 	 */
 	public WTrxMaterial()
 	{
-		log.info("");
+		if (log.isLoggable(Level.INFO)) log.info("");
 		try
 		{
 			m_WindowNo = form.getWindowNo();
@@ -115,13 +123,13 @@ public class WTrxMaterial extends TrxMaterial
 		{
 			log.log(Level.SEVERE, "", ex);
 		}
-	}	//	init
+	}
 	
 	/**
-	 *  Static Init
+	 *  Layout {@link #form}
 	 *  @throws Exception
 	 */
-	void zkInit() throws Exception
+	protected void zkInit() throws Exception
 	{
 		form.appendChild(mainPanel);
 		mainPanel.setStyle("width: 100%; height: 100%; border: none; padding: 0; margin: 0");
@@ -163,8 +171,11 @@ public class WTrxMaterial extends TrxMaterial
 		ZKUpdateUtil.setWidth(statusBar, "100%");
 		
 		LayoutUtils.addSclass("status-border", statusBar);
-	}   //  jbInit
+	}
 
+	/**
+	 * Layout {@link #parameterLayout}
+	 */
 	protected void layoutParameters() {
 		noOfColumns = 6;
 		if (ClientInfo.maxWidth(639))
@@ -216,7 +227,11 @@ public class WTrxMaterial extends TrxMaterial
 				row = rows.newRow();
 		}
 		row.appendCellChild(dateTLabel.rightAlign());
-		row.appendCellChild(dateTField.getComponent());
+		Hbox boxTo = new Hbox();
+		boxTo.appendChild(dateTField.getComponent());
+		DateRangeButton drb = (new DateRangeButton(dateFField, dateTField));
+		boxTo.appendChild(drb);
+		row.appendCellChild(boxTo);
 	}
 
 	/**
@@ -229,11 +244,9 @@ public class WTrxMaterial extends TrxMaterial
 		//  Organization
 		MLookup orgLookup = MLookupFactory.get (ctx, m_WindowNo, 0, 3660, DisplayType.TableDir);
 		orgField = new WTableDirEditor("AD_Org_ID", false, false, true, orgLookup);
-	//	orgField.addVetoableChangeListener(this);
 		//  Locator
-		MLocatorLookup locatorLookup = new MLocatorLookup(ctx, m_WindowNo);
+		MLocatorLookup locatorLookup = new MLocatorLookup(ctx, m_WindowNo, null);
 		locatorField = new WLocatorEditor ("M_Locator_ID", false, false, true, locatorLookup, m_WindowNo);
-	//	locatorField.addVetoableChangeListener(this);
 		//  Product
 		MLookup productLookup = MLookupFactory.get (ctx, m_WindowNo, 0, 3668, DisplayType.Search);
 		productField = new WSearchEditor("M_Product_ID", false, false, true, productLookup);
@@ -250,15 +263,15 @@ public class WTrxMaterial extends TrxMaterial
 	}   //  dynParameter
 
 	/**
-	 *  Dynamic Layout (Grid).
-	 * 	Based on AD_Window: Material Transactions
+	 *  Initialize {@link #m_gridController}.
+	 * 	Based on AD_Window: Material Transactions (indirect use).
 	 */
 	private void dynInit()
 	{
 		super.dynInit(statusBar);
-		//
-		
+		//		
 		m_gridController = new ADTabpanel();
+		// m_mTab is level 0 GridTab of Material Transactions (indirect use) 
 		m_gridController.init(null, m_mTab);
 		if (!m_gridController.isGridView())
 			m_gridController.switchRowPresentation();
@@ -269,19 +282,17 @@ public class WTrxMaterial extends TrxMaterial
 		ZKUpdateUtil.setHflex(m_gridController, "1");
 	}   //  dynInit
 
-
 	/**
-	 * 	Dispose
+	 * Close form.
 	 */
 	public void dispose()
 	{
 		SessionManager.getAppDesktop().closeActiveWindow();
 	}	//	dispose
-
 	
-	/**************************************************************************
-	 *  Action Listener
-	 *  @param e event
+	/**
+	 * Event Listener
+	 * @param e event
 	 */
 	public void onEvent (Event e)
 	{
@@ -292,23 +303,20 @@ public class WTrxMaterial extends TrxMaterial
 			refresh();
 		else if (e.getTarget().getId().equals(ConfirmPanel.A_ZOOM))
 			zoom();
-	}   //  actionPerformed
-
+	}
 	
-	/**************************************************************************
-	 *  Property Listener
-	 *  @param e event
+	/**
+	 * Value change listener
+	 * @param e event
 	 */
 	public void valueChange (ValueChangeEvent e)
 	{
 		if (e.getPropertyName().equals("M_Product_ID"))
 			productField.setValue(e.getNewValue());
-	}   //  vetoableChange
+	}
 
-
-	
-	/**************************************************************************
-	 *  Refresh - Create Query and refresh grid
+	/**
+	 * Refresh - Create Query and refresh {@link #m_gridController}.
 	 */
 	private void refresh()
 	{
@@ -325,7 +333,7 @@ public class WTrxMaterial extends TrxMaterial
 	}   //  refresh
 
 	/**
-	 *  Zoom
+	 * Zoom to AD_Table_ID + Record_ID of current {@link #m_gridController} row.
 	 */
 	public void zoom()
 	{
@@ -335,11 +343,15 @@ public class WTrxMaterial extends TrxMaterial
 		AEnv.zoom(AD_Table_ID, Record_ID);
 	}   //  zoom
 	
+	@Override
 	public ADForm getForm() 
 	{
 		return form;
 	}
 
+	/**
+	 * Handle onClientInfo event from browser
+	 */
 	protected void onClientInfo() 
 	{
 		if (noOfColumns > 0 && parameterLayout.getRows() != null)
@@ -357,4 +369,4 @@ public class WTrxMaterial extends TrxMaterial
 			}
 		}
 	}
-}   //  VTrxMaterial
+}

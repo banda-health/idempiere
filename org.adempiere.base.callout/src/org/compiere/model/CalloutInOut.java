@@ -78,6 +78,7 @@ public class CalloutInOut extends CalloutEngine
 			mTab.setValue("FreightAmt", order.getFreightAmt());
 
 			mTab.setValue("C_BPartner_ID", Integer.valueOf(order.getC_BPartner_ID()));
+			mTab.setValue("SalesRep_ID", Integer.valueOf(order.getSalesRep_ID()));
 
 			//[ 1867464 ]
 			mTab.setValue("C_BPartner_Location_ID", Integer.valueOf(order.getC_BPartner_Location_ID()));
@@ -86,6 +87,13 @@ public class CalloutInOut extends CalloutEngine
 				mTab.setValue("AD_User_ID", Integer.valueOf(order.getAD_User_ID()));
 			else
 				mTab.setValue("AD_User_ID", null);
+
+			if (order.isDropShip()) {
+				mTab.setValue(MInOut.COLUMNNAME_IsDropShip, order.isDropShip());
+				mTab.setValue(MInOut.COLUMNNAME_DropShip_BPartner_ID, order.getDropShip_BPartner_ID());
+				mTab.setValue(MInOut.COLUMNNAME_DropShip_Location_ID, order.getDropShip_Location_ID());
+				mTab.setValue(MInOut.COLUMNNAME_DropShip_User_ID, order.getDropShip_User_ID());
+			}
 		}
         /**
          * Modification: set corresponding document type
@@ -145,6 +153,7 @@ public class CalloutInOut extends CalloutEngine
 			mTab.setValue("FreightAmt", originalReceipt.getFreightAmt());
 
 			mTab.setValue("C_BPartner_ID", Integer.valueOf(originalReceipt.getC_BPartner_ID()));
+			mTab.setValue("SalesRep_ID", Integer.valueOf(originalReceipt.getSalesRep_ID()));
 
 			//[ 1867464 ]
 			mTab.setValue("C_BPartner_Location_ID", Integer.valueOf(originalReceipt.getC_BPartner_Location_ID()));
@@ -516,7 +525,7 @@ public class CalloutInOut extends CalloutEngine
 				mTab.setValue("M_Locator_ID", Integer.valueOf(M_Locator_ID));
 		}
 		else
-			mTab.setValue("M_AttributeSetInstance_ID", null);
+			mTab.setValue("M_AttributeSetInstance_ID", 0);
 		//
 		int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
 		boolean IsSOTrx = "Y".equals(Env.getContext(ctx, WindowNo, "IsSOTrx"));
@@ -562,7 +571,6 @@ public class CalloutInOut extends CalloutEngine
 			return "";
 
 		int M_Product_ID = Env.getContextAsInt(ctx, WindowNo, mTab.getTabNo(), "M_Product_ID");
-		//	log.log(Level.WARNING,"qty - init - M_Product_ID=" + M_Product_ID);
 		BigDecimal MovementQty, QtyEntered;
 
 		//	No Product

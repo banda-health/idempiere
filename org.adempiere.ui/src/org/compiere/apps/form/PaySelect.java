@@ -46,33 +46,37 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.ValueNamePair;
 
-
+/**
+ * Create Manual Payments From (AP) Invoices or (AR) Credit Memos.
+ */
 public class PaySelect
 {
-	/** @todo withholding */
-
 	/**	Window No			*/
-	public int         	m_WindowNo = 0;
+	protected int         	m_WindowNo = 0;
 
 	/** Format                  */
-	public DecimalFormat   m_format = DisplayType.getNumberFormat(DisplayType.Amount);
+	protected DecimalFormat   m_format = DisplayType.getNumberFormat(DisplayType.Amount);
 	/** Bank Balance            */
 	private BigDecimal      m_bankBalance = Env.ZERO;
 	/** SQL for Query           */
 	private String          m_sql;
 	/** Number of selected rows */
-	public int             m_noSelected = 0;
+	protected int             m_noSelected = 0;
 	/** Client ID               */
 	private int             m_AD_Client_ID = 0;
 	/**/
-	public boolean         m_isLocked = false;
+	protected boolean         m_isLocked = false;
 	/** Payment Selection		*/
-	public MPaySelection	m_ps = null;
+	protected MPaySelection	m_ps = null;
 	/** one-To-one payment per invoice */
-	public boolean			m_isOnePaymentPerInvoice	= false;
+	protected boolean			m_isOnePaymentPerInvoice	= false;
 	/**	Logger			*/
-	public static final CLogger log = CLogger.getCLogger(PaySelect.class);
+	protected static final CLogger log = CLogger.getCLogger(PaySelect.class);	
 
+	/**
+	 * Get list of active bank account with active C_BankAccountDoc records
+	 * @return list of {@link BankInfo}
+	 */
 	public ArrayList<BankInfo> getBankAccountData()
 	{
 		ArrayList<BankInfo> data = new ArrayList<BankInfo>();
@@ -119,6 +123,10 @@ public class PaySelect
 		return data;
 	}
 	
+	/**
+	 * Get list of business partners (C_BPartner_ID, Name) with open vendor invoice
+	 * @return list of business partners
+	 */
 	public ArrayList<KeyNamePair> getBPartnerData()
 	{
 		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
@@ -161,6 +169,10 @@ public class PaySelect
 		return data;
 	}
 	
+	/**
+	 * Get document types (C_DocType_ID, Name) for invoice and credit memo
+	 * @return list of document types
+	 */
 	public ArrayList<KeyNamePair> getDocTypeData()
 	{
 		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
@@ -200,6 +212,10 @@ public class PaySelect
 		return data;
 	}
 	
+	/**
+	 * Setup {@link ColumnInfo}, From and Where clause
+	 * @param miniTable
+	 */
 	public void prepareTable(IMiniTable miniTable)
 	{
 		Properties ctx = Env.getCtx();
@@ -253,10 +269,12 @@ public class PaySelect
 			+ " AND i.DocStatus IN ('CO','CL')"
 			+ " AND i.AD_Client_ID=?",	//	additional where & order in loadTableInfo()
 			true, "i");
-	}   //  dynInit
+	}   //  prepareTable
 
 	/**
-	 *  Load Bank Info - Load Info from Bank Account and valid Documents (PaymentRule)
+	 *  Get payment rules that's applicable to bank account
+	 *  @param bi
+	 *  @return list of applicable payment rules
 	 */
 	public ArrayList<ValueNamePair> getPaymentRuleData(BankInfo bi)
 	{
@@ -301,14 +319,21 @@ public class PaySelect
 	}
 
 	/**
-	 *  Query and create TableInfo
+	 * Load open invoice and credit memo documents into miniTable
+	 * @param bi
+	 * @param payDate
+	 * @param paymentRule
+	 * @param onlyDue
+	 * @param onlyPositiveBalance
+	 * @param bpartner
+	 * @param docType
+	 * @param miniTable
 	 */
 	public void loadTableInfo(BankInfo bi, Timestamp payDate, ValueNamePair paymentRule, boolean onlyDue, 
 			boolean onlyPositiveBalance, KeyNamePair bpartner, KeyNamePair docType, IMiniTable miniTable)
 	{
-		log.config("");
 		//  not yet initialized
-		if (m_sql == null)
+		if (m_sql == null || paymentRule == null)
 			return;
 
 		String sql = m_sql;
@@ -412,8 +437,9 @@ public class PaySelect
 	}   //  loadTableInfo
 
 	/**
-	 *  Calculate selected rows.
-	 *  - add up selected rows
+	 *  Calculate total of selected rows.
+	 *  @param miniTable
+	 *  @return info message
 	 */
 	public String calculateSelection(IMiniTable miniTable)
 	{
@@ -441,16 +467,17 @@ public class PaySelect
 		info.append(Msg.getMsg(Env.getCtx(), "Remaining")).append(" ").append(m_format.format(remaining));
 		return info.toString();
 	}   //  calculateSelection
-
-	public Trx trx = null;
 	
 	/**
-	 *  Generate PaySelection
+	 * Create Pay Selection (C_PaySelection and C_PaySelectionLine) records
+	 * @param miniTable
+	 * @param paymentRule
+	 * @param payDate
+	 * @param bi
+	 * @return error message (if any)
 	 */
 	public String generatePaySelect(IMiniTable miniTable, ValueNamePair paymentRule, Timestamp payDate, BankInfo bi)
 	{
-		log.info("");
-
 		String trxName = null;
 		Trx trx = null;
 		try {
@@ -510,12 +537,22 @@ public class PaySelect
 				trx.commit();
 				trx.close();
 			}
+			if (m_ps != null)
+				m_ps.set_TrxName(null);
 		}
 		
 		return null;
 	}   //  generatePaySelect
 
-	/**************************************************************************
+	/**
+	 * Get balance of selected bank record (after call to {@link #getPaymentRuleData(BankInfo)})
+	 * @return bank balance
+	 */
+	protected BigDecimal getBankBalance() {
+		return m_bankBalance;
+	}
+	
+	/**
 	 *  Bank Account Info
 	 */
 	public static class BankInfo
@@ -538,12 +575,13 @@ public class PaySelect
 			Currency = newCurrency;
 			Balance = newBalance;
 		}
-		int C_BankAccount_ID;
-		int C_Currency_ID;
-		String Name;
+		
+		public int C_BankAccount_ID;
+		public int C_Currency_ID;
+		public String Name;
 		public String Currency;
 		public BigDecimal Balance;
-		boolean Transfers;
+		public boolean Transfers;
 
 		/**
 		 * 	to String

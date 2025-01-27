@@ -182,7 +182,7 @@ public class CompiereService {
 	{
 		//  Get Login Info
 		String loginInfo = null;
-		//  Verify existence of User/Client/Org/Role and User's acces to Client & Org
+		//  Verify existence of User/Client/Org/Role and User's access to Client & Org
 
 		StringBuilder sql = new StringBuilder("SELECT u.Name || '@' || c.Name || '.' || o.Name AS Text")
 		.append(" FROM AD_User u, AD_Client c, AD_Org o, AD_Role r")
@@ -288,11 +288,14 @@ public class CompiereService {
 		Env.setContext(getCtx(), Env.LANGUAGE, m_language.getAD_Language());
 		
 		// Create session
-		MSession session = MSession.get (getCtx(), false);
+		MSession session = MSession.get (getCtx());
 		if (session == null){
 			log.fine("No Session found");
-			session = MSession.get (getCtx(), true);    	
+			session = MSession.create (getCtx());
+		} else {
+			session = new MSession(getCtx(), session.getAD_Session_ID(), null);
 		}
+
 		session.setWebSession("WebService");
 		
 		session.setDescription(session.getDescription() + "\nUser Agent: " + getCtx().getProperty("#UserAgent"));

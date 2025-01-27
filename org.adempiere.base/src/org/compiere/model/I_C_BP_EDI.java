@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BP_EDI
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_BP_EDI 
 {
@@ -44,8 +44,8 @@ public interface I_C_BP_EDI
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_C_BP_EDI
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -76,21 +76,6 @@ public interface I_C_BP_EDI
 	public int getAD_Sequence_ID();
 
 	public org.compiere.model.I_AD_Sequence getAD_Sequence() throws RuntimeException;
-
-    /** Column name C_BPartner_ID */
-    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
-
-	/** Set Business Partner.
-	  * Identifies a Business Partner
-	  */
-	public void setC_BPartner_ID (int C_BPartner_ID);
-
-	/** Get Business Partner.
-	  * Identifies a Business Partner
-	  */
-	public int getC_BPartner_ID();
-
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
     /** Column name C_BP_EDI_ID */
     public static final String COLUMNNAME_C_BP_EDI_ID = "C_BP_EDI_ID";
@@ -113,6 +98,21 @@ public interface I_C_BP_EDI
 
 	/** Get C_BP_EDI_UU	  */
 	public String getC_BP_EDI_UU();
+
+    /** Column name C_BPartner_ID */
+    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
+
+	/** Set Business Partner.
+	  * Identifies a Business Partner
+	  */
+	public void setC_BPartner_ID (int C_BPartner_ID);
+
+	/** Get Business Partner.
+	  * Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

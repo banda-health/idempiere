@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BPartner_Location
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_BPartner_Location 
 {
@@ -44,8 +44,8 @@ public interface I_C_BPartner_Location
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_C_BPartner_Location
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -114,6 +114,21 @@ public interface I_C_BPartner_Location
 
 	public I_C_Location getC_Location() throws RuntimeException;
 
+    /** Column name C_SalesRegion_ID */
+    public static final String COLUMNNAME_C_SalesRegion_ID = "C_SalesRegion_ID";
+
+	/** Set Sales Region.
+	  * Sales coverage region
+	  */
+	public void setC_SalesRegion_ID (int C_SalesRegion_ID);
+
+	/** Get Sales Region.
+	  * Sales coverage region
+	  */
+	public int getC_SalesRegion_ID();
+
+	public org.compiere.model.I_C_SalesRegion getC_SalesRegion() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -129,21 +144,6 @@ public interface I_C_BPartner_Location
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_SalesRegion_ID */
-    public static final String COLUMNNAME_C_SalesRegion_ID = "C_SalesRegion_ID";
-
-	/** Set Sales Region.
-	  * Sales coverage region
-	  */
-	public void setC_SalesRegion_ID (int C_SalesRegion_ID);
-
-	/** Get Sales Region.
-	  * Sales coverage region
-	  */
-	public int getC_SalesRegion_ID();
-
-	public org.compiere.model.I_C_SalesRegion getC_SalesRegion() throws RuntimeException;
 
     /** Column name CustomerAddressID */
     public static final String COLUMNNAME_CustomerAddressID = "CustomerAddressID";
@@ -166,6 +166,19 @@ public interface I_C_BPartner_Location
 	  * Facsimile number
 	  */
 	public String getFax();
+
+    /** Column name ISDN */
+    public static final String COLUMNNAME_ISDN = "ISDN";
+
+	/** Set ISDN.
+	  * ISDN or modem line
+	  */
+	public void setISDN (String ISDN);
+
+	/** Get ISDN.
+	  * ISDN or modem line
+	  */
+	public String getISDN();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -192,19 +205,6 @@ public interface I_C_BPartner_Location
 	  * Business Partner Invoice/Bill Address
 	  */
 	public boolean isBillTo();
-
-    /** Column name ISDN */
-    public static final String COLUMNNAME_ISDN = "ISDN";
-
-	/** Set ISDN.
-	  * ISDN or modem line
-	  */
-	public void setISDN (String ISDN);
-
-	/** Get ISDN.
-	  * ISDN or modem line
-	  */
-	public String getISDN();
 
     /** Column name IsPayFrom */
     public static final String COLUMNNAME_IsPayFrom = "IsPayFrom";

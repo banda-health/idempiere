@@ -24,16 +24,16 @@
  * Contributors:                                                       *
  * - Carlos Ruiz                                                       *
  **********************************************************************/
-
 package org.compiere.process;
 
 import java.sql.Timestamp;
 import java.util.logging.Level;
 
 import org.compiere.model.MMFARegistration;
+import org.compiere.model.MProcessPara;
 
 /**
- *	IDEMPIERE-4782
+ *	IDEMPIERE-4782 Multi-factor authentication
  * 	@author Carlos Ruiz - globalqss - BX Service
  */
 @org.adempiere.base.annotation.Process
@@ -49,8 +49,7 @@ public class MFAUnregister extends SvrProcess {
 			switch (name) {
 			case "MFA_Registration_ID": p_MFA_Registration_ID = para.getParameterAsInt(); break;
 			default:
-				if (log.isLoggable(Level.INFO))
-					log.log(Level.INFO, "Custom Parameter: " + name + "=" + para.getInfo());
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para);
 				break;
 			}
 		}
@@ -68,7 +67,7 @@ public class MFAUnregister extends SvrProcess {
 		MMFARegistration reg = new MMFARegistration(getCtx(), p_MFA_Registration_ID, get_TrxName());
 		reg.setIsActive(false);
 		reg.setMFAUnregisteredAt(new Timestamp(System.currentTimeMillis()));
-		reg.saveEx();
+		reg.saveCrossTenantSafeEx();
 
 		return "@OK@";
 	}

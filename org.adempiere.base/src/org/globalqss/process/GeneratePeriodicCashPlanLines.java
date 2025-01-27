@@ -14,16 +14,15 @@
  * ComPiere, Inc., 2620 Augustine Dr. #245, Santa Clara, CA 95054, USA        *
  * or via info@compiere.org or http://www.compiere.org/license.html           *
  *****************************************************************************/
-
 package org.globalqss.process;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.logging.Level;
 
 import org.compiere.model.MCashPlan;
 import org.compiere.model.MCashPlanLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereSystemError;
@@ -48,8 +47,9 @@ public class GeneratePeriodicCashPlanLines  extends SvrProcess {
 	private int p_C_CashPlan_ID = 0;
 
 	/**	Logger							*/
-	CLogger log = CLogger.getCLogger (getClass());
+	protected CLogger log = CLogger.getCLogger (getClass());
 
+	@Override
 	protected void prepare()
 	{
 		ProcessInfoParameter[] para = getParameter();
@@ -78,11 +78,12 @@ public class GeneratePeriodicCashPlanLines  extends SvrProcess {
 			else if (name.equals("Probability"))
 				p_Probability = (BigDecimal) para[i].getParameter();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		p_C_CashPlan_ID = getRecord_ID();
 	}
 
+	@Override
 	protected String doIt() throws Exception
 	{
 		boolean usename = (p_Name != null && p_Name.trim().length() > 0);

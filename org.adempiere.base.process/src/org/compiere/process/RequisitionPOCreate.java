@@ -29,6 +29,7 @@ import org.compiere.model.MCharge;
 import org.compiere.model.MConversionType;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPO;
 import org.compiere.model.MRequisition;
@@ -132,7 +133,7 @@ public class RequisitionPOCreate extends SvrProcess
 			else if (name.equals("ConsolidateDocument"))
 				p_ConsolidateDocument = "Y".equals(para[i].getParameter());
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 	
@@ -303,6 +304,7 @@ public class RequisitionPOCreate extends SvrProcess
 			|| rLine.getM_AttributeSetInstance_ID() != m_M_AttributeSetInstance_ID
 			|| rLine.getC_Charge_ID() != 0		//	single line per charge
 			|| m_order == null
+			|| (rLine.getC_BPartner_ID() > 0 && m_order.getC_BPartner_ID() != rLine.getC_BPartner_ID())
 			|| m_order.getDatePromised().compareTo(rLine.getDateRequired()) != 0
 			)
 		{

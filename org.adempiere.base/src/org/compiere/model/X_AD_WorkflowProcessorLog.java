@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for AD_WorkflowProcessorLog
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_WorkflowProcessorLog")
-public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProcessorLog, I_Persistent 
+public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProcessorLog, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_WorkflowProcessorLog (Properties ctx, int AD_WorkflowProcessorLog_ID, String trxName)
@@ -38,8 +38,8 @@ public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProces
       super (ctx, AD_WorkflowProcessorLog_ID, trxName);
       /** if (AD_WorkflowProcessorLog_ID == 0)
         {
-			setAD_WorkflowProcessor_ID (0);
 			setAD_WorkflowProcessorLog_ID (0);
+			setAD_WorkflowProcessor_ID (0);
 			setIsError (false);
         } */
     }
@@ -50,8 +50,32 @@ public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProces
       super (ctx, AD_WorkflowProcessorLog_ID, trxName, virtualColumns);
       /** if (AD_WorkflowProcessorLog_ID == 0)
         {
-			setAD_WorkflowProcessor_ID (0);
 			setAD_WorkflowProcessorLog_ID (0);
+			setAD_WorkflowProcessor_ID (0);
+			setIsError (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_WorkflowProcessorLog (Properties ctx, String AD_WorkflowProcessorLog_UU, String trxName)
+    {
+      super (ctx, AD_WorkflowProcessorLog_UU, trxName);
+      /** if (AD_WorkflowProcessorLog_UU == null)
+        {
+			setAD_WorkflowProcessorLog_ID (0);
+			setAD_WorkflowProcessor_ID (0);
+			setIsError (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_WorkflowProcessorLog (Properties ctx, String AD_WorkflowProcessorLog_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_WorkflowProcessorLog_UU, trxName, virtualColumns);
+      /** if (AD_WorkflowProcessorLog_UU == null)
+        {
+			setAD_WorkflowProcessorLog_ID (0);
+			setAD_WorkflowProcessor_ID (0);
 			setIsError (false);
         } */
     }
@@ -63,7 +87,7 @@ public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProces
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -83,6 +107,43 @@ public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProces
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set Workflow Processor Log.
+		@param AD_WorkflowProcessorLog_ID Result of the execution of the Workflow Processor
+	*/
+	public void setAD_WorkflowProcessorLog_ID (int AD_WorkflowProcessorLog_ID)
+	{
+		if (AD_WorkflowProcessorLog_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_AD_WorkflowProcessorLog_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_AD_WorkflowProcessorLog_ID, Integer.valueOf(AD_WorkflowProcessorLog_ID));
+	}
+
+	/** Get Workflow Processor Log.
+		@return Result of the execution of the Workflow Processor
+	  */
+	public int getAD_WorkflowProcessorLog_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_WorkflowProcessorLog_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set AD_WorkflowProcessorLog_UU.
+		@param AD_WorkflowProcessorLog_UU AD_WorkflowProcessorLog_UU
+	*/
+	public void setAD_WorkflowProcessorLog_UU (String AD_WorkflowProcessorLog_UU)
+	{
+		set_Value (COLUMNNAME_AD_WorkflowProcessorLog_UU, AD_WorkflowProcessorLog_UU);
+	}
+
+	/** Get AD_WorkflowProcessorLog_UU.
+		@return AD_WorkflowProcessorLog_UU	  */
+	public String getAD_WorkflowProcessorLog_UU()
+	{
+		return (String)get_Value(COLUMNNAME_AD_WorkflowProcessorLog_UU);
+	}
 
 	public org.compiere.model.I_AD_WorkflowProcessor getAD_WorkflowProcessor() throws RuntimeException
 	{
@@ -110,43 +171,6 @@ public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProces
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Workflow Processorl Log.
-		@param AD_WorkflowProcessorLog_ID Result of the execution of the Workflow Processor
-	*/
-	public void setAD_WorkflowProcessorLog_ID (int AD_WorkflowProcessorLog_ID)
-	{
-		if (AD_WorkflowProcessorLog_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_AD_WorkflowProcessorLog_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_AD_WorkflowProcessorLog_ID, Integer.valueOf(AD_WorkflowProcessorLog_ID));
-	}
-
-	/** Get Workflow Processorl Log.
-		@return Result of the execution of the Workflow Processor
-	  */
-	public int getAD_WorkflowProcessorLog_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_WorkflowProcessorLog_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set AD_WorkflowProcessorLog_UU.
-		@param AD_WorkflowProcessorLog_UU AD_WorkflowProcessorLog_UU
-	*/
-	public void setAD_WorkflowProcessorLog_UU (String AD_WorkflowProcessorLog_UU)
-	{
-		set_Value (COLUMNNAME_AD_WorkflowProcessorLog_UU, AD_WorkflowProcessorLog_UU);
-	}
-
-	/** Get AD_WorkflowProcessorLog_UU.
-		@return AD_WorkflowProcessorLog_UU	  */
-	public String getAD_WorkflowProcessorLog_UU()
-	{
-		return (String)get_Value(COLUMNNAME_AD_WorkflowProcessorLog_UU);
 	}
 
 	/** Set Binary Data.
@@ -195,10 +219,10 @@ public class X_AD_WorkflowProcessorLog extends PO implements I_AD_WorkflowProces
 	public boolean isError()
 	{
 		Object oo = get_Value(COLUMNNAME_IsError);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

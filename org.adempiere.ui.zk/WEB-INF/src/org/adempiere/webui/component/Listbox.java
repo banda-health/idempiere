@@ -30,15 +30,14 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Listitem;
 
 /**
- *
+ * Extend {@link org.zkoss.zul.Listbox}
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Feb 25, 2007
- * @version $Revision: 0.10 $
  */
 public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -3713350125429939476L;
 
@@ -47,6 +46,9 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 	private boolean draggable;
 	private String oddRowSclass;
 	
+	/**
+	 * Default Constructor
+	 */
     public Listbox() {
 		super();
 		//cache default
@@ -54,6 +56,10 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 		super.setOddRowSclass(oddRowSclass);
 	}
     
+    /**
+     * Create Listbox with items from pairs
+     * @param pairs KeyNamePair[]
+     */
     public Listbox(KeyNamePair[] pairs) {
     	super();
     	if (pairs != null && pairs.length > 0) {
@@ -66,23 +72,41 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 		super.setOddRowSclass(oddRowSclass);
     }
 
+    /**
+     * Set enable/disable listbox
+     * @param enabled
+     */
 	public void setEnabled(boolean enabled)
     {
         this.setDisabled(!enabled);
     }
     
+	/**
+	 * @return true if enable, false otherwise
+	 */
     public boolean isEnabled()
     {
         return !this.isDisabled();
     }
     
+    /**
+     * Add and return new {@link ListItem}
+     * @param label
+     * @param value
+     * @return ListItem
+     */
     public ListItem appendItem(String label, Object value)
     {
         ListItem item = new ListItem(label, value);
         super.appendChild(item);
         return item;
     }
-    
+
+    /**
+     * Add and return new {@link ListItem}
+     * @param label
+     * @param value
+     */
     public ListItem appendItem(String label, String value)
     {
         ListItem item = new ListItem(label, value);
@@ -90,20 +114,29 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
         return item;
     }
     
+    /**
+     * @param index
+     * @return ListItem at index
+     */
+    @Override
     public ListItem getItemAtIndex(int index)
     {
         return (ListItem)super.getItemAtIndex(index);
     }
     
+    /**
+     * @return Current selected ListItem
+     */
+    @Override
     public ListItem getSelectedItem()
     {
         return (ListItem)super.getSelectedItem();
     }
     
     /** 
-     * Set selected item for the list box based on the value of list item
-     * set selected to none if no item found matching the value given or 
-     * value is null
+     * Set selected item for the list box based on the value of list item.<br/>
+     * Set selected to none if no item found matching the value given or 
+     * value is null.
      * @param value Value of ListItem to set as selected
      */
     public void setValue(Object value)
@@ -137,11 +170,18 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
         }
     }
     
+    /**
+     * @return ListHead
+     */
     public ListHead getListHead()
     {
     	return (ListHead)super.getListhead();
     }
 
+    /**
+     * Get selected indices
+     * @return int[] selected indices
+     */
 	public int[] getSelectedIndices() {
 		Set<Listitem> selectedItems = this.getSelectedItems();
 		int[] selecteds = new int[this.getSelectedCount()];
@@ -154,6 +194,10 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 		return selecteds;
 	}
 	
+	/**
+	 * Set selected indices
+	 * @param selected int[] selected indices
+	 */
 	public void setSelectedIndices(int[] selected) {
 		if (selected != null && selected.length > 0) {
 			this.setSelectedIndex(selected[0]);
@@ -165,10 +209,19 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 		}
 	}
 
+	/**
+	 * Add listener for ON_DROP event for list item.<br/>
+	 * This should be called before the adding of any list items.
+	 * @param listener
+	 */
 	public void addOnDropListener(EventListener<Event> listener) {
 		onDropListeners.add(listener);
 	}
 
+	/**
+	 * Add listener for DOUBLE_CLICK event for list item
+	 * @param listener
+	 */
 	public void addDoubleClickListener(EventListener<Event> listener) {
 		doubleClickListeners.add(listener);
 	}
@@ -188,14 +241,21 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 		return super.insertBefore(newChild, refChild);
 	}
 
+	/**
+	 * @return true if ListItem should be draggable
+	 */
 	public boolean isItemDraggable() {
 		return draggable;
 	}
 	
+	/**
+	 * @param b true to enable draggable support for ListItem
+	 */
 	public void setItemDraggable(boolean b) {
 		draggable = b;
 	}
 
+	@Override
 	public void onEvent(Event event) throws Exception {
 		if (Events.ON_DOUBLE_CLICK.equals(event.getName()) && !doubleClickListeners.isEmpty()) {
 			for(EventListener<Event> listener : doubleClickListeners) {
@@ -209,7 +269,7 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 	}
 
 	/**
-	 * shortcut for appendItem(pp.getName(), pp.getKey()), to ease porting of swing form
+	 * Shortcut for appendItem(pp.getName(), pp.getKey()), to ease porting of swing form
 	 * @param pp
 	 */
 	public void addItem(KeyNamePair pp) {
@@ -217,7 +277,7 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 	}
 
 	/**
-	 * remove all items, to ease porting of swing form
+	 * Remove all items, to ease porting of swing form
 	 */
 	public void removeAllItems() {
 		int cnt = getItemCount();
@@ -227,7 +287,7 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 	}
 
 	/**
-	 * alias for removeEventListener(Events.ON_SELECT, listener), to ease porting of swing form
+	 * Shortcut for removeEventListener(Events.ON_SELECT, listener), to ease porting of swing form
 	 * @param listener
 	 */
 	public void removeActionListener(EventListener<Event> listener) {
@@ -235,7 +295,7 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 	}
 
 	/**
-	 * alias for addEventListener(Events.ON_SELECT, listener), to ease porting of swing form
+	 * Shortcut for addEventListener(Events.ON_SELECT, listener), to ease porting of swing form
 	 * @param listener
 	 */
 	public void addActionListener(EventListener<Event> listener) {
@@ -243,7 +303,7 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 	}
 
 	/**
-	 * shortcut for appendItem(pp.getName(), pp.getValue()), to ease porting of swing form
+	 * Shortcut for appendItem(pp.getName(), pp.getValue()), to ease porting of swing form
 	 * @param pp
 	 */
 	public void addItem(ValueNamePair pp) {
@@ -251,8 +311,8 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 	}
 
 	/**
-	 * select selected item base on vp.getValue, to ease porting of swing form
-	 * @param vp
+	 * Set selected item base on vp.getValue, to ease porting of swing form
+	 * @param vp ValueNamePair
 	 */
 	public void setSelectedValueNamePair(ValueNamePair vp) {
 		int count = this.getItemCount();
@@ -267,8 +327,8 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 	
 
 	/**
-	 * select selected item base on kp.getKey, to ease porting of swing form
-	 * @param kp
+	 * Set selected item base on kp.getKey, to ease porting of swing form
+	 * @param kp KeyNamePair
 	 */
 	public void setSelectedKeyNamePair(KeyNamePair kp) {
 		int count = this.getItemCount();
@@ -283,6 +343,10 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 		}
 	}
 
+	/**
+	 * Override to eset selected index.<br/>
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected void afterInsert(Component comp) {
 		super.afterInsert(comp);
@@ -293,6 +357,10 @@ public class Listbox extends org.zkoss.zul.Listbox implements EventListener<Even
 		}
 	}
 	 
+	/**
+	 * Override to eset selected index.<br/>
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean removeChild(Component child) {
 		boolean b = super.removeChild(child);

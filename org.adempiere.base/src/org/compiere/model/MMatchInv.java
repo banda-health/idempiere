@@ -25,32 +25,32 @@ import java.util.Properties;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *	Match Invoice (Receipt&lt;&gt;Invoice) Model.
- *	Accounting:
- *	- Not Invoiced Receipts (relief)
- *	- IPV
- *	
+ *  <pre>
+ *  Accounting:
+ *  - Not Invoiced Receipts (relief)
+ *  - IPV
+ *	</pre>
  *  @author Jorg Janke
  *  @version $Id: MMatchInv.java,v 1.3 2006/07/30 00:51:05 jjanke Exp $
  * 
- * @author Teo Sarca, SC ARHIPAC SERVICE SRL
+ *  @author Teo Sarca, SC ARHIPAC SERVICE SRL
  * 			<li>BF [ 1926113 ] MMatchInv.getNewerDateAcct() should work in trx
- * @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
+ *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  * 			<li> FR [ 2520591 ] Support multiples calendar for Org 
  *			@see https://sourceforge.net/p/adempiere/feature-requests/631/
- * @author Bayu Cahya, Sistematika
+ *  @author Bayu Cahya, Sistematika
  * 			<li>BF [ 2240484 ] Re MatchingPO, MMatchPO doesn't contains Invoice info
- * 
  */
 public class MMatchInv extends X_M_MatchInv
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -6673764788466220541L;
-
 
 	/**
 	 * 	Get InOut-Invoice Matches
@@ -72,11 +72,10 @@ public class MMatchInv extends X_M_MatchInv
 		return list.toArray (new MMatchInv[list.size()]);
 	}	//	get
 
-	// MZ Goodwill
 	/**
-	 * 	Get Inv Matches for InvoiceLine
+	 * 	Get InOut Matches for InvoiceLine
 	 *	@param ctx context
-	 *	@param C_InvoiceLine_ID invoice
+	 *	@param C_InvoiceLine_ID invoice line
 	 *	@param trxName transaction
 	 *	@return array of matches
 	 */
@@ -91,12 +90,11 @@ public class MMatchInv extends X_M_MatchInv
 		.list();
 		return list.toArray (new MMatchInv[list.size()]);
 	}	//	getInvoiceLine
-	// end MZ
 	
 	/**
-	 * 	Get Inv Matches for InOut
+	 * 	Get Invoice Matches for InOut
 	 *	@param ctx context
-	 *	@param M_InOut_ID shipment
+	 *	@param M_InOut_ID material receipt
 	 *	@param trxName transaction
 	 *	@return array of matches
 	 */
@@ -114,7 +112,7 @@ public class MMatchInv extends X_M_MatchInv
 	}	//	getInOut
 
 	/**
-	 * 	Get Inv Matches for Invoice
+	 * 	Get InOut Matches for Invoice
 	 *	@param ctx context
 	 *	@param C_Invoice_ID invoice
 	 *	@param trxName transaction
@@ -134,14 +132,24 @@ public class MMatchInv extends X_M_MatchInv
 		.list();
 		return list.toArray (new MMatchInv[list.size()]);
 	}	//	getInvoice
-
 	
 	/**	Static Logger	*/
 	@SuppressWarnings("unused")
 	private static CLogger	s_log	= CLogger.getCLogger (MMatchInv.class);
-
 	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_MatchInv_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MMatchInv(Properties ctx, String M_MatchInv_UU, String trxName) {
+        super(ctx, M_MatchInv_UU, trxName);
+		if (Util.isEmpty(M_MatchInv_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param M_MatchInv_ID id
@@ -151,13 +159,18 @@ public class MMatchInv extends X_M_MatchInv
 	{
 		super (ctx, M_MatchInv_ID, trxName);
 		if (M_MatchInv_ID == 0)
-		{
-			setM_AttributeSetInstance_ID(0);
-			setPosted (false);
-			setProcessed (false);
-			setProcessing (false);
-		}
+			setInitialDefaults();
 	}	//	MMatchInv
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setM_AttributeSetInstance_ID(0);
+		setPosted (false);
+		setProcessed (false);
+		setProcessing (false);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -189,20 +202,14 @@ public class MMatchInv extends X_M_MatchInv
 		setQty (qty);
 		setProcessed(true);		//	auto
 	}	//	MMatchInv
-
-	
-	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+		
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//	Set Trx Date
+		//	Set DateTrx to today date
 		if (getDateTrx() == null)
 			setDateTrx (new Timestamp(System.currentTimeMillis()));
-		//	Set Acct Date
+		//	Set DateAcct
 		if (getDateAcct() == null)
 		{
 			Timestamp ts = getNewerDateAcct();
@@ -210,6 +217,7 @@ public class MMatchInv extends X_M_MatchInv
 				ts = getDateTrx();
 			setDateAcct (ts);
 		}
+		// Set M_AttributeSetInstance_ID to M_AttributeSetInstance_ID of material receipt line.
 		if (getM_AttributeSetInstance_ID() == 0 && getM_InOutLine_ID() != 0)
 		{
 			MInOutLine iol = new MInOutLine (getCtx(), getM_InOutLine_ID(), get_TrxName());
@@ -223,6 +231,7 @@ public class MMatchInv extends X_M_MatchInv
 		if (!success)
 			return false;
 		
+		// Validate total M_MatchInv.Qty for M_InOutLine_ID against M_InOutLine.MovementQty
 		if (getM_InOutLine_ID() > 0)
 		{
 			MInOutLine line = new MInOutLine(getCtx(), getM_InOutLine_ID(), get_TrxName());
@@ -239,6 +248,7 @@ public class MMatchInv extends X_M_MatchInv
 			}
 		}
 		
+		// Validate total M_MatchInv.Qty for C_InvoiceLine_ID against M_InOutLine.MovementQty
 		if (getC_InvoiceLine_ID() > 0)
 		{
 			MInvoiceLine line = new MInvoiceLine(getCtx(), getC_InvoiceLine_ID(), get_TrxName());
@@ -258,7 +268,7 @@ public class MMatchInv extends X_M_MatchInv
 	}
 	
 	/**
-	 * 	Get the later Date Acct from invoice or shipment
+	 * 	Get the newer Date Acct between invoice and shipment
 	 *	@return date or null
 	 */
 	public Timestamp getNewerDateAcct()
@@ -283,14 +293,11 @@ public class MMatchInv extends X_M_MatchInv
 			return invoiceDate;
 		return shipDate;
 	}	//	getNewerDateAcct
-	
-	
-	/**
-	 * 	Before Delete
-	 *	@return true if acct was deleted
-	 */
+		
+	@Override
 	protected boolean beforeDelete ()
 	{
+		// Check is period open and delete postings (Fact_Acct)
 		if (isPosted())
 		{
 			MPeriod.testPeriodOpen(getCtx(), getDateTrx(), MDocType.DOCBASETYPE_MatchInvoice, getAD_Org_ID());
@@ -299,26 +306,21 @@ public class MMatchInv extends X_M_MatchInv
 		}
 		return true;
 	}	//	beforeDelete
-
 	
-	/**
-	 * 	After Delete
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		if (success)
 		{
-			// AZ Goodwill
 			deleteMatchInvCostDetail();
-			// end AZ			
 		}
 		return success;
 	}	//	afterDelete
 	
-	//
-	//AZ Goodwill
+	/**
+	 * Delete cost detail records for M_MatchInv
+	 * @return empty string
+	 */
 	protected String deleteMatchInvCostDetail()
 	{
 		// Get Account Schemas to delete MCostDetail
@@ -343,9 +345,8 @@ public class MMatchInv extends X_M_MatchInv
 		return "";
 	}
 	
-	// Bayu, Sistematika
 	/**
-	 * 	Get Inv Matches for InOutLine
+	 * 	Get Invoice Matches for InOutLine
 	 *	@param ctx context
 	 *	@param M_InOutLine_ID shipment
 	 *	@param trxName transaction
@@ -365,13 +366,11 @@ public class MMatchInv extends X_M_MatchInv
 		.list();
 		return list.toArray (new MMatchInv[list.size()]);
 	}	//	getInOutLine
-	// end Bayu
 	
 	/**
-	 * 	Reverse MatchPO.
+	 * 	Reverse this MatchInv document.
 	 *  @param reversalDate
-	 *	@return message
-	 *	@throws Exception
+	 *	@return true if reversed
 	 */
 	public boolean reverse(Timestamp reversalDate)  
 	{
@@ -395,7 +394,6 @@ public class MMatchInv extends X_M_MatchInv
 		}
 		return false;
 	}
-
 	
 	@Override
 	public MInOutLine getM_InOutLine() throws RuntimeException {

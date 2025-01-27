@@ -29,30 +29,49 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Properties;
 
 import org.adempiere.exceptions.DBException;
+import org.compiere.dbPort.Convert;
+import org.compiere.model.I_AD_UserPreference;
+import org.compiere.model.MAcctSchema;
 import org.compiere.model.MBPartner;
+import org.compiere.model.MChangeLog;
 import org.compiere.model.MClient;
+import org.compiere.model.MColumn;
 import org.compiere.model.MMessage;
+import org.compiere.model.MProduct;
+import org.compiere.model.MProductCategory;
+import org.compiere.model.MProductCategoryAcct;
+import org.compiere.model.MProductionLine;
+import org.compiere.model.MSession;
 import org.compiere.model.MTest;
 import org.compiere.model.POInfo;
+import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Ini;
 import org.compiere.util.Trx;
 import org.idempiere.test.AbstractTestCase;
+import org.idempiere.test.DictionaryIDs;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 /**
  * Tests for {@link org.compiere.model.PO} class.
  * @author Teo Sarca, SC ARHIPAC SERVICE SRL
  * @author hengsin
+ * 
+ * Run Isolated because of migration script file management
  */
+@Isolated
 public class POTest extends AbstractTestCase
 {
 	public static class MyTestPO extends MTest
@@ -81,8 +100,7 @@ public class POTest extends AbstractTestCase
 
 		public MyTestPO(Properties ctx, boolean failOnSave, String trxName)
 		{
-			super(ctx, "Test_"+System.currentTimeMillis(), 10);
-			this.set_TrxName(trxName);
+			super(ctx, "Test_"+System.currentTimeMillis(), 10, trxName);
 			this.setDescription(""+getClass());
 			this.failOnSave = failOnSave;
 		}
@@ -131,8 +149,7 @@ public class POTest extends AbstractTestCase
 				"test",
 		};
 		// Create the test PO and save
-		MTest testPO = new MTest(Env.getCtx(), getClass().getName(), 1);
-		testPO.set_TrxName(getTrxName());
+		MTest testPO = new MTest(Env.getCtx(), getClass().getName(), 1, getTrxName());
 
 		for (String str : testStrings)
 		{
@@ -177,8 +194,7 @@ public class POTest extends AbstractTestCase
 		String bigString = sb.toString();
 		//
 		// Create the test PO:
-		MTest testPO = new MTest(Env.getCtx(), getClass().getName(), 1);
-		testPO.set_TrxName(getTrxName());
+		MTest testPO = new MTest(Env.getCtx(), getClass().getName(), 1, getTrxName());
 		//
 		// Getting Max Length:
 		POInfo info = POInfo.getPOInfo(Env.getCtx(), MTest.Table_ID);
@@ -231,8 +247,10 @@ public class POTest extends AbstractTestCase
 		}
 		//
 		// Test for old objects
+		MyTestPO test = null;
+		try
 		{
-			MyTestPO test = new MyTestPO(Env.getCtx(), false, null);
+			test = new MyTestPO(Env.getCtx(), false, null);
 			assertTrue(test.save(), "Object *should* be saved -- "+test);
 			//
 			MyTestPO test2 = new MyTestPO(Env.getCtx(), test.get_ID(), null);
@@ -243,6 +261,19 @@ public class POTest extends AbstractTestCase
 			//
 			String name = MyTestPO.getName(test2.get_ID(), null);
 			assertEquals(test.getName(), name, "Object should not be modified(2) -- id="+test2);
+		}
+		finally
+		{
+			// cleanup
+			if (test != null)
+			{
+				if (test.getDependent_ID() > 0)
+				{
+					MyTestPO testDependent = new MyTestPO(Env.getCtx(), test.getDependent_ID(), null);
+					testDependent.deleteEx(true);
+				}
+				test.deleteEx(true);
+			}
 		}
 	}
 
@@ -349,6 +380,12 @@ public class POTest extends AbstractTestCase
 		//test update with default optimistic locking using updated timestamp
 		bp1.set_UseOptimisticLocking(true);
 		bp1.setDescription("bp1");
+		if (DB.isOracle()) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+		}
 		updated = bp1.save();
 		assertTrue(updated);
 		
@@ -418,6 +455,12 @@ public class POTest extends AbstractTestCase
 		//test delete with default optimistic locking
 		MMessage msg2 = new MMessage(Env.getCtx(), msg1.getAD_Message_ID(), getTrxName());				
 		msg1.setMsgText("msg 1.1 test");
+		if (DB.isOracle()) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+		}
 		msg1.saveEx();
 		
 		msg2.set_UseOptimisticLocking(true);
@@ -454,18 +497,133 @@ public class POTest extends AbstractTestCase
 
 	@Test
 	public void testVirtualColumnLoad() {
-		MTest testPo = new MTest(Env.getCtx(), getClass().getName(), 1);
+		MTest testPo = new MTest(Env.getCtx(), getClass().getName(), 1, getTrxName());
 		testPo.save();
 
 		// asynchronous (default) virtual column loading
 		assertTrue(null == testPo.get_ValueOld(MTest.COLUMNNAME_TestVirtualQty));
-		BigDecimal expected = new BigDecimal(123.45d).setScale(2, RoundingMode.HALF_DOWN);
-		assertTrue(expected.compareTo(testPo.getTestVirtualQty()) == 0);
+		BigDecimal expected = new BigDecimal("123.45");
+		assertEquals(expected, testPo.getTestVirtualQty().setScale(2, RoundingMode.HALF_UP), "Wrong value returned");
 
 		// synchronous virtual column loading
 		testPo = new MTest(Env.getCtx(), testPo.get_ID(), getTrxName(), MTest.COLUMNNAME_TestVirtualQty);
 		assertTrue(null != testPo.get_ValueOld(MTest.COLUMNNAME_TestVirtualQty));
-		assertTrue(expected.compareTo(testPo.getTestVirtualQty()) == 0);
+		assertEquals(expected, testPo.getTestVirtualQty().setScale(2, RoundingMode.HALF_UP), "Wrong value returned");
 	}
 
+	@Test
+	public void testLogMigrationScript() {
+		MClient client = MClient.get(Env.getCtx());
+		MAcctSchema as = client.getAcctSchema();
+		
+		assertFalse(Env.isLogMigrationScript(MProduct.Table_Name), "Unexpected Log Migration Script default for MProduct");
+		Env.getCtx().setProperty(Ini.P_LOGMIGRATIONSCRIPT, "Y");
+		Env.setContext(Env.getCtx(), I_AD_UserPreference.COLUMNNAME_MigrationScriptComment, "testLogMigrationScript");
+		assertTrue(Env.isLogMigrationScript(MProduct.Table_Name), "Unexpected Log Migration Script Y/N value for MProduct");
+		
+		MProductCategory lotLevel = new MProductCategory(Env.getCtx(), 0, null);
+		lotLevel.setName("testLogMigrationScript");
+		lotLevel.saveEx();
+		MProduct product = null;
+		try {
+			MProductCategoryAcct lotLevelAcct = MProductCategoryAcct.get(lotLevel.get_ID(), as.get_ID());
+			lotLevelAcct = new MProductCategoryAcct(Env.getCtx(), lotLevelAcct);
+			lotLevelAcct.setCostingLevel(MAcctSchema.COSTINGLEVEL_BatchLot);
+			lotLevelAcct.saveEx();
+			
+			product = new MProduct(Env.getCtx(), 0, null);
+			product.setM_Product_Category_ID(lotLevel.get_ID());
+			product.setName("testLogMigrationScript");
+			product.setProductType(MProduct.PRODUCTTYPE_Item);
+			product.setIsStocked(true);
+			product.setIsSold(true);
+			product.setIsPurchased(true);
+			product.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
+			product.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
+			product.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
+			product.saveEx();
+		} finally {
+			rollback();
+			
+			if (product != null) {
+				product.set_TrxName(null);
+				product.deleteEx(true);
+			}
+			
+			lotLevel.deleteEx(true);
+		}
+		
+		String fileName = Convert.getGeneratedMigrationScriptFileName();
+		String folderPg = Convert.getMigrationScriptFolder("postgresql");
+		String folderOr = Convert.getMigrationScriptFolder("oracle");
+		Convert.closeLogMigrationScript();
+		File file = new File(folderPg + fileName);
+		assertTrue(file.exists(), "Not found: " + folderPg + fileName);
+		file.delete();
+		file = new File(folderOr + fileName);
+		assertTrue(file.exists(), "Not found: " + folderOr + fileName);
+		file.delete();
+	}
+	
+	@Test
+	public void testIsVirtualColumnMethods() {
+		//column sql with no prefix
+		MColumn column = MColumn.get(Env.getCtx(), MTest.Table_Name, MTest.COLUMNNAME_TestVirtualQty);
+		assertTrue(column.isVirtualColumn(), "MColumn.isVirtualColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertTrue(column.isVirtualDBColumn(), "MColumn.isVirtualDBColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertFalse(column.isVirtualUIColumn(), "MColumn.isVirtualUIColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertFalse(column.isVirtualSearchColumn(), "MColumn.isVirtualSearchColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+
+		//column sql with @SQLFIND= prefix
+		column = MColumn.get(Env.getCtx(), MProductionLine.Table_Name, "ProductType");
+		assertTrue(column.isVirtualColumn(), "MColumn.isVirtualColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertFalse(column.isVirtualDBColumn(), "MColumn.isVirtualDBColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertFalse(column.isVirtualUIColumn(), "MColumn.isVirtualUIColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertTrue(column.isVirtualSearchColumn(), "MColumn.isVirtualSearchColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		
+		//column sql with @SQL= prefix
+		column = MColumn.get(Env.getCtx(), MTest.Table_Name, MTest.COLUMNNAME_TestVirtualQty);
+		column = new MColumn(column);
+		column.setColumnSQL(MColumn.VIRTUAL_UI_COLUMN_PREFIX+column.getColumnSQL());
+		assertTrue(column.isVirtualColumn(), "MColumn.isVirtualColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertFalse(column.isVirtualDBColumn(), "MColumn.isVirtualDBColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertTrue(column.isVirtualUIColumn(), "MColumn.isVirtualUIColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+		assertFalse(column.isVirtualSearchColumn(), "MColumn.isVirtualSearchColumn() not working as expected for ColumnSQL="+column.getColumnSQL());
+	}
+	
+	@Test
+	public void testChangeLog() {
+		MSession.create(Env.getCtx());
+		MSession session = MSession.get(Env.getCtx());
+		MProduct product = new MProduct(Env.getCtx(), DictionaryIDs.M_Product.AZALEA_BUSH.id, null);
+		String description = product.getDescription();
+		try {
+			product.setDescription(description != null ? description + "+1" : "+1");
+			product.saveEx();
+			
+			Query query = new Query(Env.getCtx(), MChangeLog.Table_Name, "AD_Session_ID=? AND AD_Table_ID=? AND Record_ID=? AND AD_Column_ID=? AND NewValue=?", null);
+			MColumn column = MColumn.get(Env.getCtx(), MProduct.Table_Name, MProduct.COLUMNNAME_Description);
+			MChangeLog changeLog = query.setParameters(session.get_ID(), MProduct.Table_ID, product.get_ID(), column.get_ID(), product.getDescription()).first();
+			assertNotNull(changeLog);
+			assertTrue(changeLog.getAD_ChangeLog_ID() > 0);
+			
+			session.addSkipChangeLogForUpdate(MProduct.Table_Name);
+			product.setDescription(description != null ? description + "+2" : "+2");
+			product.saveEx();
+			
+			changeLog = query.setParameters(session.get_ID(), MProduct.Table_ID, product.get_ID(), column.get_ID(), product.getDescription()).first();
+			assertNull(changeLog);
+			
+			session.removeSkipChangeLogForUpdate(MProduct.Table_Name);
+			product.setDescription(description != null ? description + "+3" : "+3");
+			product.saveEx();
+			
+			changeLog = query.setParameters(session.get_ID(), MProduct.Table_ID, product.get_ID(), column.get_ID(), product.getDescription()).first();
+			assertNotNull(changeLog);
+			assertTrue(changeLog.getAD_ChangeLog_ID() > 0);
+		} finally {
+			product.setDescription(description);
+			product.saveEx();
+		}
+	}
 }

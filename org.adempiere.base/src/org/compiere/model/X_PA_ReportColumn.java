@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PA_ReportColumn
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="PA_ReportColumn")
-public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persistent 
+public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_PA_ReportColumn (Properties ctx, int PA_ReportColumn_ID, String trxName)
@@ -70,8 +70,8 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 			setIsPrinted (true);
 // Y
 			setName (null);
-			setPA_ReportColumn_ID (0);
 			setPA_ReportColumnSet_ID (0);
+			setPA_ReportColumn_ID (0);
 			setPostingType (null);
 // A
 			setSeqNo (0);
@@ -114,8 +114,96 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 			setIsPrinted (true);
 // Y
 			setName (null);
-			setPA_ReportColumn_ID (0);
 			setPA_ReportColumnSet_ID (0);
+			setPA_ReportColumn_ID (0);
+			setPostingType (null);
+// A
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM PA_ReportColumn WHERE PA_ReportColumnSet_ID=@PA_ReportColumnSet_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_ReportColumn (Properties ctx, String PA_ReportColumn_UU, String trxName)
+    {
+      super (ctx, PA_ReportColumn_UU, trxName);
+      /** if (PA_ReportColumn_UU == null)
+        {
+			setColumnType (null);
+// R
+			setIsIncludeNullsActivity (false);
+// N
+			setIsIncludeNullsBPartner (false);
+// N
+			setIsIncludeNullsCampaign (false);
+// N
+			setIsIncludeNullsElementValue (false);
+// N
+			setIsIncludeNullsLocation (false);
+// N
+			setIsIncludeNullsOrg (false);
+// N
+			setIsIncludeNullsOrgTrx (false);
+// N
+			setIsIncludeNullsProduct (false);
+// N
+			setIsIncludeNullsProject (false);
+// N
+			setIsIncludeNullsSalesRegion (false);
+// N
+			setIsIncludeNullsUserElement1 (false);
+// N
+			setIsIncludeNullsUserElement2 (false);
+// N
+			setIsPrinted (true);
+// Y
+			setName (null);
+			setPA_ReportColumnSet_ID (0);
+			setPA_ReportColumn_ID (0);
+			setPostingType (null);
+// A
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM PA_ReportColumn WHERE PA_ReportColumnSet_ID=@PA_ReportColumnSet_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_ReportColumn (Properties ctx, String PA_ReportColumn_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_ReportColumn_UU, trxName, virtualColumns);
+      /** if (PA_ReportColumn_UU == null)
+        {
+			setColumnType (null);
+// R
+			setIsIncludeNullsActivity (false);
+// N
+			setIsIncludeNullsBPartner (false);
+// N
+			setIsIncludeNullsCampaign (false);
+// N
+			setIsIncludeNullsElementValue (false);
+// N
+			setIsIncludeNullsLocation (false);
+// N
+			setIsIncludeNullsOrg (false);
+// N
+			setIsIncludeNullsOrgTrx (false);
+// N
+			setIsIncludeNullsProduct (false);
+// N
+			setIsIncludeNullsProject (false);
+// N
+			setIsIncludeNullsSalesRegion (false);
+// N
+			setIsIncludeNullsUserElement1 (false);
+// N
+			setIsIncludeNullsUserElement2 (false);
+// N
+			setIsPrinted (true);
+// Y
+			setName (null);
+			setPA_ReportColumnSet_ID (0);
+			setPA_ReportColumn_ID (0);
 			setPostingType (null);
 // A
 			setSeqNo (0);
@@ -130,7 +218,7 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -199,32 +287,6 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** CalculationType AD_Reference_ID=236 */
-	public static final int CALCULATIONTYPE_AD_Reference_ID=236;
-	/** Add (Op1+Op2) = A */
-	public static final String CALCULATIONTYPE_AddOp1PlusOp2 = "A";
-	/** Percentage (Op1 of Op2) = P */
-	public static final String CALCULATIONTYPE_PercentageOp1OfOp2 = "P";
-	/** Add Range (Op1 to Op2) = R */
-	public static final String CALCULATIONTYPE_AddRangeOp1ToOp2 = "R";
-	/** Subtract (Op1-Op2) = S */
-	public static final String CALCULATIONTYPE_SubtractOp1_Op2 = "S";
-	/** Set Calculation.
-		@param CalculationType Calculation
-	*/
-	public void setCalculationType (String CalculationType)
-	{
-
-		set_Value (COLUMNNAME_CalculationType, CalculationType);
-	}
-
-	/** Get Calculation.
-		@return Calculation	  */
-	public String getCalculationType()
-	{
-		return (String)get_Value(COLUMNNAME_CalculationType);
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
@@ -367,30 +429,6 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		return ii.intValue();
 	}
 
-	/** ColumnType AD_Reference_ID=237 */
-	public static final int COLUMNTYPE_AD_Reference_ID=237;
-	/** Calculation = C */
-	public static final String COLUMNTYPE_Calculation = "C";
-	/** Relative Period = R */
-	public static final String COLUMNTYPE_RelativePeriod = "R";
-	/** Segment Value = S */
-	public static final String COLUMNTYPE_SegmentValue = "S";
-	/** Set Column Type.
-		@param ColumnType Column Type
-	*/
-	public void setColumnType (String ColumnType)
-	{
-
-		set_Value (COLUMNNAME_ColumnType, ColumnType);
-	}
-
-	/** Get Column Type.
-		@return Column Type	  */
-	public String getColumnType()
-	{
-		return (String)get_Value(COLUMNNAME_ColumnType);
-	}
-
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
@@ -445,6 +483,56 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** CalculationType AD_Reference_ID=236 */
+	public static final int CALCULATIONTYPE_AD_Reference_ID=236;
+	/** Add (Op1+Op2) = A */
+	public static final String CALCULATIONTYPE_AddOp1PlusOp2 = "A";
+	/** Percentage (Op1 of Op2) = P */
+	public static final String CALCULATIONTYPE_PercentageOp1OfOp2 = "P";
+	/** Add Range (Op1 to Op2) = R */
+	public static final String CALCULATIONTYPE_AddRangeOp1ToOp2 = "R";
+	/** Subtract (Op1-Op2) = S */
+	public static final String CALCULATIONTYPE_SubtractOp1_Op2 = "S";
+	/** Set Calculation.
+		@param CalculationType Calculation
+	*/
+	public void setCalculationType (String CalculationType)
+	{
+
+		set_Value (COLUMNNAME_CalculationType, CalculationType);
+	}
+
+	/** Get Calculation.
+		@return Calculation	  */
+	public String getCalculationType()
+	{
+		return (String)get_Value(COLUMNNAME_CalculationType);
+	}
+
+	/** ColumnType AD_Reference_ID=237 */
+	public static final int COLUMNTYPE_AD_Reference_ID=237;
+	/** Calculation = C */
+	public static final String COLUMNTYPE_Calculation = "C";
+	/** Relative Period = R */
+	public static final String COLUMNTYPE_RelativePeriod = "R";
+	/** Segment Value = S */
+	public static final String COLUMNTYPE_SegmentValue = "S";
+	/** Set Column Type.
+		@param ColumnType Column Type
+	*/
+	public void setColumnType (String ColumnType)
+	{
+
+		set_Value (COLUMNNAME_ColumnType, ColumnType);
+	}
+
+	/** Get Column Type.
+		@return Column Type	  */
+	public String getColumnType()
+	{
+		return (String)get_Value(COLUMNNAME_ColumnType);
 	}
 
 	/** CurrencyType AD_Reference_ID=238 */
@@ -540,10 +628,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 
 	/** Factor AD_Reference_ID=53285 */
 	public static final int FACTOR_AD_Reference_ID=53285;
-	/** Thousand = k */
-	public static final String FACTOR_Thousand = "k";
 	/** Million = M */
 	public static final String FACTOR_Million = "M";
+	/** Thousand = k */
+	public static final String FACTOR_Thousand = "k";
 	/** Set Factor.
 		@param Factor Scaling factor.
 	*/
@@ -605,7 +693,7 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		return ii.intValue();
 	}
 
-	/** Set Adhoc Conversion.
+	/** Set Ad hoc Conversion.
 		@param IsAdhocConversion Perform conversion for all amounts to currency
 	*/
 	public void setIsAdhocConversion (boolean IsAdhocConversion)
@@ -613,16 +701,16 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		set_Value (COLUMNNAME_IsAdhocConversion, Boolean.valueOf(IsAdhocConversion));
 	}
 
-	/** Get Adhoc Conversion.
+	/** Get Ad hoc Conversion.
 		@return Perform conversion for all amounts to currency
 	  */
 	public boolean isAdhocConversion()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAdhocConversion);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -642,10 +730,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isAllowOppositeSign()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAllowOppositeSign);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -665,10 +753,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsActivity()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsActivity);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -688,10 +776,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsBPartner()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsBPartner);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -711,10 +799,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsCampaign()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsCampaign);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -734,10 +822,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsElementValue()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsElementValue);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -757,10 +845,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsLocation()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsLocation);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -780,10 +868,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsOrg()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsOrg);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -803,10 +891,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsOrgTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsOrgTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -826,10 +914,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsProduct()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsProduct);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -849,10 +937,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsProject()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsProject);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -872,10 +960,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsSalesRegion()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsSalesRegion);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -895,10 +983,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsUserElement1()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsUserElement1);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -918,10 +1006,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isIncludeNullsUserElement2()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIncludeNullsUserElement2);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -941,10 +1029,10 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -978,6 +1066,25 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set Multiplier.
+		@param Multiplier Type Multiplier (Credit = -1)
+	*/
+	public void setMultiplier (BigDecimal Multiplier)
+	{
+		set_Value (COLUMNNAME_Multiplier, Multiplier);
+	}
+
+	/** Get Multiplier.
+		@return Type Multiplier (Credit = -1)
+	  */
+	public BigDecimal getMultiplier()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Multiplier);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/
@@ -997,7 +1104,7 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -1075,7 +1182,7 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	}
 
 	/** Set Organization.
-		@param Org_ID Organizational entity within client
+		@param Org_ID Organizational entity within tenant
 	*/
 	public void setOrg_ID (int Org_ID)
 	{
@@ -1086,7 +1193,7 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	}
 
 	/** Get Organization.
-		@return Organizational entity within client
+		@return Organizational entity within tenant
 	  */
 	public int getOrg_ID()
 	{
@@ -1154,28 +1261,6 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		return (String)get_Value(COLUMNNAME_PAPeriodType);
 	}
 
-	/** Set Report Column.
-		@param PA_ReportColumn_ID Column in Report
-	*/
-	public void setPA_ReportColumn_ID (int PA_ReportColumn_ID)
-	{
-		if (PA_ReportColumn_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_PA_ReportColumn_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_PA_ReportColumn_ID, Integer.valueOf(PA_ReportColumn_ID));
-	}
-
-	/** Get Report Column.
-		@return Column in Report
-	  */
-	public int getPA_ReportColumn_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportColumn_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_PA_ReportColumnSet getPA_ReportColumnSet() throws RuntimeException
 	{
 		return (org.compiere.model.I_PA_ReportColumnSet)MTable.get(getCtx(), org.compiere.model.I_PA_ReportColumnSet.Table_ID)
@@ -1199,6 +1284,28 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public int getPA_ReportColumnSet_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportColumnSet_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Report Column.
+		@param PA_ReportColumn_ID Column in Report
+	*/
+	public void setPA_ReportColumn_ID (int PA_ReportColumn_ID)
+	{
+		if (PA_ReportColumn_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_PA_ReportColumn_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_PA_ReportColumn_ID, Integer.valueOf(PA_ReportColumn_ID));
+	}
+
+	/** Get Report Column.
+		@return Column in Report
+	  */
+	public int getPA_ReportColumn_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportColumn_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -1231,7 +1338,7 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 	public static final String POSTINGTYPE_Reservation = "R";
 	/** Statistical = S */
 	public static final String POSTINGTYPE_Statistical = "S";
-	/** Set PostingType.
+	/** Set Posting Type.
 		@param PostingType The type of posted amount for the transaction
 	*/
 	public void setPostingType (String PostingType)
@@ -1240,7 +1347,7 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		set_Value (COLUMNNAME_PostingType, PostingType);
 	}
 
-	/** Get PostingType.
+	/** Get Posting Type.
 		@return The type of posted amount for the transaction
 	  */
 	public String getPostingType()
@@ -1284,6 +1391,24 @@ public class X_PA_ReportColumn extends PO implements I_PA_ReportColumn, I_Persis
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Round Factor.
+		@param RoundFactor Round Factor
+	*/
+	public void setRoundFactor (int RoundFactor)
+	{
+		set_Value (COLUMNNAME_RoundFactor, Integer.valueOf(RoundFactor));
+	}
+
+	/** Get Round Factor.
+		@return Round Factor	  */
+	public int getRoundFactor()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_RoundFactor);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Sequence.

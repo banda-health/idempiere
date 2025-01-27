@@ -17,23 +17,50 @@
 
 package org.adempiere.webui.event;
 
+import org.zkoss.zk.ui.Component;
+
 /**
- *
+ * Event for context menu (right-click menu) action
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 10, 2007
- * @version $Revision: 0.10 $
  */
 public class ContextMenuEvent
 {
+	/** Event id/name */
     private String contextEvent;
+	private Component target;
     
+	/**
+	 * 
+	 * @param event
+	 */
     public ContextMenuEvent(String event)
     {
         this.contextEvent = event;
     }
     
+    /**
+     * Get event name
+     * @return event name
+     */
     public String getContextEvent()
     {
         return contextEvent;
     }
+    
+    /**
+     * Set event target
+     * @param target
+     */
+    public void setTarget(Component target) {
+		this.target = target;
+	}
+	
+    /**
+     * Get event target
+     * @return target component
+     */
+	public Component getTarget() {
+		return this.target;
+	}
 }

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BankAccount
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_BankAccount 
 {
@@ -41,6 +41,27 @@ public interface I_C_BankAccount
 
     /** Load Meta Data */
 
+    /** Column name AD_Client_ID */
+    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+
+	/** Get Tenant.
+	  * Tenant for this installation.
+	  */
+	public int getAD_Client_ID();
+
+    /** Column name AD_Org_ID */
+    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
+
+	/** Set Organization.
+	  * Organizational entity within tenant
+	  */
+	public void setAD_Org_ID (int AD_Org_ID);
+
+	/** Get Organization.
+	  * Organizational entity within tenant
+	  */
+	public int getAD_Org_ID();
+
     /** Column name AccountNo */
     public static final String COLUMNNAME_AccountNo = "AccountNo";
 
@@ -54,26 +75,18 @@ public interface I_C_BankAccount
 	  */
 	public String getAccountNo();
 
-    /** Column name AD_Client_ID */
-    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+    /** Column name BBAN */
+    public static final String COLUMNNAME_BBAN = "BBAN";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Set BBAN.
+	  * Basic Bank Account Number
 	  */
-	public int getAD_Client_ID();
+	public void setBBAN (String BBAN);
 
-    /** Column name AD_Org_ID */
-    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
-
-	/** Set Organization.
-	  * Organizational entity within client
+	/** Get BBAN.
+	  * Basic Bank Account Number
 	  */
-	public void setAD_Org_ID (int AD_Org_ID);
-
-	/** Get Organization.
-	  * Organizational entity within client
-	  */
-	public int getAD_Org_ID();
+	public String getBBAN();
 
     /** Column name BankAccountType */
     public static final String COLUMNNAME_BankAccountType = "BankAccountType";
@@ -87,19 +100,6 @@ public interface I_C_BankAccount
 	  * Bank Account Type
 	  */
 	public String getBankAccountType();
-
-    /** Column name BBAN */
-    public static final String COLUMNNAME_BBAN = "BBAN";
-
-	/** Set BBAN.
-	  * Basic Bank Account Number
-	  */
-	public void setBBAN (String BBAN);
-
-	/** Get BBAN.
-	  * Basic Bank Account Number
-	  */
-	public String getBBAN();
 
     /** Column name C_BankAccount_ID */
     public static final String COLUMNNAME_C_BankAccount_ID = "C_BankAccount_ID";

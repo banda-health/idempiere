@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_ReportLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_I_ReportLine 
 {
@@ -44,8 +44,8 @@ public interface I_I_ReportLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,23 +53,14 @@ public interface I_I_ReportLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name CalculationType */
-    public static final String COLUMNNAME_CalculationType = "CalculationType";
-
-	/** Set Calculation	  */
-	public void setCalculationType (String CalculationType);
-
-	/** Get Calculation	  */
-	public String getCalculationType();
 
     /** Column name C_ElementValue_ID */
     public static final String COLUMNNAME_C_ElementValue_ID = "C_ElementValue_ID";
@@ -85,6 +76,15 @@ public interface I_I_ReportLine
 	public int getC_ElementValue_ID();
 
 	public org.compiere.model.I_C_ElementValue getC_ElementValue() throws RuntimeException;
+
+    /** Column name CalculationType */
+    public static final String COLUMNNAME_CalculationType = "CalculationType";
+
+	/** Set Calculation	  */
+	public void setCalculationType (String CalculationType);
+
+	/** Get Calculation	  */
+	public String getCalculationType();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -263,17 +263,6 @@ public interface I_I_ReportLine
 	  */
 	public String getPAPeriodType();
 
-    /** Column name PA_ReportLine_ID */
-    public static final String COLUMNNAME_PA_ReportLine_ID = "PA_ReportLine_ID";
-
-	/** Set Report Line	  */
-	public void setPA_ReportLine_ID (int PA_ReportLine_ID);
-
-	/** Get Report Line	  */
-	public int getPA_ReportLine_ID();
-
-	public org.compiere.model.I_PA_ReportLine getPA_ReportLine() throws RuntimeException;
-
     /** Column name PA_ReportLineSet_ID */
     public static final String COLUMNNAME_PA_ReportLineSet_ID = "PA_ReportLineSet_ID";
 
@@ -284,6 +273,17 @@ public interface I_I_ReportLine
 	public int getPA_ReportLineSet_ID();
 
 	public org.compiere.model.I_PA_ReportLineSet getPA_ReportLineSet() throws RuntimeException;
+
+    /** Column name PA_ReportLine_ID */
+    public static final String COLUMNNAME_PA_ReportLine_ID = "PA_ReportLine_ID";
+
+	/** Set Report Line	  */
+	public void setPA_ReportLine_ID (int PA_ReportLine_ID);
+
+	/** Get Report Line	  */
+	public int getPA_ReportLine_ID();
+
+	public org.compiere.model.I_PA_ReportLine getPA_ReportLine() throws RuntimeException;
 
     /** Column name PA_ReportSource_ID */
     public static final String COLUMNNAME_PA_ReportSource_ID = "PA_ReportSource_ID";
@@ -303,12 +303,12 @@ public interface I_I_ReportLine
     /** Column name PostingType */
     public static final String COLUMNNAME_PostingType = "PostingType";
 
-	/** Set PostingType.
+	/** Set Posting Type.
 	  * The type of posted amount for the transaction
 	  */
 	public void setPostingType (String PostingType);
 
-	/** Get PostingType.
+	/** Get Posting Type.
 	  * The type of posted amount for the transaction
 	  */
 	public String getPostingType();

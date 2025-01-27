@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_PaySchedule
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_PaySchedule 
 {
@@ -44,8 +44,8 @@ public interface I_C_PaySchedule
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,29 +53,14 @@ public interface I_C_PaySchedule
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name C_PaymentTerm_ID */
-    public static final String COLUMNNAME_C_PaymentTerm_ID = "C_PaymentTerm_ID";
-
-	/** Set Payment Term.
-	  * The terms of Payment (timing, discount)
-	  */
-	public void setC_PaymentTerm_ID (int C_PaymentTerm_ID);
-
-	/** Get Payment Term.
-	  * The terms of Payment (timing, discount)
-	  */
-	public int getC_PaymentTerm_ID();
-
-	public org.compiere.model.I_C_PaymentTerm getC_PaymentTerm() throws RuntimeException;
 
     /** Column name C_PaySchedule_ID */
     public static final String COLUMNNAME_C_PaySchedule_ID = "C_PaySchedule_ID";
@@ -98,6 +83,21 @@ public interface I_C_PaySchedule
 
 	/** Get C_PaySchedule_UU	  */
 	public String getC_PaySchedule_UU();
+
+    /** Column name C_PaymentTerm_ID */
+    public static final String COLUMNNAME_C_PaymentTerm_ID = "C_PaymentTerm_ID";
+
+	/** Set Payment Term.
+	  * The terms of Payment (timing, discount)
+	  */
+	public void setC_PaymentTerm_ID (int C_PaymentTerm_ID);
+
+	/** Get Payment Term.
+	  * The terms of Payment (timing, discount)
+	  */
+	public int getC_PaymentTerm_ID();
+
+	public org.compiere.model.I_C_PaymentTerm getC_PaymentTerm() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

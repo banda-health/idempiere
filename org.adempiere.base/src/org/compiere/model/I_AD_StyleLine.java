@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_StyleLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_StyleLine 
 {
@@ -44,8 +44,8 @@ public interface I_AD_StyleLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,29 +53,14 @@ public interface I_AD_StyleLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name AD_Style_ID */
-    public static final String COLUMNNAME_AD_Style_ID = "AD_Style_ID";
-
-	/** Set Style.
-	  * CSS style for field and label
-	  */
-	public void setAD_Style_ID (int AD_Style_ID);
-
-	/** Get Style.
-	  * CSS style for field and label
-	  */
-	public int getAD_Style_ID();
-
-	public org.compiere.model.I_AD_Style getAD_Style() throws RuntimeException;
 
     /** Column name AD_StyleLine_ID */
     public static final String COLUMNNAME_AD_StyleLine_ID = "AD_StyleLine_ID";
@@ -102,6 +87,21 @@ public interface I_AD_StyleLine
 	  * CSS Style Line
 	  */
 	public String getAD_StyleLine_UU();
+
+    /** Column name AD_Style_ID */
+    public static final String COLUMNNAME_AD_Style_ID = "AD_Style_ID";
+
+	/** Set Style.
+	  * CSS style for field and label
+	  */
+	public void setAD_Style_ID (int AD_Style_ID);
+
+	/** Get Style.
+	  * CSS style for field and label
+	  */
+	public int getAD_Style_ID();
+
+	public org.compiere.model.I_AD_Style getAD_Style() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

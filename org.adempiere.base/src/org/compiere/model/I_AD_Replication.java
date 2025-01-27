@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Replication
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_Replication 
 {
@@ -44,8 +44,8 @@ public interface I_AD_Replication
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,27 +53,14 @@ public interface I_AD_Replication
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name AD_Replication_ID */
-    public static final String COLUMNNAME_AD_Replication_ID = "AD_Replication_ID";
-
-	/** Set Replication.
-	  * Data Replication Target
-	  */
-	public void setAD_Replication_ID (int AD_Replication_ID);
-
-	/** Get Replication.
-	  * Data Replication Target
-	  */
-	public int getAD_Replication_ID();
 
     /** Column name AD_ReplicationStrategy_ID */
     public static final String COLUMNNAME_AD_ReplicationStrategy_ID = "AD_ReplicationStrategy_ID";
@@ -89,6 +76,19 @@ public interface I_AD_Replication
 	public int getAD_ReplicationStrategy_ID();
 
 	public org.compiere.model.I_AD_ReplicationStrategy getAD_ReplicationStrategy() throws RuntimeException;
+
+    /** Column name AD_Replication_ID */
+    public static final String COLUMNNAME_AD_Replication_ID = "AD_Replication_ID";
+
+	/** Set Replication.
+	  * Data Replication Target
+	  */
+	public void setAD_Replication_ID (int AD_Replication_ID);
+
+	/** Get Replication.
+	  * Data Replication Target
+	  */
+	public int getAD_Replication_ID();
 
     /** Column name AD_Replication_UU */
     public static final String COLUMNNAME_AD_Replication_UU = "AD_Replication_UU";
@@ -118,12 +118,12 @@ public interface I_AD_Replication
     /** Column name DateLastRun */
     public static final String COLUMNNAME_DateLastRun = "DateLastRun";
 
-	/** Set Date last run.
+	/** Set Date Last Run.
 	  * Date the process was last run.
 	  */
 	public void setDateLastRun (Timestamp DateLastRun);
 
-	/** Get Date last run.
+	/** Get Date Last Run.
 	  * Date the process was last run.
 	  */
 	public Timestamp getDateLastRun();
@@ -270,13 +270,13 @@ public interface I_AD_Replication
     /** Column name Remote_Client_ID */
     public static final String COLUMNNAME_Remote_Client_ID = "Remote_Client_ID";
 
-	/** Set Remote Client.
-	  * Remote Client to be used to replicate / synchronize data with.
+	/** Set Remote Tenant.
+	  * Remote Tenant to be used to replicate / synchronize data with.
 	  */
 	public void setRemote_Client_ID (int Remote_Client_ID);
 
-	/** Get Remote Client.
-	  * Remote Client to be used to replicate / synchronize data with.
+	/** Get Remote Tenant.
+	  * Remote Tenant to be used to replicate / synchronize data with.
 	  */
 	public int getRemote_Client_ID();
 

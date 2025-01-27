@@ -29,35 +29,55 @@ import org.compiere.model.MSysConfig;
 import org.compiere.print.IHTMLExtension;
 import org.compiere.print.PrintData;
 import org.compiere.print.PrintDataElement;
+import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.Executions;
 
 /**
- * 
+ * Default implementation for HTML report extension
  * @author hengsin
- *
  */
 public class HTMLExtension implements IHTMLExtension {
 
+	/**	Logger				*/
+	private static CLogger log = CLogger.getCLogger(HTMLExtension.class);
+			
 	private String classPrefix;
 	private String componentId;
 	private String scriptURL;
 	private String styleURL;
 	private String contextPath;
+	private String processID;
 
+	/**
+	 * @param contextPath
+	 * @param classPrefix
+	 * @param componentId
+	 */
 	public HTMLExtension(String contextPath, String classPrefix, String componentId) {
+		this(contextPath, classPrefix, componentId, "");
+	}
+	
+	/**
+	 * @param contextPath
+	 * @param classPrefix
+	 * @param componentId
+	 * @param processID
+	 */
+	public HTMLExtension(String contextPath, String classPrefix, String componentId, String processID) {
 
 		String theme = MSysConfig.getValue(MSysConfig.HTML_REPORT_THEME, "/", Env.getAD_Client_ID(Env.getCtx()));
 
-		if (! theme.startsWith("/") && !theme.startsWith("~./"))
+		if (!theme.startsWith("/") && !theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE))
 			theme = "/" + theme;
 		if (! theme.endsWith("/"))
 			theme = theme + "/";
 
 		this.classPrefix = classPrefix;
 		this.componentId = componentId;
-		if (theme.startsWith("~./")) {
+		if (theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE)) {
 			if (Executions.getCurrent() != null) {
 				this.styleURL = Executions.encodeURL(theme + "css/report.css");
 			}
@@ -65,16 +85,30 @@ public class HTMLExtension implements IHTMLExtension {
 			this.styleURL = contextPath + theme + "css/report.css";
 		}
 		this.contextPath = contextPath;
+		this.processID = processID;
 	}
 	
+	@Override
+	public String getWebFontLinks() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("<link rel=\"stylesheet\" href=\"")
+			.append(contextPath)
+			.append("/css/font-awesome.css.dsp")
+			.append("\">");
+		return builder.toString();
+	}
+
+	@Override
 	public void extendIDColumn(int row, ConcreteElement columnElement, a href,
 			PrintDataElement dataElement) {
-		href.addAttribute("onclick", "parent.idempiere.showColumnMenu(document, event, '" + dataElement.getColumnName() + "', " + row + ")");		
+		href.addAttribute("onclick", "parent.idempiere.showColumnMenu(document, event, '" + dataElement.getColumnName() + "', " + row + ", " + ThemeManager.isUseFontIconForImage() + ", " + processID + ")");		
 		href.addAttribute ("componentId", componentId);
 		href.addAttribute ("foreignColumnName", dataElement.getForeignColumnName());
 		href.addAttribute ("value", dataElement.getValueAsString());
+		href.addAttribute ("displayValue", dataElement.getValueDisplay(Env.getLanguage(Env.getCtx())));
 	}
 
+	@Override
 	public void extendRowElement(ConcreteElement row, PrintData printData) {
 		PrintDataElement pkey = printData.getPKey();
 		if (pkey != null)
@@ -86,58 +120,108 @@ public class HTMLExtension implements IHTMLExtension {
 		}
 	}
 
+	@Override
 	public String getClassPrefix() {
 		return classPrefix;
 	}
 
+	@Override
 	public String getScriptURL() {
 		return scriptURL;
 	}
 
+	@Override
 	public String getStyleURL() {
 		return styleURL;
 	}
 
+	@Override
 	public void setWebAttribute (body reportBody){
 		// set attribute value for create menu context
-		StringBuilder windowImageURL = new StringBuilder();
-		String windowIco = ThemeManager.getThemeResource("images/mWindow.png");
-		if (windowIco.startsWith("~./")) {
-			if (Executions.getCurrent() != null) {
-				windowImageURL.append(Executions.encodeURL(windowIco));
-			}
-		} else {
-			windowImageURL.append(contextPath);
-			if (!windowIco.startsWith("/") && !contextPath.endsWith("/"))
-				windowImageURL.append("/");
-			windowImageURL.append(windowIco);
+		StringBuilder windowIconAttr = new StringBuilder();
+		if(ThemeManager.isUseFontIconForImage()) {
+			windowIconAttr.append("z-icon-Window");
 		}
-		StringBuilder reportImageURL = new StringBuilder();
-		String reportIco = ThemeManager.getThemeResource("images/mReport.png");
-		if (reportIco.startsWith("~./")) {
-			if (Executions.getCurrent() != null) {
-				reportImageURL.append(Executions.encodeURL(reportIco));
+		else {
+			String windowIco = ThemeManager.getThemeResource("images/mWindow.png");
+			if (windowIco.startsWith("~./")) {
+				if (Executions.getCurrent() != null) {
+					windowIconAttr.append(Executions.encodeURL(windowIco));
+				}
+			} else {
+				windowIconAttr.append(contextPath);
+				if (!windowIco.startsWith("/") && !contextPath.endsWith("/"))
+					windowIconAttr.append("/");
+				windowIconAttr.append(windowIco);
 			}
-		} else {
-			reportImageURL.append(contextPath);
-			if (!reportIco.startsWith("/") && !contextPath.endsWith("/"))
-				reportImageURL.append("/");
-			reportImageURL.append(reportIco);
-		}		
-		reportBody.addAttribute("windowIco",windowImageURL.toString());
-		reportBody.addAttribute("reportIco", reportImageURL.toString());
+		}
+		StringBuilder reportIconAttr = new StringBuilder();
+		if(ThemeManager.isUseFontIconForImage()) {
+			reportIconAttr.append("z-icon-Report");
+		}
+		else {
+			String reportIco = ThemeManager.getThemeResource("images/mReport.png");
+			if (reportIco.startsWith("~./")) {
+				if (Executions.getCurrent() != null) {
+					reportIconAttr.append(Executions.encodeURL(reportIco));
+				}
+			} else {
+				reportIconAttr.append(contextPath);
+				if (!reportIco.startsWith("/") && !contextPath.endsWith("/"))
+					reportIconAttr.append("/");
+				reportIconAttr.append(reportIco);
+			}
+		}
+		StringBuilder drillAssistantIconAttr = new StringBuilder();
+		if(ThemeManager.isUseFontIconForImage()) {
+			drillAssistantIconAttr.append("z-icon-Zoom");
+		}
+		else {
+			String drillAssistantIco = ThemeManager.getThemeResource("images/Zoom16.png");
+			if (drillAssistantIco.startsWith("~./")) {
+				if (Executions.getCurrent() != null) {
+					drillAssistantIconAttr.append(Executions.encodeURL(drillAssistantIco));
+				}
+			} else {
+				drillAssistantIconAttr.append(contextPath);
+				if (!drillAssistantIco.startsWith("/") && !contextPath.endsWith("/"))
+					drillAssistantIconAttr.append("/");
+				drillAssistantIconAttr.append(drillAssistantIco);
+			}
+		}
+		reportBody.addAttribute("windowIco",windowIconAttr.toString());
+		reportBody.addAttribute("reportIco", reportIconAttr.toString());
 		reportBody.addAttribute ("reportLabel", Msg.getMsg(AEnv.getLanguage(Env.getCtx()), "Report").replace("&", ""));
 		reportBody.addAttribute ("windowLabel", Msg.getMsg(AEnv.getLanguage(Env.getCtx()), "Window"));
 		
+		reportBody.addAttribute("drillAssistantIco", drillAssistantIconAttr.toString());
+		reportBody.addAttribute ("drillAssistantLabel", Msg.getMsg(AEnv.getLanguage(Env.getCtx()), "DrillAssistant").replace("&", ""));
+
 	}
-	
+
+	@Override
 	public String getFullPathStyle() {
 		String theme = MSysConfig.getValue(MSysConfig.HTML_REPORT_THEME, "/", Env.getAD_Client_ID(Env.getCtx()));
-		if (! theme.startsWith("/"))
+		if (!theme.startsWith("/") && !theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE))
 			theme = "/" + theme;
-		if (! theme.endsWith("/"))
+		if (!theme.endsWith("/"))
 			theme = theme + "/";
 		String resFile = theme + "css/report.css";
+		
+		// Support to Parse Context Variable
+		if (resFile.contains("@"))
+		{
+			resFile = Env.parseContext(Env.getCtx(), 0, resFile, false);
+			if (Util.isEmpty(resFile))
+			{
+				log.warning("Report theme URL '"+ theme +"' failed to parse, Defaulting to default report.css url");
+				resFile = "/css/report.css"; // default
+			}
+		}
+		
+		// translate ~./ url to classpath url
+		if (theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE))
+			resFile = ThemeManager.toClassPathResourcePath(resFile);
 		
 		URL urlFile = this.getClass().getResource(resFile);
 		if (urlFile == null) {
@@ -147,9 +231,10 @@ public class HTMLExtension implements IHTMLExtension {
 		if (urlFile != null) {
 			FileOutputStream cssStream = null;
 			File cssFile = null;
+			InputStream stream = null;
 			try {
 				// copy the resource to a temporary file to process it with 2pack
-				InputStream stream = urlFile.openStream();
+				stream = urlFile.openStream();
 				cssFile = File.createTempFile("report", ".css");
 				cssStream = new FileOutputStream(cssFile);
 			    byte[] buffer = new byte[1024];
@@ -164,6 +249,13 @@ public class HTMLExtension implements IHTMLExtension {
 					try {
 						cssStream.close();
 					} catch (Exception e2) {}
+				}
+				if (stream != null) {
+					try {
+						stream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			return cssFile.getAbsolutePath();

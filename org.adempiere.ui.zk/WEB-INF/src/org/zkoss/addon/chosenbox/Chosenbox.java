@@ -1,7 +1,4 @@
-/******************************************************************************
- * Project: Trek Global ERP                                                   *
- * 															
- * Chosenbox.java
+/* Chosenbox.java
 
 	Purpose:
 		
@@ -32,6 +29,7 @@ import java.util.logging.Logger;
 import org.apache.commons.text.StringEscapeUtils;
 import org.zkoss.lang.Objects;
 import org.zkoss.xel.VariableResolver;
+import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.au.out.AuSetAttribute;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -119,6 +117,9 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 		}
 	}
 	
+	/**
+	 * Post onOk event to first parent component that listen to it
+	 */
 	private void postOnOk() {
 		Component p = getParent();
 		while (p != null) {
@@ -158,6 +159,7 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 
 	/**
 	 * Sets the tab order of the input node of this component.
+	 * @param tabindex
 	 */
 	public void setTabindex(int tabindex) throws WrongValueException {
 		if (_tabindex != tabindex) {
@@ -686,8 +688,9 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 		if (_options != null) {
 			smartUpdate("items", _options);
 			_options = null; //purge the data
+		}else {
+			smartUpdate("chgSel", getChgSel());
 		}
-		smartUpdate("chgSel", getChgSel());
 	}
 
 	private void updateListContent(String prefix, ListModel<T> subModel) {		
@@ -811,8 +814,8 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 					objects, null, null, null, index, 0));
 			if (selItems.size() < (getSubListModel() != null ? getSubListModel().getSize() : getModel().getSize())) {
 				StringBuilder script = new StringBuilder();
-				script.append("var w=zk.Widget.$('#").append(getUuid()).append("');");
-				script.append("w.$n('inp').focus();");
+				script.append("(function(){let w=zk.Widget.$('#").append(getUuid()).append("');");
+				script.append("w.$n('inp').focus();})()");
 				Executions.schedule(getDesktop(), e -> {setOpen(true);Clients.evalJavaScript(script.toString());}, new Event("onPostSelect"));
 			}
 			_onSelectTimestamp = System.currentTimeMillis();
@@ -842,6 +845,11 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 		this._subListModel = _subListModel;
 	}
 	
+	@Override
+	public void focus() {
+		response(new AuScript("$('#"+getUuid()+"-inp').focus();"));
+	}
+
 	private final ItemRenderer<T> _defRend = new ItemRenderer<T>() {
 		public String render(final Component owner, final T data, final int index) {
 			final Chosenbox<?> self = (Chosenbox<?>) owner;
@@ -858,9 +866,6 @@ public class Chosenbox<T> extends HtmlBasedComponent {
 									return new ForEachStatus() {
 										public ForEachStatus getPrevious() {
 											return null;
-										}
-										public Object getEach() {
-											return data;
 										}
 										public int getIndex() {
 											return index;

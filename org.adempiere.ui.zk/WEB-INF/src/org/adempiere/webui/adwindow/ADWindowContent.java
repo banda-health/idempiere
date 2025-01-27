@@ -38,7 +38,6 @@ import org.compiere.util.CLogger;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.KeyEvent;
 import org.zkoss.zul.Div;
@@ -46,29 +45,37 @@ import org.zkoss.zul.Tab;
 import org.zkoss.zul.Vlayout;
 
 /**
- *
- * This class is based on org.compiere.apps.APanel written by Jorg Janke.
- * @author Jorg Janke
- *
+ * Controller for {@link ADWindow} content.
+ * 
  * @author <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @author <a href="mailto:hengsin@gmail.com">Low Heng Sin</a>
  * @date Feb 25, 2007
- * @version $Revision: 0.10 $
  */
 public class ADWindowContent extends AbstractADWindowContent
 {
     @SuppressWarnings("unused")
 	private static final CLogger logger = CLogger.getCLogger(ADWindowContent.class);
 
+    /** Main layout component **/
     private Vlayout layout;
-
+    /** Center Div of {@link #layout}, host {@link CompositeADTabbox} **/
     private Div contentArea;
 
+    /**
+     * @param ctx
+     * @param windowNo
+     * @param adWindowId
+     */
 	public ADWindowContent(Properties ctx, int windowNo, int adWindowId)
     {
         super(ctx, windowNo, adWindowId);
     }
 
+	/**
+	 * Layout UI.<br/>
+	 * Vertical layout of toolbar, breadCrumb, statusBar and {@link #contentArea}.
+	 */
+	@Override
    	protected Component doCreatePart(Component parent)
     {
    		layout = new ADWindowVlayout(this);
@@ -100,6 +107,7 @@ public class ADWindowContent extends AbstractADWindowContent
 
         LayoutUtils.addSclass("adwindow-status", statusBar);
 
+        //IADTabbox
         contentArea = new Div();
         contentArea.setParent(layout);
         ZKUpdateUtil.setVflex(contentArea, "1");
@@ -119,20 +127,26 @@ public class ADWindowContent extends AbstractADWindowContent
         return layout;
     }
 
+	/**
+	 * Create {@link CompositeADTabbox}
+	 */
+	@Override
     protected IADTabbox createADTab()
     {
     	CompositeADTabbox composite = new CompositeADTabbox();
     	return composite;
     }
 
+	/**
+	 * Get main layout component
+	 * @return {@link Vlayout}
+	 */
+	@Override
 	public Vlayout getComponent() {
 		return layout;
 	}
 
-	/**
-     * @param event
-     * @see EventListener#onEvent(Event)
-     */
+	@Override
     public void onEvent(Event event) {
     	if (Events.ON_CTRL_KEY.equals(event.getName())) {
     		KeyEvent keyEvent = (KeyEvent) event;
@@ -154,6 +168,9 @@ public class ADWindowContent extends AbstractADWindowContent
     	}
     }
 
+	/**
+	 * ITabOnCloseHandler to call {@link ADWindowContent#onExit(Callback)} when user wants to close an AD Window
+	 */
 	class TabOnCloseHanlder implements ITabOnCloseHandler, Callback<Boolean> {
 		private Tabpanel tabPanel;
 		public void onClose(Tabpanel tabPanel) {
@@ -170,8 +187,8 @@ public class ADWindowContent extends AbstractADWindowContent
 	}
 	
 	/**
-	 * close tab contain this window
-	 * @param tabPanel
+	 * Close tab related to tabPanel
+	 * @param tabPanel Tabpanel that represent AD_Window
 	 */
 	protected void closeTab (Tabpanel tabPanel) {
 		Tab tab = tabPanel.getLinkedTab();
@@ -180,24 +197,31 @@ public class ADWindowContent extends AbstractADWindowContent
 			SessionManager.getAppDesktop().unregisterWindow(getWindowNo());
 	}
 	
+	/**
+	 * Vlayout subclass to override onPageDetached. 
+	 */
 	public static class ADWindowVlayout extends Vlayout implements IHelpContext {
 		/**
 		 * generated serial id
 		 */
 		private static final long serialVersionUID = 6104341168705201721L;
-		private AbstractADWindowContent content;
+		private ADWindowContent content;
 
-		protected ADWindowVlayout(AbstractADWindowContent content) {
+		protected ADWindowVlayout(ADWindowContent content) {
 			super();
 			this.content = content;
 		}
 
+		/**
+		 * clean up listeners
+		 */
 		@Override
 		public void onPageDetached(Page page) {
 			super.onPageDetached(page);
 			try {
 				SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY, content);
 			} catch (Exception e){}
+			content.layout.removeEventListener(WindowContainer.ON_WINDOW_CONTAINER_SELECTION_CHANGED_EVENT, content);
 		}
 	}
 

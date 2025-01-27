@@ -22,16 +22,19 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
+import org.adempiere.base.upload.IUploadService;
 import org.adempiere.util.Callback;
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
+import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
 import org.adempiere.webui.component.Column;
 import org.adempiere.webui.component.Columns;
-import org.adempiere.webui.component.Datebox;
 import org.adempiere.webui.component.Grid;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.ListModelTable;
@@ -47,17 +50,22 @@ import org.adempiere.webui.component.Tabs;
 import org.adempiere.webui.component.VerticalBox;
 import org.adempiere.webui.component.WListItemRenderer;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.desktop.IDesktop;
+import org.adempiere.webui.editor.WDateEditor;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.DateRangeButton;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAcctSchemaElement;
+import org.compiere.model.MAuthorizationAccount;
 import org.compiere.model.MColumn;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.model.X_C_AcctSchema_Element;
 import org.compiere.report.core.RModel;
@@ -69,10 +77,15 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.idempiere.ui.zk.media.IMediaView;
+import org.idempiere.ui.zk.media.Medias;
+import org.idempiere.ui.zk.media.WMediaOptions;
+import org.zkoss.util.media.AMedia;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.KeyEvent;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Caption;
 import org.zkoss.zul.Center;
@@ -88,7 +101,7 @@ import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
 
 /**
- *  Account Viewer : Based on class AcctViewer
+ *  Account Viewer
  *
  *  @author Niraj Sohun
  *  		July 27, 2007
@@ -96,11 +109,10 @@ import org.zkoss.zul.Space;
  *  @author Elaine Tan
  *  @author Low Heng Sin
  */
-
 public class WAcctViewer extends Window implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 3440375640756094077L;
 
@@ -153,8 +165,8 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	private Label lSort = new Label();
 	private Label lGroup = new Label();
 
-	private Datebox selDateFrom = new Datebox();
-	private Datebox selDateTo = new Datebox();
+	private WDateEditor selDateFrom = new WDateEditor();
+	private WDateEditor selDateTo = new WDateEditor();
 
 	private Checkbox selDocument = new Checkbox();
 	private Checkbox displayQty = new Checkbox();
@@ -192,6 +204,10 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	private Borderlayout resultPanel;
 
 	private RModel m_rmodel;
+	/**
+	 * SysConfig USE_ESC_FOR_TAB_CLOSING
+	 */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
 	/**	Logger				*/
 	private static final CLogger log = CLogger.getCLogger(WAcctViewer.class);
@@ -199,7 +215,6 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	/**
 	 *  Default constructor
 	 */
-
 	public WAcctViewer()
 	{
 		this (0, 0, 0);
@@ -212,14 +227,13 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	 *  @param AD_Table_ID Table
 	 *  @param Record_ID Record
 	 */
-
 	public WAcctViewer(int AD_Client_ID, int AD_Table_ID, int Record_ID)
 	{
 		super ();
 
-		log.info("AD_Table_ID=" + AD_Table_ID + ", Record_ID=" + Record_ID);
+		if (log.isLoggable(Level.INFO))
+			log.info("AD_Table_ID=" + AD_Table_ID + ", Record_ID=" + Record_ID);
 
-		//setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		m_windowNo = SessionManager.getAppDesktop().registerWindow(this);
 		m_data = new WAcctViewerData (Env.getCtx(), m_windowNo, AD_Client_ID, AD_Table_ID);
 
@@ -229,17 +243,19 @@ public class WAcctViewer extends Window implements EventListener<Event>
 			dynInit (AD_Table_ID, Record_ID);
 			setAttribute(MODE_KEY, MODE_EMBEDDED);
 			setAttribute(Window.INSERT_POSITION_KEY, Window.INSERT_NEXT);
+			setAttribute(IDesktop.WINDOWNO_ATTRIBUTE, m_windowNo);	// for closing the window with shortcut
+	    	SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
+	    	addEventListener(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this);
 			AEnv.showWindow(this);
 		}
 		catch(Exception e)
 		{
 			log.log(Level.SEVERE, "", e);
-			//dispose();
 		}
-	} // AcctViewer
+	}
 
 	/**
-	 *  Static Init.
+	 *  Layout window
 	 *  <pre>
 	 *  - mainPanel
 	 *      - tabbedPane
@@ -249,7 +265,6 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	 *  </pre>
 	 *  @throws Exception
 	 */
-
 	private void init() throws Exception
 	{
 		// Selection Panel
@@ -313,9 +328,11 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		row = rows.newRow();
 		row.appendChild(lDate);
 		hlayout = new Hlayout();
-		hlayout.appendChild(selDateFrom);		
+		hlayout.appendChild(selDateFrom.getComponent());		
 		hlayout.appendChild(new Label(" - "));
-		hlayout.appendChild(selDateTo);
+		hlayout.appendChild(selDateTo.getComponent());
+		DateRangeButton drb = (new DateRangeButton(selDateFrom, selDateTo));
+		hlayout.appendChild(drb);
 		row.appendChild(hlayout);
 
 			// Organization
@@ -442,8 +459,6 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		ZKUpdateUtil.setHflex(sortBy4, "1");
 		row.appendChild(group4);
 
-		//"images/InfoAccount16.png"
-
 		Groupbox groupDisplay = new Groupbox();
 		Caption capDisplay = new Caption(Msg.getMsg(Env.getCtx(), "Display"));
 		groupDisplay.appendChild(capDisplay);
@@ -541,11 +556,8 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		resultPanel.appendChild(resultCenter);
 		ZKUpdateUtil.setHflex(table, "1");
 		ZKUpdateUtil.setVflex(table, true);
-		//ZKUpdateUtil.setHeight(table, "99%");
-		//table.setStyle("position: absolute;");
 		resultCenter.appendChild(table);
 		ZKUpdateUtil.setHflex(table, "1");
-		//ZKUpdateUtil.setVflex(table, "1");
 		table.addEventListener(Events.ON_DOUBLE_CLICK, this);
 		if (ClientInfo.isMobile())
 			table.setSizedByContent(true);
@@ -591,7 +603,7 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		layout.setParent(this);
 		ZKUpdateUtil.setHeight(layout, "100%");
 		ZKUpdateUtil.setWidth(layout, "100%");
-		layout.setStyle("background-color: transparent; margin: 0; position: absolute; padding: 0;");
+		layout.setStyle("background-color: transparent; margin: 0; position: relative; padding: 0;");
 
 		Center center = new Center();
 		center.setParent(layout);
@@ -610,7 +622,7 @@ public class WAcctViewer extends Window implements EventListener<Event>
 
 		this.setTitle(Msg.getMsg(Env.getCtx(), TITLE));
 		this.setClosable(true);
-		this.setStyle("position: absolute; width: 100%; height: 100%;");
+		this.setStyle("position: relative; width: 100%; height: 100%;");
 		this.setSizable(true);
 		this.setMaximizable(true);
 	}
@@ -621,7 +633,6 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	 *  @param AD_Table_ID table
 	 *  @param Record_ID record
 	 */
-
 	private void dynInit (int AD_Table_ID, int Record_ID)
 	{
 		m_data.validateAcctSchemas(Record_ID);
@@ -694,6 +705,12 @@ public class WAcctViewer extends Window implements EventListener<Event>
 			stateChanged();
 	} // dynInit
 
+	/**
+	 * set selected table and record id
+	 * @param AD_Table_ID
+	 * @param Record_ID
+	 * @return true if AD_Table_ID is found, false otherwise
+	 */
 	private boolean setSelectedTable(int AD_Table_ID, int Record_ID)
 	{
 		int cnt = selTable.getItemCount();
@@ -719,9 +736,8 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	}
 
 	/**
-	 *  Dispose
+	 *  Dispose window
 	 */
-
 	public void dispose()
 	{
 		m_data.dispose();
@@ -729,30 +745,27 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		this.detach();
 	} // dispose;
 
-	/**************************************************************************
-	 *  Tab Changed
+	/**
+	 *  After Tab Selection Changed
 	 */
 	public void stateChanged()
 	{
-	//	log.info( "AcctViewer.stateChanged");
 		boolean visible = m_data.documentQuery && tabResult.isSelected();
 
-		bRePost.setVisible(visible);
+		bRePost.setVisible(visible && !Env.isReadOnlySession());
 		bExport.setVisible(tabResult.isSelected());
 		bZoom.setVisible(tabResult.isSelected());
 
-		forcePost.setVisible(visible);
+		forcePost.setVisible(visible && !Env.isReadOnlySession());
 	}   //  stateChanged
 
 	/**
 	 *  Event Performed (Event Listener)
 	 *  @param e Event
 	 */
-
+	@Override
 	public void onEvent(Event e) throws Exception
 	{
-		// log.info(e.getActionCommand());
-
 		Object source = e.getTarget();
 
 		if (source == tabResult)
@@ -792,16 +805,49 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		else if (Events.ON_DOUBLE_CLICK.equals(e.getName()) && source instanceof Listbox && source == table) {
 			actionZoomFactAcct();
 		}
+		else if (e.getName().equals(Events.ON_CTRL_KEY)) {
+        	KeyEvent keyEvent = (KeyEvent) e;
+			if (LayoutUtils.isReallyVisible(this))
+				this.onCtrlKeyEvent(keyEvent);
+		}
+		else if(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT.equals(e.getName())) {
+        	IDesktop desktop = SessionManager.getAppDesktop();
+        	if (m_windowNo > 0 && desktop.isCloseTabWithShortcut())
+        		desktop.closeWindow(m_windowNo);
+        	else
+        		desktop.setCloseTabWithShortcut(true);
+        }
 	} // onEvent
 
+	/**
+	 * Export to excel.<br/>
+	 * Show excel viewer if available.
+	 */
 	private void actionExport() {
 		if (m_rmodel != null && m_rmodel.getRowCount() > 0) {
 			RModelExcelExporter exporter = new RModelExcelExporter(m_rmodel);
 			File file;
 			try {
-				file = new File(FileUtil.getTempMailName(Msg.getMsg(Env.getCtx(), TITLE), ".xls"));
+				file = new File(FileUtil.getTempMailName(Msg.getMsg(Env.getCtx(), TITLE), ".xlsx"));
 				exporter.export(file, Env.getLanguage(Env.getCtx()));
-				Filedownload.save(file, "application/vnd.ms-excel");
+				AMedia media = new AMedia(file.getName(), null, Medias.EXCEL_XML_MIME_TYPE, file, true);
+				IMediaView view = Extensions.getMediaView(Medias.EXCEL_XML_MIME_TYPE, Medias.EXCEL_XML_FILE_EXT, ClientInfo.isMobile());
+				Map<MAuthorizationAccount, IUploadService> uploadServicesMap = MAuthorizationAccount.getUserUploadServices();
+				if (view != null || uploadServicesMap.size() > 0) {
+					WMediaOptions options = new WMediaOptions(media, view != null ? () -> {
+						Window viewWindow = new Window();
+						viewWindow.setWidth("100%");
+						viewWindow.setHeight("100%");
+						viewWindow.setTitle(media.getName());
+						viewWindow.setAttribute(Window.MODE_KEY, Mode.EMBEDDED);
+						AEnv.showWindow(viewWindow);
+						view.renderMediaView(viewWindow, media, false);
+					} : null, uploadServicesMap);
+					options.setPage(getPage());
+					options.doHighlighted();
+				} else {
+					Filedownload.save(file, Medias.EXCEL_XML_MIME_TYPE);
+				}
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}			
@@ -810,9 +856,8 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	}
 
 	/**
-	 * 	New Acct Schema
+	 * 	Handle Acct Schema selection
 	 */
-
 	private void actionAcctSchema()
 	{
 		Listitem listitem = selAcctSchema.getSelectedItem();
@@ -828,7 +873,8 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		m_data.C_AcctSchema_ID = kp.getKey();
 		m_data.ASchema = MAcctSchema.get(Env.getCtx(), m_data.C_AcctSchema_ID);
 
-		log.info(m_data.ASchema.toString());
+		if (log.isLoggable(Level.INFO))
+			log.info(m_data.ASchema.toString());
 
 		//  Sort Options
 
@@ -891,7 +937,6 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	 * 	Add to Sort
 	 *	@param vn name pair
 	 */
-
 	private void sortAddItem(ValueNamePair vn)
 	{
 		sortBy1.appendItem(vn.getName(), vn);
@@ -901,9 +946,9 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	} // sortAddItem
 
 	/**
-	 *  Query
+	 *  Query.
+	 *  Delegate to {@link WAcctViewerData#query()}
 	 */
-
 	private void actionQuery()
 	{
 		//  Parameter Info
@@ -1104,7 +1149,6 @@ public class WAcctViewer extends Window implements EventListener<Event>
 
 			table.appendChild(listhead);
 		}
-		// Elaine 2008/07/28
 		else
 		{
 			Listhead listhead = table.getListhead();
@@ -1146,15 +1190,14 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	/**
 	 *  Document selection
 	 */
-
 	private void actionDocument()
 	{
 		boolean doc = selDocument.isChecked();
 		selTable.setEnabled(doc);
 		selRecord.setEnabled(doc);
 		//
-		selDateFrom.setEnabled(!doc);
-		selDateTo.setEnabled(!doc);
+		selDateFrom.setReadWrite(!doc);
+		selDateTo.setReadWrite(!doc);
 		selOrg.setEnabled(!doc);
 		selAcct.setEnabled(!doc);
 		sel1.setEnabled(!doc);
@@ -1168,9 +1211,8 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	} // actionDocument
 
 	/**
-	 *  Save Table selection (reset Record selection)
+	 *  Handle Table selection (reset Record selection)
 	 */
-
 	private void actionTable()
 	{
 		Listitem listitem = selTable.getSelectedItem();
@@ -1192,17 +1234,15 @@ public class WAcctViewer extends Window implements EventListener<Event>
 	} // actionTable
 
 	/**
-	 *  Action Button
+	 *  Handle Info Button action.<br/>
+	 *  Show info window.
 	 *
 	 *  @param button pressed button
-	 *  @return ID
-	 * @throws Exception
+	 *  @throws Exception
 	 */
-
 	private void actionButton(final Button button) throws Exception
 	{
 		final String keyColumn = button.getName();
-		log.info(keyColumn);
 		String whereClause = "(IsSummary='N' OR IsSummary IS NULL)";
 		String lookupColumn = keyColumn;
 
@@ -1258,6 +1298,7 @@ public class WAcctViewer extends Window implements EventListener<Event>
 
 		final String tableName = lookupColumn.substring(0, lookupColumn.length()-3);
 
+		// Show info window
 		final InfoPanel info = InfoPanel.create(m_data.WindowNo, tableName, lookupColumn, "", false, whereClause);
 
 		if (!info.loadedOK())
@@ -1296,26 +1337,24 @@ public class WAcctViewer extends Window implements EventListener<Event>
 				
 			}
 		});
-		AEnv.showWindow(info);
-		
+		AEnv.showWindow(info);		
 	} // actionButton
 
 	/**
 	 *  RePost Record
 	 */
-
 	private void actionRePost()
 	{
 		if (m_data.documentQuery
 			&& m_data.AD_Table_ID != 0 && m_data.Record_ID != 0)
 		{
 			// IDEMPIERE-2392
-			if (! MPeriod.isOpen(Env.getCtx(), m_data.AD_Table_ID, m_data.Record_ID, null)) {
-				FDialog.error(0, WAcctViewer.this, "Error", Msg.getMsg(Env.getCtx(), "PeriodClosed"));
+			if (! MPeriod.isOpen(Env.getCtx(), m_data.AD_Table_ID, m_data.Record_ID, null, true)) {
+				Dialog.error(0, "Error", Msg.getMsg(Env.getCtx(), "PeriodClosed"));
 				return;
 			}
 
-			FDialog.ask(m_data.WindowNo, this, "PostImmediate?", new Callback<Boolean>() {
+			Dialog.ask(m_data.WindowNo, "PostImmediate?", new Callback<Boolean>() {
 				
 				@Override
 				public void onCallback(Boolean result) 
@@ -1328,7 +1367,7 @@ public class WAcctViewer extends Window implements EventListener<Event>
 							m_data.AD_Table_ID, m_data.Record_ID, force);
 						//setCursor(Cursor.getDefaultCursor());
 						if (error != null)
-							FDialog.error(0, WAcctViewer.this, "PostingError-N", error);
+							Dialog.error(0, "PostingError-N", error);
 
 						actionQuery();
 					}
@@ -1337,7 +1376,9 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		}
 	} // actionRePost
 
-	// Elaine 2009/07/29
+	/**
+	 * Zoom to table id + record id
+	 */
 	private void actionZoom()
 	{
 		int selected = table.getSelectedIndex();
@@ -1355,8 +1396,10 @@ public class WAcctViewer extends Window implements EventListener<Event>
 			AEnv.zoom(AD_Table_ID, Record_ID);
 		}
 	}
-	//
-	
+
+	/**
+	 * Zoom to fact acct window (double click action)
+	 */
 	private void actionZoomFactAcct() {
 		int selected = table.getSelectedIndex();
 		if(selected == -1) return;
@@ -1376,5 +1419,17 @@ public class WAcctViewer extends Window implements EventListener<Event>
 		super.onPageAttached(newpage, oldpage);
 		if (newpage != null)
 			SessionManager.getAppDesktop().updateHelpContext(X_AD_CtxHelp.CTXTYPE_Home, 0);
+	}
+	
+	/**
+	 * Handle shortcut key event
+	 * @param keyEvent
+	 */
+	private void onCtrlKeyEvent(KeyEvent keyEvent) {
+		if ((keyEvent.isAltKey() && keyEvent.getKeyCode() == 0x58)	// Alt-X
+				|| (keyEvent.getKeyCode() == 0x1B && isUseEscForTabClosing)) { 	// ESC
+			keyEvent.stopPropagation();
+			Events.echoEvent(new Event(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this));
+		}
 	}
 }

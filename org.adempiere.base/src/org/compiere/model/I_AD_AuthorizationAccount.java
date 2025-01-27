@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_AuthorizationAccount
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_AuthorizationAccount 
 {
@@ -40,24 +40,6 @@ public interface I_AD_AuthorizationAccount
     BigDecimal accessLevel = BigDecimal.valueOf(6);
 
     /** Load Meta Data */
-
-    /** Column name AccessToken */
-    public static final String COLUMNNAME_AccessToken = "AccessToken";
-
-	/** Set Access Token	  */
-	public void setAccessToken (String AccessToken);
-
-	/** Get Access Token	  */
-	public String getAccessToken();
-
-    /** Column name AccessTokenTimestamp */
-    public static final String COLUMNNAME_AccessTokenTimestamp = "AccessTokenTimestamp";
-
-	/** Set Access Token Timestamp	  */
-	public void setAccessTokenTimestamp (Timestamp AccessTokenTimestamp);
-
-	/** Get Access Token Timestamp	  */
-	public Timestamp getAccessTokenTimestamp();
 
     /** Column name AD_AuthorizationAccount_ID */
     public static final String COLUMNNAME_AD_AuthorizationAccount_ID = "AD_AuthorizationAccount_ID";
@@ -100,8 +82,8 @@ public interface I_AD_AuthorizationAccount
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -109,12 +91,12 @@ public interface I_AD_AuthorizationAccount
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -132,6 +114,24 @@ public interface I_AD_AuthorizationAccount
 	public int getAD_User_ID();
 
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
+
+    /** Column name AccessToken */
+    public static final String COLUMNNAME_AccessToken = "AccessToken";
+
+	/** Set Access Token	  */
+	public void setAccessToken (String AccessToken);
+
+	/** Get Access Token	  */
+	public String getAccessToken();
+
+    /** Column name AccessTokenTimestamp */
+    public static final String COLUMNNAME_AccessTokenTimestamp = "AccessTokenTimestamp";
+
+	/** Set Access Token Timestamp	  */
+	public void setAccessTokenTimestamp (Timestamp AccessTokenTimestamp);
+
+	/** Get Access Token Timestamp	  */
+	public Timestamp getAccessTokenTimestamp();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -214,6 +214,15 @@ public interface I_AD_AuthorizationAccount
 
 	/** Get Authorized	  */
 	public boolean isAuthorized();
+
+    /** Column name Preferred_UserName */
+    public static final String COLUMNNAME_Preferred_UserName = "Preferred_UserName";
+
+	/** Set Preferred User Name	  */
+	public void setPreferred_UserName (String Preferred_UserName);
+
+	/** Get Preferred User Name	  */
+	public String getPreferred_UserName();
 
     /** Column name RefreshToken */
     public static final String COLUMNNAME_RefreshToken = "RefreshToken";

@@ -22,19 +22,19 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
+import org.compiere.util.ValueNamePair;
 
 /** Generated Model for AD_PInstance_Para
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_PInstance_Para")
-public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Persistent 
+public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_PInstance_Para (Properties ctx, int AD_PInstance_Para_ID, String trxName)
@@ -43,6 +43,8 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
       /** if (AD_PInstance_Para_ID == 0)
         {
 			setAD_PInstance_ID (0);
+			setIsNotClause (false);
+// N
 			setSeqNo (0);
         } */
     }
@@ -54,6 +56,34 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
       /** if (AD_PInstance_Para_ID == 0)
         {
 			setAD_PInstance_ID (0);
+			setIsNotClause (false);
+// N
+			setSeqNo (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_PInstance_Para (Properties ctx, String AD_PInstance_Para_UU, String trxName)
+    {
+      super (ctx, AD_PInstance_Para_UU, trxName);
+      /** if (AD_PInstance_Para_UU == null)
+        {
+			setAD_PInstance_ID (0);
+			setIsNotClause (false);
+// N
+			setSeqNo (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_PInstance_Para (Properties ctx, String AD_PInstance_Para_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_PInstance_Para_UU, trxName, virtualColumns);
+      /** if (AD_PInstance_Para_UU == null)
+        {
+			setAD_PInstance_ID (0);
+			setIsNotClause (false);
+// N
 			setSeqNo (0);
         } */
     }
@@ -65,7 +95,7 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -82,7 +112,7 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_AD_PInstance_Para[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -160,28 +190,28 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
 		return (String)get_Value(COLUMNNAME_Info_To);
 	}
 
-	/** Set Parameter Name.
-		@param ParameterName Parameter Name
+	/** Set Not Clause.
+		@param IsNotClause Indicates if a chosen multiple component value must be negate
 	*/
-	public void setParameterName (String ParameterName)
+	public void setIsNotClause (boolean IsNotClause)
 	{
-		set_Value (COLUMNNAME_ParameterName, ParameterName);
+		set_Value (COLUMNNAME_IsNotClause, Boolean.valueOf(IsNotClause));
 	}
 
-	/** Get Parameter Name.
-		@return Parameter Name	  */
-	public String getParameterName()
+	/** Get Not Clause.
+		@return Indicates if a chosen multiple component value must be negate
+	  */
+	public boolean isNotClause()
 	{
-		return (String)get_Value(COLUMNNAME_ParameterName);
+		Object oo = get_Value(COLUMNNAME_IsNotClause);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
 	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), getParameterName());
-    }
 
 	/** Set Process Date.
 		@param P_Date Process Parameter
@@ -284,6 +314,29 @@ public class X_AD_PInstance_Para extends PO implements I_AD_PInstance_Para, I_Pe
 	{
 		return (String)get_Value(COLUMNNAME_P_String_To);
 	}
+
+	/** Set Parameter Name.
+		@param ParameterName Parameter Name
+	*/
+	public void setParameterName (String ParameterName)
+	{
+		set_Value (COLUMNNAME_ParameterName, ParameterName);
+	}
+
+	/** Get Parameter Name.
+		@return Parameter Name	  */
+	public String getParameterName()
+	{
+		return (String)get_Value(COLUMNNAME_ParameterName);
+	}
+
+    /** Get Record UU/ColumnName
+        @return UU/ColumnName pair
+      */
+    public ValueNamePair getValueNamePair()
+    {
+        return new ValueNamePair(get_UUID(), getParameterName());
+    }
 
 	/** Set Sequence.
 		@param SeqNo Method of ordering records; lowest number comes first

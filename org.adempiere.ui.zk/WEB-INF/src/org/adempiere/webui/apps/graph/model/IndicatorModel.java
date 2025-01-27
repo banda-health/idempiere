@@ -18,14 +18,15 @@ import java.awt.Color;
 import org.compiere.model.MGoal;
 
 /**
- * 
+ * Model for performance indicator (meter/gauge)
  * @author hengsin
- *
  */
 public class IndicatorModel {
 	public MGoal goalModel;
+	/** not used in billboard implementation */
 	public Color chartBackground;
 	public Color dialBackground;
+	/** not used in billboard implementation */
 	public Color needleColor;
 	public Color tickColor;
 }

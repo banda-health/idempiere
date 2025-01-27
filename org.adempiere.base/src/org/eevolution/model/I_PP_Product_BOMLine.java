@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for PP_Product_BOMLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_PP_Product_BOMLine 
@@ -46,8 +46,8 @@ public interface I_PP_Product_BOMLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_PP_Product_BOMLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -89,6 +89,21 @@ public interface I_PP_Product_BOMLine
 	  * The Grouping Components to the Backflush
 	  */
 	public String getBackflushGroup();
+
+    /** Column name C_UOM_ID */
+    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
+
+	/** Set UOM.
+	  * Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID);
+
+	/** Get UOM.
+	  * Unit of Measure
+	  */
+	public int getC_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name ComponentType */
     public static final String COLUMNNAME_ComponentType = "ComponentType";
@@ -131,21 +146,6 @@ public interface I_PP_Product_BOMLine
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_UOM_ID */
-    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
-
-	/** Set UOM.
-	  * Unit of Measure
-	  */
-	public void setC_UOM_ID (int C_UOM_ID);
-
-	/** Get UOM.
-	  * Unit of Measure
-	  */
-	public int getC_UOM_ID();
-
-	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -322,25 +322,6 @@ public interface I_PP_Product_BOMLine
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException;
 
-    /** Column name PP_Product_BOM_ID */
-    public static final String COLUMNNAME_PP_Product_BOM_ID = "PP_Product_BOM_ID";
-
-	/** Set BOM &amp;
- Formula.
-	  * BOM &amp;
- Formula
-	  */
-	public void setPP_Product_BOM_ID (int PP_Product_BOM_ID);
-
-	/** Get BOM &amp;
- Formula.
-	  * BOM &amp;
- Formula
-	  */
-	public int getPP_Product_BOM_ID();
-
-	public org.eevolution.model.I_PP_Product_BOM getPP_Product_BOM() throws RuntimeException;
-
     /** Column name PP_Product_BOMLine_ID */
     public static final String COLUMNNAME_PP_Product_BOMLine_ID = "PP_Product_BOMLine_ID";
 
@@ -363,6 +344,38 @@ public interface I_PP_Product_BOMLine
 	/** Get PP_Product_BOMLine_UU	  */
 	public String getPP_Product_BOMLine_UU();
 
+    /** Column name PP_Product_BOM_ID */
+    public static final String COLUMNNAME_PP_Product_BOM_ID = "PP_Product_BOM_ID";
+
+	/** Set BOM &amp;
+ Formula.
+	  * BOM &amp;
+ Formula
+	  */
+	public void setPP_Product_BOM_ID (int PP_Product_BOM_ID);
+
+	/** Get BOM &amp;
+ Formula.
+	  * BOM &amp;
+ Formula
+	  */
+	public int getPP_Product_BOM_ID();
+
+	public org.eevolution.model.I_PP_Product_BOM getPP_Product_BOM() throws RuntimeException;
+
+    /** Column name QtyBOM */
+    public static final String COLUMNNAME_QtyBOM = "QtyBOM";
+
+	/** Set Quantity.
+	  * Indicate the Quantity use in this BOM
+	  */
+	public void setQtyBOM (BigDecimal QtyBOM);
+
+	/** Get Quantity.
+	  * Indicate the Quantity use in this BOM
+	  */
+	public BigDecimal getQtyBOM();
+
     /** Column name QtyBatch */
     public static final String COLUMNNAME_QtyBatch = "QtyBatch";
 
@@ -375,19 +388,6 @@ public interface I_PP_Product_BOMLine
 	  * Indicate the Quantity % use in this Formula
 	  */
 	public BigDecimal getQtyBatch();
-
-    /** Column name QtyBOM */
-    public static final String COLUMNNAME_QtyBOM = "QtyBOM";
-
-	/** Set Quantity.
-	  * Indicate the Quantity  use in this BOM
-	  */
-	public void setQtyBOM (BigDecimal QtyBOM);
-
-	/** Get Quantity.
-	  * Indicate the Quantity  use in this BOM
-	  */
-	public BigDecimal getQtyBOM();
 
     /** Column name Scrap */
     public static final String COLUMNNAME_Scrap = "Scrap";

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_ClientInfo
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_ClientInfo 
 {
@@ -41,14 +41,6 @@ public interface I_AD_ClientInfo
 
     /** Load Meta Data */
 
-    /** Column name AD_Client_ID */
-    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
-
-	/** Get Client.
-	  * Client/Tenant for this installation.
-	  */
-	public int getAD_Client_ID();
-
     /** Column name AD_ClientInfo_UU */
     public static final String COLUMNNAME_AD_ClientInfo_UU = "AD_ClientInfo_UU";
 
@@ -58,16 +50,24 @@ public interface I_AD_ClientInfo
 	/** Get AD_ClientInfo_UU	  */
 	public String getAD_ClientInfo_UU();
 
+    /** Column name AD_Client_ID */
+    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+
+	/** Get Tenant.
+	  * Tenant for this installation.
+	  */
+	public int getAD_Client_ID();
+
     /** Column name AD_Org_ID */
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -258,22 +258,6 @@ public interface I_AD_ClientInfo
 
 	public org.compiere.model.I_C_Charge getC_ChargeFreight() throws RuntimeException;
 
-    /** Column name Created */
-    public static final String COLUMNNAME_Created = "Created";
-
-	/** Get Created.
-	  * Date this record was created
-	  */
-	public Timestamp getCreated();
-
-    /** Column name CreatedBy */
-    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
-
-	/** Get Created By.
-	  * User who created this records
-	  */
-	public int getCreatedBy();
-
     /** Column name C_UOM_Length_ID */
     public static final String COLUMNNAME_C_UOM_Length_ID = "C_UOM_Length_ID";
 
@@ -333,6 +317,22 @@ public interface I_AD_ClientInfo
 	public int getC_UOM_Weight_ID();
 
 	public org.compiere.model.I_C_UOM getC_UOM_Weight() throws RuntimeException;
+
+    /** Column name Created */
+    public static final String COLUMNNAME_Created = "Created";
+
+	/** Get Created.
+	  * Date this record was created
+	  */
+	public Timestamp getCreated();
+
+    /** Column name CreatedBy */
+    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
+
+	/** Get Created By.
+	  * User who created this records
+	  */
+	public int getCreatedBy();
 
     /** Column name FY_StartDate */
     public static final String COLUMNNAME_FY_StartDate = "FY_StartDate";
@@ -400,15 +400,6 @@ public interface I_AD_ClientInfo
 	  */
 	public int getKeepLogDays();
 
-    /** Column name Logo_ID */
-    public static final String COLUMNNAME_Logo_ID = "Logo_ID";
-
-	/** Set Logo	  */
-	public void setLogo_ID (int Logo_ID);
-
-	/** Get Logo	  */
-	public int getLogo_ID();
-
     /** Column name LogoReport_ID */
     public static final String COLUMNNAME_LogoReport_ID = "LogoReport_ID";
 
@@ -426,6 +417,15 @@ public interface I_AD_ClientInfo
 
 	/** Get Logo Web	  */
 	public int getLogoWeb_ID();
+
+    /** Column name Logo_ID */
+    public static final String COLUMNNAME_Logo_ID = "Logo_ID";
+
+	/** Set Logo	  */
+	public void setLogo_ID (int Logo_ID);
+
+	/** Get Logo	  */
+	public int getLogo_ID();
 
     /** Column name M_ProductFreight_ID */
     public static final String COLUMNNAME_M_ProductFreight_ID = "M_ProductFreight_ID";
@@ -463,6 +463,19 @@ public interface I_AD_ClientInfo
 	public int getStorageImage_ID();
 
 	public org.compiere.model.I_AD_StorageProvider getStorageImage() throws RuntimeException;
+
+    /** Column name TimeZone */
+    public static final String COLUMNNAME_TimeZone = "TimeZone";
+
+	/** Set Time Zone.
+	  * Time zone name
+	  */
+	public void setTimeZone (String TimeZone);
+
+	/** Get Time Zone.
+	  * Time zone name
+	  */
+	public String getTimeZone();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

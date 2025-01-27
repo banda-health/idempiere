@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for CM_ChatTypeUpdate
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_CM_ChatTypeUpdate 
 {
@@ -44,8 +44,8 @@ public interface I_CM_ChatTypeUpdate
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_CM_ChatTypeUpdate
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -77,6 +77,15 @@ public interface I_CM_ChatTypeUpdate
 
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
 
+    /** Column name CM_ChatTypeUpdate_UU */
+    public static final String COLUMNNAME_CM_ChatTypeUpdate_UU = "CM_ChatTypeUpdate_UU";
+
+	/** Set CM_ChatTypeUpdate_UU	  */
+	public void setCM_ChatTypeUpdate_UU (String CM_ChatTypeUpdate_UU);
+
+	/** Get CM_ChatTypeUpdate_UU	  */
+	public String getCM_ChatTypeUpdate_UU();
+
     /** Column name CM_ChatType_ID */
     public static final String COLUMNNAME_CM_ChatType_ID = "CM_ChatType_ID";
 
@@ -91,15 +100,6 @@ public interface I_CM_ChatTypeUpdate
 	public int getCM_ChatType_ID();
 
 	public org.compiere.model.I_CM_ChatType getCM_ChatType() throws RuntimeException;
-
-    /** Column name CM_ChatTypeUpdate_UU */
-    public static final String COLUMNNAME_CM_ChatTypeUpdate_UU = "CM_ChatTypeUpdate_UU";
-
-	/** Set CM_ChatTypeUpdate_UU	  */
-	public void setCM_ChatTypeUpdate_UU (String CM_ChatTypeUpdate_UU);
-
-	/** Get CM_ChatTypeUpdate_UU	  */
-	public String getCM_ChatTypeUpdate_UU();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

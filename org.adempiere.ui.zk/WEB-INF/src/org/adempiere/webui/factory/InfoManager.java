@@ -27,7 +27,7 @@ import org.compiere.util.CCache;
 import org.osgi.framework.Constants;
 
 /**
- *
+ * Static methods for instantiation of {@link InfoPanel}/{@link InfoWindow}
  * @author hengsin
  *
  */
@@ -36,7 +36,7 @@ public class InfoManager
 	private final static CCache<Long, IServiceReferenceHolder<IInfoFactory>> s_infoFactoryCache = new CCache<Long, IServiceReferenceHolder<IInfoFactory>>(null, "IInfoFactory", 10, false);
 	
 	/**
-	 * 
+	 * Create info panel or info window
 	 * @param WindowNo
 	 * @param tableName
 	 * @param keyColumn
@@ -91,7 +91,7 @@ public class InfoManager
     }
 
 	/**
-	 * 
+	 * Create info panel or info window
 	 * @param lookup
 	 * @param field
 	 * @param tableName
@@ -121,7 +121,7 @@ public class InfoManager
 					IInfoFactory service = serviceReference.getService();
 					if (service != null) {
 						visitedIds.add(key);
-						ip = service.create(lookup, field, tableName, keyColumn, queryValue, false, whereClause, AD_InfoWindow_ID);
+						ip = service.create(lookup, field, tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID);
 						if (ip != null)
 							return ip;
 					} else {
@@ -141,7 +141,7 @@ public class InfoManager
 			if (service != null)
 			{
 				s_infoFactoryCache.put(serviceId, serviceReference);
-				ip = service.create(lookup, field, tableName, keyColumn, queryValue, false, whereClause, AD_InfoWindow_ID);
+				ip = service.create(lookup, field, tableName, keyColumn, queryValue, multiSelection, whereClause, AD_InfoWindow_ID);
 				if (ip != null)
 					break;
 			}
@@ -150,7 +150,7 @@ public class InfoManager
 	}
 	
 	/**
-	 * 
+	 * Create info window
 	 * @param AD_InfoWindow_ID
 	 * @return {@link InfoWindow}
 	 */
@@ -159,14 +159,25 @@ public class InfoManager
 		return create (AD_InfoWindow_ID, null);
 	}
 
-
 	/**
-	 * 
+	 * Create info window
 	 * @param AD_InfoWindow_ID
 	 * @param predefinedContextVariables
 	 * @return {@link InfoWindow}
 	 */
 	public static InfoWindow create (int AD_InfoWindow_ID, String predefinedContextVariables)
+	{
+		return create(-1, AD_InfoWindow_ID, predefinedContextVariables);
+	}
+
+	/**
+	 * Create info window
+	 * @param windowNo
+	 * @param AD_InfoWindow_ID
+	 * @param predefinedContextVariables
+	 * @return {@link InfoWindow}
+	 */
+	public static InfoWindow create (int windowNo, int AD_InfoWindow_ID, String predefinedContextVariables)
     {
         InfoWindow info = null;
 
@@ -179,7 +190,7 @@ public class InfoManager
 					IInfoFactory service = serviceReference.getService();
 					if (service != null) {
 						visitedIds.add(key);
-						info = service.create(AD_InfoWindow_ID ,predefinedContextVariables);
+						info = service.create(windowNo, AD_InfoWindow_ID ,predefinedContextVariables);
 						if (info != null)
 							return info;
 					} else {
@@ -199,7 +210,7 @@ public class InfoManager
 			if (service != null)
 			{
 				s_infoFactoryCache.put(serviceId, serviceReference);
-				info = service.create(AD_InfoWindow_ID, predefinedContextVariables);
+				info = service.create(windowNo, AD_InfoWindow_ID, predefinedContextVariables);
 				if (info != null)
 					break;
 			}

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for PA_GoalRestriction
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_PA_GoalRestriction 
 {
@@ -44,8 +44,8 @@ public interface I_PA_GoalRestriction
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,29 +53,14 @@ public interface I_PA_GoalRestriction
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name C_BPartner_ID */
-    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
-
-	/** Set Business Partner.
-	  * Identifies a Business Partner
-	  */
-	public void setC_BPartner_ID (int C_BPartner_ID);
-
-	/** Get Business Partner.
-	  * Identifies a Business Partner
-	  */
-	public int getC_BPartner_ID();
-
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
     /** Column name C_BP_Group_ID */
     public static final String COLUMNNAME_C_BP_Group_ID = "C_BP_Group_ID";
@@ -91,6 +76,21 @@ public interface I_PA_GoalRestriction
 	public int getC_BP_Group_ID();
 
 	public org.compiere.model.I_C_BP_Group getC_BP_Group() throws RuntimeException;
+
+    /** Column name C_BPartner_ID */
+    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
+
+	/** Set Business Partner.
+	  * Identifies a Business Partner
+	  */
+	public void setC_BPartner_ID (int C_BPartner_ID);
+
+	/** Get Business Partner.
+	  * Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -181,29 +181,14 @@ public interface I_PA_GoalRestriction
     public static final String COLUMNNAME_Org_ID = "Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setOrg_ID (int Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getOrg_ID();
-
-    /** Column name PA_Goal_ID */
-    public static final String COLUMNNAME_PA_Goal_ID = "PA_Goal_ID";
-
-	/** Set Goal.
-	  * Performance Goal
-	  */
-	public void setPA_Goal_ID (int PA_Goal_ID);
-
-	/** Get Goal.
-	  * Performance Goal
-	  */
-	public int getPA_Goal_ID();
-
-	public org.compiere.model.I_PA_Goal getPA_Goal() throws RuntimeException;
 
     /** Column name PA_GoalRestriction_ID */
     public static final String COLUMNNAME_PA_GoalRestriction_ID = "PA_GoalRestriction_ID";
@@ -226,6 +211,21 @@ public interface I_PA_GoalRestriction
 
 	/** Get PA_GoalRestriction_UU	  */
 	public String getPA_GoalRestriction_UU();
+
+    /** Column name PA_Goal_ID */
+    public static final String COLUMNNAME_PA_Goal_ID = "PA_Goal_ID";
+
+	/** Set Goal.
+	  * Performance Goal
+	  */
+	public void setPA_Goal_ID (int PA_Goal_ID);
+
+	/** Get Goal.
+	  * Performance Goal
+	  */
+	public int getPA_Goal_ID();
+
+	public org.compiere.model.I_PA_Goal getPA_Goal() throws RuntimeException;
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

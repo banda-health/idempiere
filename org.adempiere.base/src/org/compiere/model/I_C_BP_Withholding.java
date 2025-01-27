@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BP_Withholding
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_BP_Withholding 
 {
@@ -44,8 +44,8 @@ public interface I_C_BP_Withholding
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,14 +53,23 @@ public interface I_C_BP_Withholding
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
+
+    /** Column name C_BP_Withholding_UU */
+    public static final String COLUMNNAME_C_BP_Withholding_UU = "C_BP_Withholding_UU";
+
+	/** Set C_BP_Withholding_UU	  */
+	public void setC_BP_Withholding_UU (String C_BP_Withholding_UU);
+
+	/** Get C_BP_Withholding_UU	  */
+	public String getC_BP_Withholding_UU();
 
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
@@ -77,14 +86,20 @@ public interface I_C_BP_Withholding
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
-    /** Column name C_BP_Withholding_UU */
-    public static final String COLUMNNAME_C_BP_Withholding_UU = "C_BP_Withholding_UU";
+    /** Column name C_Withholding_ID */
+    public static final String COLUMNNAME_C_Withholding_ID = "C_Withholding_ID";
 
-	/** Set C_BP_Withholding_UU	  */
-	public void setC_BP_Withholding_UU (String C_BP_Withholding_UU);
+	/** Set Withholding.
+	  * Withholding type defined
+	  */
+	public void setC_Withholding_ID (int C_Withholding_ID);
 
-	/** Get C_BP_Withholding_UU	  */
-	public String getC_BP_Withholding_UU();
+	/** Get Withholding.
+	  * Withholding type defined
+	  */
+	public int getC_Withholding_ID();
+
+	public org.compiere.model.I_C_Withholding getC_Withholding() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -101,21 +116,6 @@ public interface I_C_BP_Withholding
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_Withholding_ID */
-    public static final String COLUMNNAME_C_Withholding_ID = "C_Withholding_ID";
-
-	/** Set Withholding.
-	  * Withholding type defined
-	  */
-	public void setC_Withholding_ID (int C_Withholding_ID);
-
-	/** Get Withholding.
-	  * Withholding type defined
-	  */
-	public int getC_Withholding_ID();
-
-	public org.compiere.model.I_C_Withholding getC_Withholding() throws RuntimeException;
 
     /** Column name ExemptReason */
     public static final String COLUMNNAME_ExemptReason = "ExemptReason";

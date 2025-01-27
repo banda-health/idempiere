@@ -25,6 +25,7 @@ import org.compiere.model.MCommissionRun;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -45,11 +46,10 @@ public class CommissionAPInvoice extends SvrProcess
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++)
 		{
-			String name = para[i].getParameterName();
 			if (para[i].getParameter() == null)
 				;
 			else
-				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 	}	//	prepare
 
@@ -100,10 +100,15 @@ public class CommissionAPInvoice extends SvrProcess
 		iLine.setTax();
 		if (!iLine.save())
 			throw new IllegalStateException("CommissionAPInvoice - cannot save Invoice Line");
+
+		comRun.setC_Invoice_ID(invoice.getC_Invoice_ID());
+		comRun.setProcessed(true);
+		comRun.saveEx();
+
 		//
 		addBufferLog(invoice.get_ID(), null, null, Msg.getElement(getCtx(), MInvoice.COLUMNNAME_C_Invoice_ID) + " #" + invoice.getDocumentNo(), MInvoice.Table_ID, invoice.get_ID());
 		//
-		return "@Success@";
+		return "@Created@";
 	}	//	doIt
 
 }	//	CommissionAPInvoice

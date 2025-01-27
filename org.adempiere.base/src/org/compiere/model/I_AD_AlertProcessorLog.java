@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_AlertProcessorLog
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_AlertProcessorLog 
 {
@@ -40,21 +40,6 @@ public interface I_AD_AlertProcessorLog
     BigDecimal accessLevel = BigDecimal.valueOf(6);
 
     /** Load Meta Data */
-
-    /** Column name AD_AlertProcessor_ID */
-    public static final String COLUMNNAME_AD_AlertProcessor_ID = "AD_AlertProcessor_ID";
-
-	/** Set Alert Processor.
-	  * Alert Processor/Server Parameter
-	  */
-	public void setAD_AlertProcessor_ID (int AD_AlertProcessor_ID);
-
-	/** Get Alert Processor.
-	  * Alert Processor/Server Parameter
-	  */
-	public int getAD_AlertProcessor_ID();
-
-	public org.compiere.model.I_AD_AlertProcessor getAD_AlertProcessor() throws RuntimeException;
 
     /** Column name AD_AlertProcessorLog_ID */
     public static final String COLUMNNAME_AD_AlertProcessorLog_ID = "AD_AlertProcessorLog_ID";
@@ -78,11 +63,26 @@ public interface I_AD_AlertProcessorLog
 	/** Get AD_AlertProcessorLog_UU	  */
 	public String getAD_AlertProcessorLog_UU();
 
+    /** Column name AD_AlertProcessor_ID */
+    public static final String COLUMNNAME_AD_AlertProcessor_ID = "AD_AlertProcessor_ID";
+
+	/** Set Alert Processor.
+	  * Alert Processor/Server Parameter
+	  */
+	public void setAD_AlertProcessor_ID (int AD_AlertProcessor_ID);
+
+	/** Get Alert Processor.
+	  * Alert Processor/Server Parameter
+	  */
+	public int getAD_AlertProcessor_ID();
+
+	public org.compiere.model.I_AD_AlertProcessor getAD_AlertProcessor() throws RuntimeException;
+
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -90,12 +90,12 @@ public interface I_AD_AlertProcessorLog
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 

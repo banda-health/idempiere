@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_UOM
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_UOM 
 {
@@ -44,8 +44,8 @@ public interface I_C_UOM
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,14 +53,36 @@ public interface I_C_UOM
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
+
+    /** Column name C_UOM_ID */
+    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
+
+	/** Set UOM.
+	  * Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID);
+
+	/** Get UOM.
+	  * Unit of Measure
+	  */
+	public int getC_UOM_ID();
+
+    /** Column name C_UOM_UU */
+    public static final String COLUMNNAME_C_UOM_UU = "C_UOM_UU";
+
+	/** Set C_UOM_UU	  */
+	public void setC_UOM_UU (String C_UOM_UU);
+
+	/** Get C_UOM_UU	  */
+	public String getC_UOM_UU();
 
     /** Column name CostingPrecision */
     public static final String COLUMNNAME_CostingPrecision = "CostingPrecision";
@@ -90,28 +112,6 @@ public interface I_C_UOM
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_UOM_ID */
-    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
-
-	/** Set UOM.
-	  * Unit of Measure
-	  */
-	public void setC_UOM_ID (int C_UOM_ID);
-
-	/** Get UOM.
-	  * Unit of Measure
-	  */
-	public int getC_UOM_ID();
-
-    /** Column name C_UOM_UU */
-    public static final String COLUMNNAME_C_UOM_UU = "C_UOM_UU";
-
-	/** Set C_UOM_UU	  */
-	public void setC_UOM_UU (String C_UOM_UU);
-
-	/** Get C_UOM_UU	  */
-	public String getC_UOM_UU();
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -177,6 +177,19 @@ public interface I_C_UOM
 	  * Rule for rounding  calculated amounts
 	  */
 	public int getStdPrecision();
+
+    /** Column name UNCEFACT */
+    public static final String COLUMNNAME_UNCEFACT = "UNCEFACT";
+
+	/** Set UN/CEFACT Code.
+	  * Code for Units of Measure used in International Trade
+	  */
+	public void setUNCEFACT (String UNCEFACT);
+
+	/** Get UN/CEFACT Code.
+	  * Code for Units of Measure used in International Trade
+	  */
+	public String getUNCEFACT();
 
     /** Column name UOMSymbol */
     public static final String COLUMNNAME_UOMSymbol = "UOMSymbol";

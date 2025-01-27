@@ -15,20 +15,18 @@
  *****************************************************************************/
 package org.eevolution.process;
 
-
-
 import org.adempiere.exceptions.FillMandatoryException;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MProcessPara;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 
-
 /**
  * Re-calculate Invoice Tax (and unpost the document)
- *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
+ * @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  * 				<li>FR [ 2520591 ] Support multiples calendar for Org 
  * 				@see https://sourceforge.net/p/adempiere/feature-requests/631/
  * @author Teo Sarca, www.arhipac.ro
@@ -54,6 +52,8 @@ public class InvoiceCalculateTax extends SvrProcess
 			{
 				p_C_Invoice_ID = para.getParameterAsInt();
 			}
+			else
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para);
 		}
 		
 		if (p_C_Invoice_ID <= 0)
@@ -71,6 +71,10 @@ public class InvoiceCalculateTax extends SvrProcess
 		return "@ProcessOK@";
 	}
 	
+	/**
+	 * Recalculate invoice tax
+	 * @param invoice
+	 */
 	public static void recalculateTax(MInvoice invoice)
 	{
 		//

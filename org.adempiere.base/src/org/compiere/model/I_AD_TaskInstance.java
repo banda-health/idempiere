@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_TaskInstance
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_TaskInstance 
 {
@@ -44,8 +44,8 @@ public interface I_AD_TaskInstance
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,27 +53,14 @@ public interface I_AD_TaskInstance
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name AD_Task_ID */
-    public static final String COLUMNNAME_AD_Task_ID = "AD_Task_ID";
-
-	/** Set OS Task.
-	  * Operation System Task
-	  */
-	public void setAD_Task_ID (int AD_Task_ID);
-
-	/** Get OS Task.
-	  * Operation System Task
-	  */
-	public int getAD_Task_ID();
 
     /** Column name AD_TaskInstance_ID */
     public static final String COLUMNNAME_AD_TaskInstance_ID = "AD_TaskInstance_ID";
@@ -92,6 +79,19 @@ public interface I_AD_TaskInstance
 
 	/** Get AD_TaskInstance_UU	  */
 	public String getAD_TaskInstance_UU();
+
+    /** Column name AD_Task_ID */
+    public static final String COLUMNNAME_AD_Task_ID = "AD_Task_ID";
+
+	/** Set OS Task.
+	  * Operation System Task
+	  */
+	public void setAD_Task_ID (int AD_Task_ID);
+
+	/** Get OS Task.
+	  * Operation System Task
+	  */
+	public int getAD_Task_ID();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

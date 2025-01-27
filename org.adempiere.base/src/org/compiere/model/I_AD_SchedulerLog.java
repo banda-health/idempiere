@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_SchedulerLog
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_SchedulerLog 
 {
@@ -44,8 +44,8 @@ public interface I_AD_SchedulerLog
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,29 +53,14 @@ public interface I_AD_SchedulerLog
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name AD_Scheduler_ID */
-    public static final String COLUMNNAME_AD_Scheduler_ID = "AD_Scheduler_ID";
-
-	/** Set Scheduler.
-	  * Schedule Processes
-	  */
-	public void setAD_Scheduler_ID (int AD_Scheduler_ID);
-
-	/** Get Scheduler.
-	  * Schedule Processes
-	  */
-	public int getAD_Scheduler_ID();
-
-	public org.compiere.model.I_AD_Scheduler getAD_Scheduler() throws RuntimeException;
 
     /** Column name AD_SchedulerLog_ID */
     public static final String COLUMNNAME_AD_SchedulerLog_ID = "AD_SchedulerLog_ID";
@@ -98,6 +83,21 @@ public interface I_AD_SchedulerLog
 
 	/** Get AD_SchedulerLog_UU	  */
 	public String getAD_SchedulerLog_UU();
+
+    /** Column name AD_Scheduler_ID */
+    public static final String COLUMNNAME_AD_Scheduler_ID = "AD_Scheduler_ID";
+
+	/** Set Scheduler.
+	  * Schedule Processes
+	  */
+	public void setAD_Scheduler_ID (int AD_Scheduler_ID);
+
+	/** Get Scheduler.
+	  * Schedule Processes
+	  */
+	public int getAD_Scheduler_ID();
+
+	public org.compiere.model.I_AD_Scheduler getAD_Scheduler() throws RuntimeException;
 
     /** Column name BinaryData */
     public static final String COLUMNNAME_BinaryData = "BinaryData";

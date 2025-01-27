@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for U_RoleMenu
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_U_RoleMenu 
 {
@@ -44,8 +44,8 @@ public interface I_U_RoleMenu
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_U_RoleMenu
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -106,22 +106,6 @@ public interface I_U_RoleMenu
 	  */
 	public boolean isActive();
 
-    /** Column name Updated */
-    public static final String COLUMNNAME_Updated = "Updated";
-
-	/** Get Updated.
-	  * Date this record was updated
-	  */
-	public Timestamp getUpdated();
-
-    /** Column name UpdatedBy */
-    public static final String COLUMNNAME_UpdatedBy = "UpdatedBy";
-
-	/** Get Updated By.
-	  * User who updated this records
-	  */
-	public int getUpdatedBy();
-
     /** Column name U_RoleMenu_ID */
     public static final String COLUMNNAME_U_RoleMenu_ID = "U_RoleMenu_ID";
 
@@ -150,4 +134,20 @@ public interface I_U_RoleMenu
 	public int getU_WebMenu_ID();
 
 	public org.compiere.model.I_U_WebMenu getU_WebMenu() throws RuntimeException;
+
+    /** Column name Updated */
+    public static final String COLUMNNAME_Updated = "Updated";
+
+	/** Get Updated.
+	  * Date this record was updated
+	  */
+	public Timestamp getUpdated();
+
+    /** Column name UpdatedBy */
+    public static final String COLUMNNAME_UpdatedBy = "UpdatedBy";
+
+	/** Get Updated By.
+	  * User who updated this records
+	  */
+	public int getUpdatedBy();
 }

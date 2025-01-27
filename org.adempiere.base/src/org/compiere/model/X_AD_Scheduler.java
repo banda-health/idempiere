@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Scheduler
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Scheduler")
-public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent 
+public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Scheduler (Properties ctx, int AD_Scheduler_ID, String trxName)
@@ -66,6 +66,38 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Scheduler (Properties ctx, String AD_Scheduler_UU, String trxName)
+    {
+      super (ctx, AD_Scheduler_UU, trxName);
+      /** if (AD_Scheduler_UU == null)
+        {
+			setAD_Process_ID (0);
+			setAD_Schedule_ID (0);
+			setAD_Scheduler_ID (0);
+			setKeepLogDays (0);
+// 7
+			setName (null);
+			setSupervisor_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Scheduler (Properties ctx, String AD_Scheduler_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Scheduler_UU, trxName, virtualColumns);
+      /** if (AD_Scheduler_UU == null)
+        {
+			setAD_Process_ID (0);
+			setAD_Schedule_ID (0);
+			setAD_Scheduler_ID (0);
+			setKeepLogDays (0);
+// 7
+			setName (null);
+			setSupervisor_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Scheduler (Properties ctx, ResultSet rs, String trxName)
     {
@@ -73,7 +105,7 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -242,7 +274,7 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Date last run.
+	/** Set Date Last Run.
 		@param DateLastRun Date the process was last run.
 	*/
 	public void setDateLastRun (Timestamp DateLastRun)
@@ -250,7 +282,7 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 		set_Value (COLUMNNAME_DateLastRun, DateLastRun);
 	}
 
-	/** Get Date last run.
+	/** Get Date Last Run.
 		@return Date the process was last run.
 	  */
 	public Timestamp getDateLastRun()
@@ -258,7 +290,7 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_DateLastRun);
 	}
 
-	/** Set Date next run.
+	/** Set Date Next Run.
 		@param DateNextRun Date the process will run next
 	*/
 	public void setDateNextRun (Timestamp DateNextRun)
@@ -266,7 +298,7 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 		set_Value (COLUMNNAME_DateNextRun, DateNextRun);
 	}
 
-	/** Get Date next run.
+	/** Get Date Next Run.
 		@return Date the process will run next
 	  */
 	public Timestamp getDateNextRun()
@@ -328,7 +360,7 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -346,13 +378,41 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	public org.compiere.model.I_R_MailText getR_MailText() throws RuntimeException
+	{
+		return (org.compiere.model.I_R_MailText)MTable.get(getCtx(), org.compiere.model.I_R_MailText.Table_ID)
+			.getPO(getR_MailText_ID(), get_TrxName());
+	}
+
+	/** Set Mail Template.
+		@param R_MailText_ID Text templates for mailings
+	*/
+	public void setR_MailText_ID (int R_MailText_ID)
+	{
+		if (R_MailText_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_R_MailText_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_R_MailText_ID, Integer.valueOf(R_MailText_ID));
+	}
+
+	/** Get Mail Template.
+		@return Text templates for mailings
+	  */
+	public int getR_MailText_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_R_MailText_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Record ID.
@@ -403,34 +463,6 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 	public String getReportOutputType()
 	{
 		return (String)get_Value(COLUMNNAME_ReportOutputType);
-	}
-
-	public org.compiere.model.I_R_MailText getR_MailText() throws RuntimeException
-	{
-		return (org.compiere.model.I_R_MailText)MTable.get(getCtx(), org.compiere.model.I_R_MailText.Table_ID)
-			.getPO(getR_MailText_ID(), get_TrxName());
-	}
-
-	/** Set Mail Template.
-		@param R_MailText_ID Text templates for mailings
-	*/
-	public void setR_MailText_ID (int R_MailText_ID)
-	{
-		if (R_MailText_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_R_MailText_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_R_MailText_ID, Integer.valueOf(R_MailText_ID));
-	}
-
-	/** Get Mail Template.
-		@return Text templates for mailings
-	  */
-	public int getR_MailText_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_R_MailText_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Scheduler State.

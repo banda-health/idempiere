@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BankAccount_Acct
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_BankAccount_Acct 
 {
@@ -44,8 +44,8 @@ public interface I_C_BankAccount_Acct
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_C_BankAccount_Acct
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -76,6 +76,21 @@ public interface I_C_BankAccount_Acct
 	public int getB_Asset_Acct();
 
 	public I_C_ValidCombination getB_Asset_A() throws RuntimeException;
+
+    /** Column name B_InTransit_Acct */
+    public static final String COLUMNNAME_B_InTransit_Acct = "B_InTransit_Acct";
+
+	/** Set Bank In Transit.
+	  * Bank In Transit Account
+	  */
+	public void setB_InTransit_Acct (int B_InTransit_Acct);
+
+	/** Get Bank In Transit.
+	  * Bank In Transit Account
+	  */
+	public int getB_InTransit_Acct();
+
+	public I_C_ValidCombination getB_InTransit_A() throws RuntimeException;
 
     /** Column name B_InterestExp_Acct */
     public static final String COLUMNNAME_B_InterestExp_Acct = "B_InterestExp_Acct";
@@ -106,21 +121,6 @@ public interface I_C_BankAccount_Acct
 	public int getB_InterestRev_Acct();
 
 	public I_C_ValidCombination getB_InterestRev_A() throws RuntimeException;
-
-    /** Column name B_InTransit_Acct */
-    public static final String COLUMNNAME_B_InTransit_Acct = "B_InTransit_Acct";
-
-	/** Set Bank In Transit.
-	  * Bank In Transit Account
-	  */
-	public void setB_InTransit_Acct (int B_InTransit_Acct);
-
-	/** Get Bank In Transit.
-	  * Bank In Transit Account
-	  */
-	public int getB_InTransit_Acct();
-
-	public I_C_ValidCombination getB_InTransit_A() throws RuntimeException;
 
     /** Column name B_PaymentSelect_Acct */
     public static final String COLUMNNAME_B_PaymentSelect_Acct = "B_PaymentSelect_Acct";

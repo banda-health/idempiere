@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for EXP_ProcessorParameter
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_EXP_ProcessorParameter 
 {
@@ -44,8 +44,8 @@ public interface I_EXP_ProcessorParameter
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_EXP_ProcessorParameter
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -91,17 +91,6 @@ public interface I_EXP_ProcessorParameter
 	  */
 	public String getDescription();
 
-    /** Column name EXP_Processor_ID */
-    public static final String COLUMNNAME_EXP_Processor_ID = "EXP_Processor_ID";
-
-	/** Set Export Processor	  */
-	public void setEXP_Processor_ID (int EXP_Processor_ID);
-
-	/** Get Export Processor	  */
-	public int getEXP_Processor_ID();
-
-	public org.compiere.model.I_EXP_Processor getEXP_Processor() throws RuntimeException;
-
     /** Column name EXP_ProcessorParameter_ID */
     public static final String COLUMNNAME_EXP_ProcessorParameter_ID = "EXP_ProcessorParameter_ID";
 
@@ -119,6 +108,17 @@ public interface I_EXP_ProcessorParameter
 
 	/** Get EXP_ProcessorParameter_UU	  */
 	public String getEXP_ProcessorParameter_UU();
+
+    /** Column name EXP_Processor_ID */
+    public static final String COLUMNNAME_EXP_Processor_ID = "EXP_Processor_ID";
+
+	/** Set Export Processor	  */
+	public void setEXP_Processor_ID (int EXP_Processor_ID);
+
+	/** Get Export Processor	  */
+	public int getEXP_Processor_ID();
+
+	public org.compiere.model.I_EXP_Processor getEXP_Processor() throws RuntimeException;
 
     /** Column name Help */
     public static final String COLUMNNAME_Help = "Help";

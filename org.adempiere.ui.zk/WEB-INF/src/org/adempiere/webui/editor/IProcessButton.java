@@ -16,7 +16,7 @@ package org.adempiere.webui.editor;
 import org.adempiere.webui.adwindow.IADTabpanel;
 
 /**
- * 
+ * Interface for process button
  * @author hengsin
  *
  */
@@ -27,12 +27,34 @@ public interface IProcessButton {
 	 *  @return AD_Process_ID or 0
 	 */
 	public int getProcess_ID();
+	
+	/**
+	 * Get info window id
+	 * @return AD_InfoWindow_ID
+	 */
+	public int getInfoWindow_ID();
 
+	/**
+	 * Get {@link IADTabpanel} instance that own this button
+	 * @return {@link IADTabpanel} instance that own this button
+	 */
 	public IADTabpanel getADTabpanel();
 
+	/**
+	 * Get Column Name
+	 * @return Column Name
+	 */
 	public String getColumnName();
 
+	/**
+	 * Get Description
+	 * @return Description
+	 */
 	public String getDescription();
 
+	/**
+	 * Get display text
+	 * @return Display text
+	 */
 	public String getDisplay();
 }

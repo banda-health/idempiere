@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_PackageLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_PackageLine 
 {
@@ -44,8 +44,8 @@ public interface I_M_PackageLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_PackageLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -119,21 +119,6 @@ public interface I_M_PackageLine
 
 	public org.compiere.model.I_M_InOutLine getM_InOutLine() throws RuntimeException;
 
-    /** Column name M_Package_ID */
-    public static final String COLUMNNAME_M_Package_ID = "M_Package_ID";
-
-	/** Set Package.
-	  * Shipment Package
-	  */
-	public void setM_Package_ID (int M_Package_ID);
-
-	/** Get Package.
-	  * Shipment Package
-	  */
-	public int getM_Package_ID();
-
-	public org.compiere.model.I_M_Package getM_Package() throws RuntimeException;
-
     /** Column name M_PackageLine_ID */
     public static final String COLUMNNAME_M_PackageLine_ID = "M_PackageLine_ID";
 
@@ -166,6 +151,21 @@ public interface I_M_PackageLine
 	public int getM_PackageMPS_ID();
 
 	public org.compiere.model.I_M_PackageMPS getM_PackageMPS() throws RuntimeException;
+
+    /** Column name M_Package_ID */
+    public static final String COLUMNNAME_M_Package_ID = "M_Package_ID";
+
+	/** Set Package.
+	  * Shipment Package
+	  */
+	public void setM_Package_ID (int M_Package_ID);
+
+	/** Get Package.
+	  * Shipment Package
+	  */
+	public int getM_Package_ID();
+
+	public org.compiere.model.I_M_Package getM_Package() throws RuntimeException;
 
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";

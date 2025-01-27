@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for R_StandardResponse
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_R_StandardResponse 
 {
@@ -44,8 +44,8 @@ public interface I_R_StandardResponse
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_R_StandardResponse
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -104,19 +104,6 @@ public interface I_R_StandardResponse
 	  */
 	public String getName();
 
-    /** Column name ResponseText */
-    public static final String COLUMNNAME_ResponseText = "ResponseText";
-
-	/** Set Response Text.
-	  * Request Response Text
-	  */
-	public void setResponseText (String ResponseText);
-
-	/** Get Response Text.
-	  * Request Response Text
-	  */
-	public String getResponseText();
-
     /** Column name R_StandardResponse_ID */
     public static final String COLUMNNAME_R_StandardResponse_ID = "R_StandardResponse_ID";
 
@@ -138,6 +125,19 @@ public interface I_R_StandardResponse
 
 	/** Get R_StandardResponse_UU	  */
 	public String getR_StandardResponse_UU();
+
+    /** Column name ResponseText */
+    public static final String COLUMNNAME_ResponseText = "ResponseText";
+
+	/** Set Response Text.
+	  * Request Response Text
+	  */
+	public void setResponseText (String ResponseText);
+
+	/** Get Response Text.
+	  * Request Response Text
+	  */
+	public String getResponseText();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

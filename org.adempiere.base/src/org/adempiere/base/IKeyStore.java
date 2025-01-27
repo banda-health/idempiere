@@ -16,14 +16,12 @@ package org.adempiere.base;
 import javax.crypto.SecretKey;
 
 /**
- * 
+ * Interface for security key store 
  * @author deepak
- *
  */
 public interface IKeyStore {
 
 	/**
-	 * 
 	 * @param AD_Client_ID
 	 * @return secret key
 	 */

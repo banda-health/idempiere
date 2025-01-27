@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_AttributeSetInstance
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_AttributeSetInstance 
 {
@@ -44,8 +44,8 @@ public interface I_M_AttributeSetInstance
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_AttributeSetInstance
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -130,21 +130,6 @@ public interface I_M_AttributeSetInstance
 	  */
 	public String getLot();
 
-    /** Column name M_AttributeSet_ID */
-    public static final String COLUMNNAME_M_AttributeSet_ID = "M_AttributeSet_ID";
-
-	/** Set Attribute Set.
-	  * Product Attribute Set
-	  */
-	public void setM_AttributeSet_ID (int M_AttributeSet_ID);
-
-	/** Get Attribute Set.
-	  * Product Attribute Set
-	  */
-	public int getM_AttributeSet_ID();
-
-	public org.compiere.model.I_M_AttributeSet getM_AttributeSet() throws RuntimeException;
-
     /** Column name M_AttributeSetInstance_ID */
     public static final String COLUMNNAME_M_AttributeSetInstance_ID = "M_AttributeSetInstance_ID";
 
@@ -166,6 +151,21 @@ public interface I_M_AttributeSetInstance
 
 	/** Get M_AttributeSetInstance_UU	  */
 	public String getM_AttributeSetInstance_UU();
+
+    /** Column name M_AttributeSet_ID */
+    public static final String COLUMNNAME_M_AttributeSet_ID = "M_AttributeSet_ID";
+
+	/** Set Attribute Set.
+	  * Product Attribute Set
+	  */
+	public void setM_AttributeSet_ID (int M_AttributeSet_ID);
+
+	/** Get Attribute Set.
+	  * Product Attribute Set
+	  */
+	public int getM_AttributeSet_ID();
+
+	public org.compiere.model.I_M_AttributeSet getM_AttributeSet() throws RuntimeException;
 
     /** Column name M_Lot_ID */
     public static final String COLUMNNAME_M_Lot_ID = "M_Lot_ID";

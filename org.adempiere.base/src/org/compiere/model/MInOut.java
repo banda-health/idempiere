@@ -29,12 +29,16 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.base.Core;
+import org.adempiere.base.CreditStatus;
+import org.adempiere.base.ICreditManager;
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.exceptions.BackDateTrxNotAllowedException;
 import org.adempiere.exceptions.DBException;
 import org.adempiere.exceptions.NegativeInventoryDisallowedException;
 import org.adempiere.exceptions.PeriodClosedException;
 import org.adempiere.util.IReservationTracer;
 import org.adempiere.util.IReservationTracerFactory;
+import org.adempiere.util.ShippingUtil;
 import org.compiere.print.MPrintFormat;
 import org.compiere.print.ReportEngine;
 import org.compiere.process.DocAction;
@@ -47,9 +51,14 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
+import org.compiere.util.Trx;
+import org.compiere.util.TrxEventListener;
+import org.compiere.util.Util;
+import org.compiere.wf.MWFActivity;
+import org.compiere.wf.MWorkflow;
 
 /**
- *  Shipment Model
+ *  Shipment/Receipt Model
  *
  *  @author Jorg Janke
  *  @version $Id: MInOut.java,v 1.4 2006/07/30 00:51:03 jjanke Exp $
@@ -71,10 +80,248 @@ import org.compiere.util.TimeUtil;
 public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = 5791054523079936837L;
-
+	private static final long serialVersionUID = 327740106819501242L;
+	
+	/** Matching SQL Template for M_InOut */
+	private static final String BASE_MATCHING_SQL = 
+			"""
+				SELECT hdr.M_InOut_ID, hdr.DocumentNo, hdr.MovementDate, bp.Name, hdr.C_BPartner_ID,
+				lin.Line, lin.M_InOutLine_ID, p.Name, lin.M_Product_ID,
+				CASE WHEN (dt.DocBaseType='MMS' AND hdr.issotrx='N') THEN lin.MovementQty * -1 ELSE lin.MovementQty END,
+				%s, org.Name, hdr.AD_Org_ID 
+				 FROM M_InOut hdr 
+				 INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)
+				 INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)
+				 INNER JOIN M_InOutLine lin ON (hdr.M_InOut_ID=lin.M_InOut_ID)
+				 INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)
+				 INNER JOIN C_DocType dt ON (hdr.C_DocType_ID = dt.C_DocType_ID AND (dt.DocBaseType='MMR' OR (dt.DocBaseType='MMS' AND hdr.isSOTrx ='N')))
+				 FULL JOIN %s m ON (lin.M_InOutLine_ID=m.M_InOutLine_ID) 
+				 WHERE hdr.DocStatus IN ('CO','CL')				  
+			""";
+	
+	/** Matching SQL template for GROUP BY */
+	private static final String BASE_MATCHING_GROUP_BY_SQL =
+			"""
+				GROUP BY hdr.M_InOut_ID,hdr.DocumentNo,hdr.MovementDate,bp.Name,hdr.C_BPartner_ID,
+				  lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, org.Name, hdr.AD_Org_ID, dt.DocBaseType, hdr.IsSOTrx
+				HAVING %s <> %s
+			""";
+	
+	public static final String NOT_FULLY_MATCHED_TO_ORDER = BASE_MATCHING_SQL.formatted(
+			"SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END)", 
+			"M_MatchPO");
+	
+	public static final String NOT_FULLY_MATCHED_TO_ORDER_GROUP_BY = BASE_MATCHING_GROUP_BY_SQL.formatted(
+			"CASE WHEN (dt.DocBaseType='MMS' AND hdr.issotrx='N') THEN lin.MovementQty * -1 ELSE lin.MovementQty END",
+			"SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END)"); 
+			
+	public static final String FULL_OR_PARTIALLY_MATCHED_TO_ORDER = BASE_MATCHING_SQL.formatted(
+			"SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END)", 
+			"M_MatchPO");
+	
+	public static final String FULL_OR_PARTIALLY_MATCHED_TO_ORDER_GROUP_BY = BASE_MATCHING_GROUP_BY_SQL.formatted(
+			"0",
+			"SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END)");
+	
+	public static final String NOT_FULLY_MATCHED_TO_INVOICE = BASE_MATCHING_SQL.formatted("SUM(COALESCE(m.Qty,0))", 
+			"M_MatchInv");
+	
+	public static final String NOT_FULLY_MATCHED_TO_INVOICE_GROUP_BY = BASE_MATCHING_GROUP_BY_SQL.formatted(
+			"CASE WHEN (dt.DocBaseType='MMS' AND hdr.issotrx='N') THEN lin.MovementQty * -1 ELSE lin.MovementQty END",
+			"SUM(COALESCE(m.Qty,0))");
+	
+	public static final String FULL_OR_PARTIALLY_MATCHED_TO_INVOICE = BASE_MATCHING_GROUP_BY_SQL.formatted(
+			"SUM(COALESCE(m.Qty,0))", 
+			"M_MatchInv");
+	
+	public static final String FULL_OR_PARTIALLY_MATCHED_TO_INVOICE_GROUP_BY = BASE_MATCHING_GROUP_BY_SQL.formatted(
+			"0",
+			"SUM(COALESCE(m.Qty,0))");
+	
+	/**
+	 * @param C_BPartner_ID
+	 * @param M_Product_ID
+	 * @param C_OrderLine_ID
+	 * @param from
+	 * @param to
+	 * @param trxName
+	 * @return list of material receipts not fully matched to order
+	 */
+	public static List<MatchingRecord> getNotFullyMatchedToOrder(int C_BPartner_ID, int M_Product_ID, int C_OrderLine_ID, Timestamp from, Timestamp to, String trxName) {
+		StringBuilder builder = new StringBuilder(NOT_FULLY_MATCHED_TO_ORDER);
+		if (C_OrderLine_ID > 0) {
+			builder.append(" AND m.C_OrderLine_ID=").append(C_OrderLine_ID);
+		}
+		if (M_Product_ID > 0) {
+			builder.append(" AND lin.M_Product_ID=").append(M_Product_ID);
+		}
+		if (C_BPartner_ID > 0) {
+			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
+		}
+		if (from != null) {
+			builder.append(" AND ").append("hdr.MovementDate").append(" >= ").append(DB.TO_DATE(from));
+		}
+		if (to != null) {
+			builder.append(" AND ").append("hdr.MovementDate").append(" <= ").append(DB.TO_DATE(to));
+		}
+		String sql = MRole.getDefault().addAccessSQL(
+				builder.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
+				+ NOT_FULLY_MATCHED_TO_ORDER_GROUP_BY;
+		
+		List<MatchingRecord> records = new ArrayList<>();
+		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				records.add(matchingRecord);
+			}
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage(), e);
+		}
+		return records;
+	}
+	
+	/**
+	 * @param C_BPartner_ID
+	 * @param M_Product_ID
+	 * @param C_OrderLine_ID
+	 * @param from
+	 * @param to
+	 * @param trxName
+	 * @return list of material receipts full or partially match to order 
+	 */
+	public static List<MatchingRecord> getFullOrPartiallyMatchedToOrder(int C_BPartner_ID, int M_Product_ID, int C_OrderLine_ID, Timestamp from, Timestamp to, String trxName) {
+		StringBuilder builder = new StringBuilder(FULL_OR_PARTIALLY_MATCHED_TO_ORDER);
+		if (C_OrderLine_ID > 0) {
+			builder.append(" AND m.C_OrderLine_ID=").append(C_OrderLine_ID);
+		}
+		if (M_Product_ID > 0) {
+			builder.append(" AND lin.M_Product_ID=").append(M_Product_ID);
+		}
+		if (C_BPartner_ID > 0) {
+			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
+		}
+		if (from != null) {
+			builder.append(" AND ").append("hdr.MovementDate").append(" >= ").append(DB.TO_DATE(from));
+		}
+		if (to != null) {
+			builder.append(" AND ").append("hdr.MovementDate").append(" <= ").append(DB.TO_DATE(to));
+		}
+		String sql = MRole.getDefault().addAccessSQL(
+				builder.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
+				+ FULL_OR_PARTIALLY_MATCHED_TO_ORDER_GROUP_BY;
+		
+		List<MatchingRecord> records = new ArrayList<>();
+		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				records.add(matchingRecord);
+			}
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage(), e);
+		}
+		return records;
+	}
+	
+	/**
+	 * @param C_BPartner_ID
+	 * @param M_Product_ID
+	 * @param C_InvoiceLine_ID
+	 * @param from
+	 * @param to
+	 * @param trxName
+	 * @return list of material receipts not fully match to invoice
+	 */
+	public static List<MatchingRecord> getNotFullyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName) {
+		StringBuilder builder = new StringBuilder(NOT_FULLY_MATCHED_TO_INVOICE);
+		if (C_InvoiceLine_ID > 0) {
+			builder.append(" AND m.C_InvoiceLine_ID=").append(C_InvoiceLine_ID);
+		}
+		if (M_Product_ID > 0) {
+			builder.append(" AND lin.M_Product_ID=").append(M_Product_ID);
+		}
+		if (C_BPartner_ID > 0) {
+			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
+		}
+		if (from != null) {
+			builder.append(" AND ").append("hdr.MovementDate").append(" >= ").append(DB.TO_DATE(from));
+		}
+		if (to != null) {
+			builder.append(" AND ").append("hdr.MovementDate").append(" <= ").append(DB.TO_DATE(to));
+		}
+		String sql = MRole.getDefault().addAccessSQL(
+				builder.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
+				+ NOT_FULLY_MATCHED_TO_INVOICE_GROUP_BY;
+		
+		List<MatchingRecord> records = new ArrayList<>();
+		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				records.add(matchingRecord);
+			}
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage(), e);
+		}
+		return records;
+	}
+	
+	/**
+	 * @param C_BPartner_ID
+	 * @param M_Product_ID
+	 * @param C_InvoiceLine_ID
+	 * @param from
+	 * @param to
+	 * @param trxName
+	 * @return list of material receipts full or partially match to invoice 
+	 */
+	public static List<MatchingRecord> getFullOrPartiallyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName) {
+		StringBuilder builder = new StringBuilder(FULL_OR_PARTIALLY_MATCHED_TO_INVOICE);
+		if (C_InvoiceLine_ID > 0) {
+			builder.append(" AND m.C_InvoiceLine_ID=").append(C_InvoiceLine_ID);
+		}
+		if (M_Product_ID > 0) {
+			builder.append(" AND lin.M_Product_ID=").append(M_Product_ID);
+		}
+		if (C_BPartner_ID > 0) {
+			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
+		}
+		if (from != null) {
+			builder.append(" AND ").append("hdr.MovementDate").append(" >= ").append(DB.TO_DATE(from));
+		}
+		if (to != null) {
+			builder.append(" AND ").append("hdr.MovementDate").append(" <= ").append(DB.TO_DATE(to));
+		}
+		String sql = MRole.getDefault().addAccessSQL(
+				builder.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
+				+ FULL_OR_PARTIALLY_MATCHED_TO_INVOICE_GROUP_BY;
+		
+		List<MatchingRecord> records = new ArrayList<>();
+		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
+			ResultSet rs = stmt.executeQuery();
+			while (rs.next()) {
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				records.add(matchingRecord);
+			}
+		} catch (SQLException e) {
+			throw new DBException(e.getMessage(), e);
+		}
+		return records;
+	}
+	
+	/**
+	 * record for matchings
+	 */
+	public static record MatchingRecord(int M_InOut_ID, String documentNo, Timestamp documentDate, String businessPartnerName, int C_BPartner_ID, int line, int M_InOutLine_ID,
+			String productName, int M_Product_ID, BigDecimal movementQty, BigDecimal matchedQty, String organizationName, int AD_Org_ID) {}
+	
 	/**
 	 * 	Create Shipment From Order
 	 *	@param order order
@@ -275,7 +522,6 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	}	//	copyFrom
 
 	/**
-	 *  @deprecated
 	 * 	Create new Shipment by copying
 	 * 	@param from shipment
 	 * 	@param dateDoc date of the document date
@@ -285,7 +531,9 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	@param trxName trx
 	 * 	@param setOrder set the order link
 	 *	@return Shipment
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static MInOut copyFrom (MInOut from, Timestamp dateDoc,
 		int C_DocType_ID, boolean isSOTrx, boolean counter, String trxName, boolean setOrder)
 	{
@@ -296,41 +544,64 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	}
 
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_InOut_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MInOut(Properties ctx, String M_InOut_UU, String trxName) {
+        super(ctx, M_InOut_UU, trxName);
+		if (Util.isEmpty(M_InOut_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param M_InOut_ID
-	 *	@param trxName rx name
+	 *	@param trxName trx name
 	 */
 	public MInOut (Properties ctx, int M_InOut_ID, String trxName)
 	{
 		this (ctx, M_InOut_ID, trxName, (String[]) null);
 	}	//	MInOut
 
+	/**
+	 * @param ctx
+	 * @param M_InOut_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MInOut(Properties ctx, int M_InOut_ID, String trxName, String... virtualColumns) {
 		super(ctx, M_InOut_ID, trxName, virtualColumns);
 		if (M_InOut_ID == 0)
-		{
-			setIsSOTrx (false);
-			setMovementDate (new Timestamp (System.currentTimeMillis ()));
-			setDateAcct (getMovementDate());
-			setDeliveryRule (DELIVERYRULE_Availability);
-			setDeliveryViaRule (DELIVERYVIARULE_Pickup);
-			setFreightCostRule (FREIGHTCOSTRULE_FreightIncluded);
-			setDocStatus (DOCSTATUS_Drafted);
-			setDocAction (DOCACTION_Complete);
-			setPriorityRule (PRIORITYRULE_Medium);
-			setNoPackages(0);
-			setIsInTransit(false);
-			setIsPrinted (false);
-			setSendEMail (false);
-			setIsInDispute(false);
-			//
-			setIsApproved(false);
-			super.setProcessed (false);
-			setProcessing(false);
-			setPosted(false);
-		}
+			setInitialDefaults();
+	}
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setIsSOTrx (false);
+		setMovementDate (new Timestamp (System.currentTimeMillis ()));
+		setDateAcct (getMovementDate());
+		setDeliveryRule (DELIVERYRULE_Availability);
+		setDeliveryViaRule (DELIVERYVIARULE_Pickup);
+		setFreightCostRule (FREIGHTCOSTRULE_FreightIncluded);
+		setDocStatus (DOCSTATUS_Drafted);
+		setDocAction (DOCACTION_Complete);
+		setPriorityRule (PRIORITYRULE_Medium);
+		setNoPackages(0);
+		setIsInTransit(false);
+		setIsPrinted (false);
+		setSendEMail (false);
+		setIsInDispute(false);
+		//
+		setIsApproved(false);
+		super.setProcessed (false);
+		setProcessing(false);
+		setPosted(false);
 	}
 
 	/**
@@ -532,7 +803,6 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	}	//	MInOut
 
-
 	/**	Lines					*/
 	protected MInOutLine[]	m_lines = null;
 	/** Confirmations			*/
@@ -540,10 +810,9 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	/** BPartner				*/
 	protected MBPartner		m_partner = null;
 
-
 	/**
-	 * 	Get Document Status
-	 *	@return Document Status Clear Text
+	 * 	Get Document Status Name
+	 *	@return Document Status Name
 	 */
 	public String getDocStatusName()
 	{
@@ -569,6 +838,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 *	String representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MInOut[")
@@ -580,8 +850,9 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	/**
 	 * 	Get Document Info
-	 *	@return document info (untranslated)
+	 *	@return document info (not translated)
 	 */
+	@Override
 	public String getDocumentInfo()
 	{
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
@@ -593,6 +864,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Create PDF
 	 *	@return File or null
 	 */
+	@Override
 	public File createPDF ()
 	{
 		try
@@ -626,6 +898,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 			ProcessInfo pi = new ProcessInfo ("", format.getJasperProcess_ID());
 			pi.setRecord_ID ( getM_InOut_ID() );
 			pi.setIsBatch(true);
+			pi.setTransientObject(format);
 			
 			ServerProcessCtl.process(pi, null);
 			
@@ -669,7 +942,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	/**
 	 * 	Get Confirmations
-	 * 	@param requery requery
+	 * 	@param requery true to requery from DB
 	 *	@return array of Confirmations
 	 */
 	public MInOutConfirm[] getConfirmations(boolean requery)
@@ -686,7 +959,6 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		list.toArray (m_confirms);
 		return m_confirms;
 	}	//	getConfirmations
-
 
 	/**
 	 * 	Copy Lines From other Shipment
@@ -775,16 +1047,17 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	protected boolean m_reversal = false;
 
 	/**
-	 * 	Set Reversal
+	 * 	Set reversal state (instance variable)
 	 *	@param reversal reversal
 	 */
 	protected void setReversal(boolean reversal)
 	{
 		m_reversal = reversal;
 	}	//	setReversal
+	
 	/**
 	 * 	Is Reversal
-	 *	@return reversal
+	 *	@return true reversal state is set to true
 	 */
 	public boolean isReversal()
 	{
@@ -796,6 +1069,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Propagate to Lines/Taxes
 	 *	@param processed processed
 	 */
+	@Override
 	public void setProcessed (boolean processed)
 	{
 		super.setProcessed (processed);
@@ -811,7 +1085,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	/**
 	 * 	Get BPartner
-	 *	@return partner
+	 *	@return business partner
 	 */
 	public MBPartner getBPartner()
 	{
@@ -822,7 +1096,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	/**
 	 * 	Set Document Type
-	 * 	@param DocBaseType doc type MDocType.DOCBASETYPE_
+	 * 	@param DocBaseType MDocType.DOCBASETYPE_*
 	 */
 	public void setC_DocType_ID (String DocBaseType)
 	{
@@ -846,7 +1120,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	/**
 	 * 	Set Default C_DocType_ID.
-	 * 	Based on SO flag
+	 * 	Based on IsSOTrx flag.
 	 */
 	public void setC_DocType_ID()
 	{
@@ -946,6 +1220,9 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 			MInOutConfirm.create (this, MInOutConfirm.CONFIRMTYPE_ShipReceiptConfirm, true);
 	}	//	createConfirmation
 	
+	/**
+	 * Void confirmations
+	 */
 	protected void voidConfirmations()
 	{
 		for(MInOutConfirm confirm : getConfirmations(true))
@@ -958,7 +1235,6 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 			}
 		}
 	}
-
 
 	/**
 	 * 	Set Warehouse and check/set Organization
@@ -983,12 +1259,12 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	}	//	setM_Warehouse_ID
 
 	/**
-	 * Gets Movement Type based on Document Type's DocBaseType and isSOTrx
+	 * Get Movement Type based on Document Type's DocBaseType and isSOTrx
 	 * @param ctx 
 	 * @param C_DocType_ID Document Type ID
 	 * @param issotrx is sales transaction
 	 * @param trxName transaction name
-	 * @return Movement Type
+	 * @return Movement Type (MOVEMENTTYPE_*)
 	 */
 	public static String getMovementType(Properties ctx, int C_DocType_ID, boolean issotrx, String trxName) {
 		String movementType = null;
@@ -1018,19 +1294,14 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
         setMovementType(movementType); 
 	}
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true or false
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if(newRecord || is_ValueChanged("C_DocType_ID")) {
 			setMovementType();
 		}
-		
+		// Validate warehouse and document belongs to the same organization
 		MWarehouse wh = MWarehouse.get(getCtx(), getM_Warehouse_ID());
-		//	Warehouse Org
 		if (newRecord)
 		{
 			if (wh.getAD_Org_ID() != getAD_Org_ID())
@@ -1039,49 +1310,64 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 				return false;
 			}
 		}
-
+		// Change DELIVERYRULE_Force to DELIVERYRULE_Availability if warehouse disallow negative inventory
 		boolean disallowNegInv = wh.isDisallowNegativeInv();
 		String DeliveryRule = getDeliveryRule();
 		if((disallowNegInv && DELIVERYRULE_Force.equals(DeliveryRule)) ||
 				(DeliveryRule == null || DeliveryRule.length()==0))
 			setDeliveryRule(DELIVERYRULE_Availability);
 
-        // Shipment/Receipt can have either Order/RMA (For Movement type)
+        // Shipment/Receipt must fill one of Order or RMA field, not both
         if (getC_Order_ID() != 0 && getM_RMA_ID() != 0)
         {
             log.saveError("OrderOrRMA", "");
             return false;
         }
-
-		//	Shipment - Needs Order/RMA
-		if (!getMovementType().contentEquals(MInOut.MOVEMENTTYPE_CustomerReturns) && isSOTrx() && getC_Order_ID() == 0 && getM_RMA_ID() == 0)
-		{
-			log.saveError("FillMandatory", Msg.translate(getCtx(), "C_Order_ID"));
-			return false;
-		}
-
+        // Set document type to C_DocTypeShipment_ID of RMA document type (sales transaction only)
         if (isSOTrx() && getM_RMA_ID() != 0)
         {
-            // Set Document and Movement type for this Receipt
             MRMA rma = new MRMA(getCtx(), getM_RMA_ID(), get_TrxName());
             MDocType docType = MDocType.get(getCtx(), rma.getC_DocType_ID());
             setC_DocType_ID(docType.getC_DocTypeShipment_ID());
         }
                 
+        if (newRecord && isSOTrx())
+        {
+        	// Set ShipperAccount and FreightCharges 
+        	if (MInOut.FREIGHTCOSTRULE_CustomerAccount.equals(getFreightCostRule()))
+    		{
+        		if (Util.isEmpty(getShipperAccount()))
+        		{
+        			String shipperAccount = ShippingUtil.getBPShipperAccount(getM_Shipper_ID(), getC_BPartner_ID(), getC_BPartner_Location_ID(), getAD_Org_ID(), get_TrxName());
+        			setShipperAccount(shipperAccount);
+        		}
+        		
+        		if (Util.isEmpty(getFreightCharges()))
+        			setFreightCharges(MInOut.FREIGHTCHARGES_Collect);
+    		}
+        }
+        // Set SalesRep_ID from order or RMA (original MInOut)
+        if (getSalesRep_ID() == 0) {
+        	if (getC_Order_ID() > 0) {
+        		MOrder order = new MOrder(getCtx(), getC_Order_ID(), get_TrxName());
+        		setSalesRep_ID(order.getSalesRep_ID());
+        	} else if (getM_RMA_ID() > 0) {
+        		MRMA rma = new MRMA(getCtx(), getM_RMA_ID(), get_TrxName());
+        		MInOut originalReceipt = rma.getShipment();
+        		setSalesRep_ID(originalReceipt.getSalesRep_ID());
+        	}
+        }
+
 		return true;
 	}	//	beforeSave
 
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success || newRecord)
 			return success;
 
+		// Propagate AD_Org_ID change to lines
 		if (is_ValueChanged("AD_Org_ID"))
 		{
 			final String sql = "UPDATE M_InOutLine ol"
@@ -1095,12 +1381,12 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		return true;
 	}	//	afterSave
 
-
-	/**************************************************************************
+	/**
 	 * 	Process document
 	 *	@param processAction document action
 	 *	@return true if performed
 	 */
+	@Override
 	public boolean processIt (String processAction)
 	{
 		m_processMsg = null;
@@ -1117,6 +1403,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Unlock Document.
 	 * 	@return true if success
 	 */
+	@Override
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1128,6 +1415,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Invalidate Document
 	 * 	@return true if success
 	 */
+	@Override
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1139,6 +1427,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 *	Prepare Document
 	 * 	@return new status (In Progress or Invalid)
 	 */
+	@Override
 	public String prepareIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1158,6 +1447,12 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (!MPeriod.isOpen(getCtx(), getDateAcct(), dt.getDocBaseType(), getAD_Org_ID()))
 		{
 			m_processMsg = "@PeriodClosed@";
+			return DocAction.STATUS_Invalid;
+		}
+		
+		if (!MAcctSchema.isBackDateTrxAllowed(getCtx(), getDateAcct(), get_TrxName()))
+		{
+			m_processMsg = "@BackDateTrxNotAllowed@";
 			return DocAction.STATUS_Invalid;
 		}
 
@@ -1187,40 +1482,14 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		}
 				
 		//	Credit Check
-		if (isSOTrx() && !isReversal() && !isCustomerReturn())
+		ICreditManager creditManager = Core.getCreditManager(this);
+		if (creditManager != null)
 		{
-			I_C_Order order = getC_Order();
-			if (order != null && MDocType.DOCSUBTYPESO_PrepayOrder.equals(order.getC_DocType().getDocSubTypeSO())
-					&& !MSysConfig.getBooleanValue(MSysConfig.CHECK_CREDIT_ON_PREPAY_ORDER, true, getAD_Client_ID(), getAD_Org_ID())) {
-				// ignore -- don't validate Prepay Orders depending on sysconfig parameter
-			} else {
-				MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
-				if (MBPartner.SOCREDITSTATUS_CreditStop.equals(bp.getSOCreditStatus()))
-				{
-					m_processMsg = "@BPartnerCreditStop@ - @TotalOpenBalance@="
-						+ bp.getTotalOpenBalance()
-						+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
-					return DocAction.STATUS_Invalid;
-				}
-				if (MBPartner.SOCREDITSTATUS_CreditHold.equals(bp.getSOCreditStatus()))
-				{
-					m_processMsg = "@BPartnerCreditHold@ - @TotalOpenBalance@="
-						+ bp.getTotalOpenBalance()
-						+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
-					return DocAction.STATUS_Invalid;
-				}
-				if (!MBPartner.SOCREDITSTATUS_NoCreditCheck.equals(bp.getSOCreditStatus())
-						&& Env.ZERO.compareTo(bp.getSO_CreditLimit()) != 0)
-				{
-					BigDecimal notInvoicedAmt = MBPartner.getNotInvoicedAmt(getC_BPartner_ID());
-					if (MBPartner.SOCREDITSTATUS_CreditHold.equals(bp.getSOCreditStatus(notInvoicedAmt)))
-					{
-						m_processMsg = "@BPartnerOverSCreditHold@ - @TotalOpenBalance@="
-							+ bp.getTotalOpenBalance() + ", @NotInvoicedAmt@=" + notInvoicedAmt
-							+ ", @SO_CreditLimit@=" + bp.getSO_CreditLimit();
-						return DocAction.STATUS_Invalid;
-					}
-				}
+			CreditStatus status = creditManager.checkCreditStatus(DOCACTION_Prepare);
+			if (status.isError())
+			{
+				m_processMsg = status.getErrorMsg();
+				return DocAction.STATUS_Invalid;
 			}
 		}
 
@@ -1280,6 +1549,32 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (m_processMsg != null)
 			return DocAction.STATUS_Invalid;
 
+		// Check if Order is Valid - load all C_Order_ID and replace/remove C_Order_ID if not valid
+		if (getC_Order_ID() > 0) {
+		    int[] orderIds = DB.getIDsEx(get_TrxName(), 
+		    		" SELECT DISTINCT ol.C_Order_ID "
+		    		+ " FROM M_InOutLine iol "
+		    		+ " JOIN C_OrderLine ol ON (iol.C_OrderLine_ID=ol.C_OrderLine_ID) "
+		    		+ " WHERE iol.M_InOut_ID=?", getM_InOut_ID());
+		    if (orderIds.length == 1 && orderIds[0] != getC_Order_ID())
+		        setC_Order_ID(orderIds[0]);
+		    else if (orderIds.length > 1)
+		        setC_Order_ID(0);
+		}
+		
+		// Check if RMA is Valid - load all M_RMA_ID and replace/remove M_RMA_ID if not valid
+		if (getM_RMA_ID() > 0) {
+		    int[] rmaIds = DB.getIDsEx(get_TrxName(), 
+		    		" SELECT DISTINCT rmal.M_RMA_ID "
+		    		+ " FROM M_InOutLine iol "
+		    		+ " JOIN M_RMALine rmal ON (iol.M_RMALine_ID=rmal.M_RMALine_ID) "
+		    		+ " WHERE iol.M_InOut_ID=?", getM_InOut_ID());
+		    if (rmaIds.length == 1 && rmaIds[0] != getM_RMA_ID())
+		        setM_RMA_ID(rmaIds[0]);
+		    else if (rmaIds.length > 1)
+		        setM_RMA_ID(0);
+		}
+		
 		m_justPrepared = true;
 		if (!DOCACTION_Complete.equals(getDocAction()))
 			setDocAction(DOCACTION_Complete);
@@ -1290,7 +1585,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * Check if Document is Customer Return.
 	 * @return True if Document is Customer Return
 	 */
-	private boolean isCustomerReturn() {
+	public boolean isCustomerReturn() {
 		MDocType doctype = MDocType.get(getC_DocType_ID());
 		if(isSOTrx() && doctype.getDocBaseType().equals("MMR") && doctype.isSOTrx())
 			return true;
@@ -1301,6 +1596,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Approve Document
 	 * 	@return true if success
 	 */
+	@Override
 	public boolean  approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1312,6 +1608,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Reject Approval
 	 * 	@return true if success
 	 */
+	@Override
 	public boolean rejectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -1323,6 +1620,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Complete Document
 	 * 	@return new status (Complete, In Progress, Invalid, Waiting ..)
 	 */
+	@Override
 	public String completeIt()
 	{
 		//	Re-Check
@@ -1350,6 +1648,24 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (!isApproved())
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
+		
+		if (!isReversal())
+		{
+			try {
+				periodClosedCheckForBackDateTrx(null);
+			} catch (PeriodClosedException e) {
+				m_processMsg = e.getLocalizedMessage();
+				return DocAction.STATUS_Invalid;
+			}
+		}
+		
+		//	Stock Coverage Check
+		if (!isReversal() && !stockCoverageCheckForBackDateTrx(null))
+		{
+			m_processMsg = "@InsufficientStockCoverage@";
+			return DocAction.STATUS_Invalid;
+		}
+			
 		StringBuilder info = new StringBuilder();
 
 		StringBuilder errors = new StringBuilder();
@@ -1376,8 +1692,8 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 					if (log.isLoggable(Level.FINE)) log.fine("OrderLine - Reserved=" + oLine.getQtyReserved()
 						+ ", Delivered=" + oLine.getQtyDelivered());
 				}
-	
-	
+				boolean orderClosed = oLine != null && DocAction.STATUS_Closed.equals(oLine.getParent().getDocStatus());
+				
 	            // Load RMA Line
 	            MRMALine rmaLine = null;
 	
@@ -1459,7 +1775,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 									return status;
 							}
 							
-							//	Update Storage - see also VMatch.createMatchRecord
+							//	Update Storage - see also Match.createMatchRecord
 							if (!MStorageOnHand.add(getCtx(),
 								sLine.getM_Locator_ID(),
 								sLine.getM_Product_ID(),
@@ -1493,8 +1809,8 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 									return status;
 							}
 						}
-						
-						if (oLine!=null && mtrx!=null && 
+												
+						if (oLine!=null && mtrx!=null && !orderClosed && 
 						   ((!isReversal() && oLine.getQtyReserved().signum() > 0) || (isReversal() && oLine.getQtyOrdered().signum() > 0)))
 						{					
 							if (sLine.getC_OrderLine_ID() != 0 && oLine.getM_Product_ID() > 0)
@@ -1580,7 +1896,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 						if (dateMPolicy == null)
 							dateMPolicy = getMovementDate();
 
-						//	Fallback: Update Storage - see also VMatch.createMatchRecord
+						//	Fallback: Update Storage - see also Match.createMatchRecord
 						if (pendingQty.signum() != 0 &&
 							!MStorageOnHand.add(getCtx(), 
 							sLine.getM_Locator_ID(),
@@ -1592,7 +1908,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 							m_processMsg = "Cannot correct Inventory OnHand [" + product.getValue() + "] - " + lastError;
 							return DocAction.STATUS_Invalid;
 						}
-						if (oLine!=null && oLine.getM_Product_ID() > 0 &&
+						if (oLine!=null && oLine.getM_Product_ID() > 0 && !orderClosed &&
 							((!isReversal() && oLine.getQtyReserved().signum() > 0) || (isReversal() && oLine.getQtyOrdered().signum() > 0)))  
 						{
 							IReservationTracer tracer = null;
@@ -1636,7 +1952,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 				}	//	stock movement
 	
 				//	Correct Order Line
-				if (product != null && oLine != null)		//	other in VMatch.createMatchRecord
+				if (product != null && oLine != null && !orderClosed)		//	other in Match.createMatchRecord
 				{
 					if (oLine.getQtyOrdered().signum() >= 0)
 					{
@@ -1833,7 +2149,30 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		//  Drop Shipments
 		MInOut dropShipment = createDropShipment();
 		if (dropShipment != null)
+		{
 			info.append(" - @DropShipment@: @M_InOut_ID@=").append(dropShipment.getDocumentNo());
+			ProcessInfo pi = MWFActivity.getCurrentWorkflowProcessInfo();
+			if (pi != null)
+			{
+				Trx.get(get_TrxName(), false).addTrxEventListener(new TrxEventListener() {					
+					@Override
+					public void afterRollback(Trx trx, boolean success) {
+						trx.removeTrxEventListener(this);
+					}
+					
+					@Override
+					public void afterCommit(Trx trx, boolean success) {
+						if (success)
+							pi.addLog(pi.getAD_PInstance_ID(), null, null, dropShipment.getDocumentInfo(), Table_ID, dropShipment.get_ID());
+						trx.removeTrxEventListener(this);
+					}
+					
+					@Override
+					public void afterClose(Trx trx) {
+					}
+				});
+			}
+		}
 		if (dropShipment != null)
 			addDocsPostProcess(dropShipment);
 		//	User Validation
@@ -1852,7 +2191,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	/**
 	 * Outstanding (not processed) Customer Confirmations ?
-	 * @return true if there are pending Customer Confirmations
+	 * @return true if there are pending Customer Confirmations (MInOutConfirm.CONFIRMTYPE_CustomerConfirmation)
 	 */
 	public boolean pendingCustomerConfirmations() {
 		MInOutConfirm[] confirmations = getConfirmations(true);
@@ -1884,8 +2223,12 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	}
 
 	/* Save array of documents to process AFTER completing this one */
-	ArrayList<PO> docsPostProcess = new ArrayList<PO>();
+	protected ArrayList<PO> docsPostProcess = new ArrayList<PO>();
 
+	/**
+	 * Add doc for post processing (after processing of document action)
+	 * @param doc
+	 */
 	protected void addDocsPostProcess(PO doc) {
 		docsPostProcess.add(doc);
 	}
@@ -1897,8 +2240,8 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	/**
 	 * Automatically creates a customer shipment for any
-	 * drop shipment material receipt
-	 * Based on createCounterDoc() by JJ
+	 * drop shipment material receipt.
+	 * Based on createCounterDoc() by JJ.
 	 * @return shipment if created else null
 	 */
 	protected MInOut createDropShipment() {
@@ -1939,7 +2282,14 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		dropShipment.setDropShip_Location_ID(0);
 		dropShipment.setDropShip_User_ID(0);
 		dropShipment.setMovementType(MOVEMENTTYPE_CustomerShipment);
-
+		if (!Util.isEmpty(getTrackingNo()) && getM_Shipper_ID() > 0 && 
+				DELIVERYVIARULE_Shipper.equals(getDeliveryViaRule()))
+		{
+			dropShipment.setTrackingNo(getTrackingNo());
+			dropShipment.setDeliveryViaRule(DELIVERYVIARULE_Shipper);
+			dropShipment.setM_Shipper_ID(getM_Shipper_ID());
+		}
+		
 		//	References (Should not be required
 		dropShipment.setSalesRep_ID(getSalesRep_ID());
 		dropShipment.saveEx(get_TrxName());
@@ -1958,13 +2308,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 		if (log.isLoggable(Level.FINE)) log.fine(dropShipment.toString());
 
-		dropShipment.setDocAction(DocAction.ACTION_Complete);
 		// do not post immediate dropshipment, should post after source shipment
 		dropShipment.set_Attribute(DocumentEngine.DOCUMENT_POST_IMMEDIATE_AFTER_COMPLETE, Boolean.FALSE);
-		// added AdempiereException by Zuhri
-		if (!dropShipment.processIt(DocAction.ACTION_Complete))
-			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + dropShipment.getProcessMsg());
-		// end added
+		ProcessInfo processInfo = MWorkflow.runDocumentActionWorkflow(dropShipment, DocAction.ACTION_Complete);
+		if (processInfo.isError())
+			throw new RuntimeException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + ": " + dropShipment.toString() + " - " + dropShipment.getProcessMsg());
 		dropShipment.saveEx();
 
 		return dropShipment;
@@ -1980,6 +2328,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 			if (getDateAcct().before(getMovementDate())) {
 				setDateAcct(getMovementDate());
 				MPeriod.testPeriodOpen(getCtx(), getDateAcct(), getC_DocType_ID(), getAD_Org_ID());
+				MAcctSchema.testBackDateTrxAllowed(getCtx(), getDateAcct(), get_TrxName());
 			}
 		}
 		if (dt.isOverwriteSeqOnComplete()) {
@@ -1990,8 +2339,10 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	}
 
 	/**
-	 * 	Check Material Policy
-	 * 	Sets line ASI
+	 * 	Check Material Policy.
+	 * 	Create MInOutLineMA and set line ASI (if needed).
+	 *  @param line
+	 *  @param qty
 	 */
 	protected void checkMaterialPolicy(MInOutLine line,BigDecimal qty)
 	{
@@ -2140,8 +2491,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		return qtyToReceive;
 	}
 
-
-	/**************************************************************************
+	/**
 	 * 	Create Counter Document
 	 * 	@return InOut
 	 */
@@ -2202,7 +2552,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 			counter.setDropShip_User_ID(getDropShip_User_ID());
 		}
 
-		//	Refernces (Should not be required
+		//	References (Should not be required)
 		counter.setSalesRep_ID(getSalesRep_ID());
 		counter.saveEx(get_TrxName());
 
@@ -2244,6 +2594,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Void Document.
 	 * 	@return true if success
 	 */
+	@Override
 	public boolean voidIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());		
@@ -2300,6 +2651,15 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 				accrual = true;
 			}
 			
+			try
+			{
+				MAcctSchema.testBackDateTrxAllowed(getCtx(), getDateAcct(), get_TrxName());
+			}
+			catch (BackDateTrxNotAllowedException e)
+			{
+				accrual = true;
+			}
+			
 			if (accrual)
 				return reverseAccrualIt();
 			else
@@ -2320,6 +2680,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Close Document.
 	 * 	@return true if success
 	 */
+	@Override
 	public boolean closeIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -2342,6 +2703,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Reverse Correction - same date
 	 * 	@return true if success
 	 */
+	@Override
 	public boolean reverseCorrectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -2366,6 +2728,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		return true;
 	}	//	reverseCorrectionIt
 
+	/**
+	 * Reverse this document
+	 * @param accrual true to create reversal document using current date, false to use the accounting date of this document
+	 * @return reversal MInOut
+	 */
 	protected MInOut reverse(boolean accrual) {
 		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
 		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), Env.DATE) : getDateAcct();
@@ -2376,6 +2743,25 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (!MPeriod.isOpen(getCtx(), reversalDate, dt.getDocBaseType(), getAD_Org_ID()))
 		{
 			m_processMsg = "@PeriodClosed@";
+			return null;
+		}
+		if (!MAcctSchema.isBackDateTrxAllowed(getCtx(), reversalDate, get_TrxName()))
+		{
+			m_processMsg = "@BackDateTrxNotAllowed@";
+			return null;
+		}
+		
+		try {
+			periodClosedCheckForBackDateTrx(reversalDate);
+		} catch (PeriodClosedException e) {
+			m_processMsg = e.getLocalizedMessage();
+			return null;
+		}
+		
+		//	Stock Coverage Check
+		if (!stockCoverageCheckForBackDateTrx(reversalDate))
+		{
+			m_processMsg = "@InsufficientStockCoverageForReversal@";
 			return null;
 		}
 
@@ -2467,7 +2853,6 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		reversal.setM_RMA_ID(getM_RMA_ID());
 		StringBuilder msgadd = new StringBuilder("{->").append(getDocumentNo()).append(")");
 		reversal.addDescription(msgadd.toString());
-		//FR1948157
 		reversal.setReversal_ID(getM_InOut_ID());
 		reversal.saveEx(get_TrxName());
 		//
@@ -2493,12 +2878,16 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		// Void Confirmations
 		setDocStatus(DOCSTATUS_Reversed); // need to set & save docstatus to be able to check it in MInOutConfirm.voidIt()
 		saveEx();
-		//FR1948157
 		this.setReversal_ID(reversal.getM_InOut_ID());
 		voidConfirmations();
 		return reversal;
 	}
 
+	/**
+	 * Reverse match invoice and match PO.
+	 * @param reversalDate
+	 * @return false if there errors, true otherwise
+	 */
 	protected boolean reverseMatching(Timestamp reversalDate) {
 		MMatchInv[] mInv = MMatchInv.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
 		for (MMatchInv mMatchInv : mInv)
@@ -2538,9 +2927,10 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	}
 
 	/**
-	 * 	Reverse Accrual - none
+	 * 	Reverse Accrual - current date
 	 * 	@return false
 	 */
+	@Override
 	public boolean reverseAccrualIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -2569,6 +2959,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Re-activate
 	 * 	@return false
 	 */
+	@Override
 	public boolean reActivateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -2585,11 +2976,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		return false;
 	}	//	reActivateIt
 
-
-	/*************************************************************************
+	/**
 	 * 	Get Summary
 	 *	@return Summary of Document
 	 */
+	@Override
 	public String getSummary()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -2607,6 +2998,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Get Process Message
 	 *	@return clear text error message
 	 */
+	@Override
 	public String getProcessMsg()
 	{
 		return m_processMsg;
@@ -2616,6 +3008,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Get Document Owner (Responsible)
 	 *	@return AD_User_ID
 	 */
+	@Override
 	public int getDoc_User_ID()
 	{
 		return getSalesRep_ID();
@@ -2623,8 +3016,9 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 
 	/**
 	 * 	Get Document Approval Amount
-	 *	@return amount
+	 *	@return 0
 	 */
+	@Override
 	public BigDecimal getApprovalAmt()
 	{
 		return Env.ZERO;
@@ -2634,6 +3028,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * 	Get C_Currency_ID
 	 *	@return Accounting Currency
 	 */
+	@Override
 	public int getC_Currency_ID ()
 	{
 		return Env.getContextAsInt(getCtx(),Env.C_CURRENCY_ID);
@@ -2661,7 +3056,7 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * @param M_InOutLine_ID
 	 * @param reversal
 	 * @param trxName
-	 * @return error doc status if there are any errors
+	 * @return error doc status if there are any errors, null otherwise
 	 */
 	protected String moveOnHandToShipmentASI(MProduct product, int M_Locator_ID, int M_AttributeSetInstance_ID, BigDecimal qty,
 			Timestamp dateMaterialPolicy, int M_InOutLine_ID, boolean reversal, String trxName) {
@@ -2722,6 +3117,18 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		return null;
 	}
 
+	/**
+	 * Move non ASI on hand (M_AttributeSetInstance_ID==0) to ASI storage record
+	 * @param product
+	 * @param M_Locator_ID
+	 * @param M_AttributeSetInstance_ID
+	 * @param dateMaterialPolicy
+	 * @param qty
+	 * @param M_InOutLine_ID
+	 * @param reversal
+	 * @param trxName
+	 * @return null or error doc status
+	 */
 	private String doMove(MProduct product, int M_Locator_ID, int M_AttributeSetInstance_ID, Timestamp dateMaterialPolicy, BigDecimal qty,
 			int M_InOutLine_ID, boolean reversal, String trxName) {
 		MStorageOnHand[] storages;
@@ -2777,5 +3184,377 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Create Line from orderline/invoiceline/rmaline
+	 * @param C_OrderLine_ID
+	 * @param C_InvoiceLine_ID
+	 * @param M_RMALine_ID
+	 * @param M_Product_ID
+	 * @param C_UOM_ID
+	 * @param Qty
+	 * @param M_Locator_ID
+	 */
+	public void createLineFrom(int C_OrderLine_ID, int C_InvoiceLine_ID, int M_RMALine_ID, 
+			int M_Product_ID, int C_UOM_ID, BigDecimal Qty, int M_Locator_ID)
+	{
+		MInvoiceLine il = null;
+		if (C_InvoiceLine_ID != 0)
+			il = new MInvoiceLine (Env.getCtx(), C_InvoiceLine_ID, get_TrxName());
+		
+		MInOutLine iol = new MInOutLine (this);
+		iol.setM_Product_ID(M_Product_ID, C_UOM_ID);	//	Line UOM
+		iol.setQty(Qty);							//	Movement/Entered
+		//
+		MOrderLine ol = null;
+		MRMALine rmal = null;
+		if (C_OrderLine_ID != 0)
+		{
+			iol.setC_OrderLine_ID(C_OrderLine_ID);
+			ol = new MOrderLine (Env.getCtx(), C_OrderLine_ID, get_TrxName());
+			if (ol.getQtyEntered().compareTo(ol.getQtyOrdered()) != 0)
+			{
+				iol.setMovementQty(Qty
+						.multiply(ol.getQtyOrdered())
+						.divide(ol.getQtyEntered(), 12, RoundingMode.HALF_UP));
+				iol.setC_UOM_ID(ol.getC_UOM_ID());
+			}
+			iol.setM_AttributeSetInstance_ID(ol.getM_AttributeSetInstance_ID());
+			iol.setDescription(ol.getDescription());
+			//
+			iol.setC_Project_ID(ol.getC_Project_ID());
+			iol.setC_ProjectPhase_ID(ol.getC_ProjectPhase_ID());
+			iol.setC_ProjectTask_ID(ol.getC_ProjectTask_ID());
+			iol.setC_Activity_ID(ol.getC_Activity_ID());
+			iol.setC_Campaign_ID(ol.getC_Campaign_ID());
+			iol.setAD_OrgTrx_ID(ol.getAD_OrgTrx_ID());
+			iol.setUser1_ID(ol.getUser1_ID());
+			iol.setUser2_ID(ol.getUser2_ID());
+		}
+		else if (il != null)
+		{
+			if (il.getC_OrderLine_ID() > 0)
+				iol.setC_OrderLine_ID(il.getC_OrderLine_ID());
+			if (il.getQtyEntered().compareTo(il.getQtyInvoiced()) != 0)
+			{
+				iol.setMovementQty(Qty
+						.multiply(il.getQtyInvoiced())
+						.divide(il.getQtyEntered(), 12, RoundingMode.HALF_UP));
+				iol.setC_UOM_ID(il.getC_UOM_ID());
+			}
+			iol.setDescription(il.getDescription());
+			iol.setC_Project_ID(il.getC_Project_ID());
+			iol.setC_ProjectPhase_ID(il.getC_ProjectPhase_ID());
+			iol.setC_ProjectTask_ID(il.getC_ProjectTask_ID());
+			iol.setC_Activity_ID(il.getC_Activity_ID());
+			iol.setC_Campaign_ID(il.getC_Campaign_ID());
+			iol.setAD_OrgTrx_ID(il.getAD_OrgTrx_ID());
+			iol.setUser1_ID(il.getUser1_ID());
+			iol.setUser2_ID(il.getUser2_ID());
+		}
+		else if (M_RMALine_ID != 0)
+		{
+			rmal = new MRMALine(Env.getCtx(), M_RMALine_ID, get_TrxName());
+			iol.setM_RMALine_ID(M_RMALine_ID);
+			iol.setQtyEntered(Qty);
+			iol.setDescription(rmal.getDescription());
+			iol.setM_AttributeSetInstance_ID(rmal.getM_AttributeSetInstance_ID());
+			iol.setC_Project_ID(rmal.getC_Project_ID());
+			iol.setC_ProjectPhase_ID(rmal.getC_ProjectPhase_ID());
+			iol.setC_ProjectTask_ID(rmal.getC_ProjectTask_ID());
+			iol.setC_Activity_ID(rmal.getC_Activity_ID());
+			iol.setAD_OrgTrx_ID(rmal.getAD_OrgTrx_ID());
+			iol.setUser1_ID(rmal.getUser1_ID());
+			iol.setUser2_ID(rmal.getUser2_ID());
+		}
+
+		//	Charge
+		if (M_Product_ID == 0)
+		{
+			if (ol != null && ol.getC_Charge_ID() != 0)			//	from order
+				iol.setC_Charge_ID(ol.getC_Charge_ID());
+			else if (il != null && il.getC_Charge_ID() != 0)	//	from invoice
+				iol.setC_Charge_ID(il.getC_Charge_ID());
+			else if (rmal != null && rmal.getC_Charge_ID() != 0) // from rma
+				iol.setC_Charge_ID(rmal.getC_Charge_ID());
+		}
+		// Set locator
+		iol.setM_Locator_ID(M_Locator_ID);
+		iol.saveEx();
+		//	Create Invoice Line Link
+		if (il != null)
+		{
+			il.setM_InOutLine_ID(iol.getM_InOutLine_ID());
+			il.saveEx();
+		}
+	}
+	
+	/**
+	 * Update from order/invoice/rma
+	 * <ul>
+	 * <li>if linked to another order/invoice/rma - remove link</li>
+	 * <li>if no link set it</li>
+	 * </ul>
+	 * @param order
+	 * @param invoice
+	 * @param rma
+	 */
+	public void updateFrom(MOrder order, MInvoice invoice, MRMA rma)
+	{
+		if (order != null && order.getC_Order_ID() != 0)
+		{
+			setC_Order_ID (order.getC_Order_ID());
+			setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
+			setC_Project_ID(order.getC_Project_ID());
+			setC_Campaign_ID(order.getC_Campaign_ID());
+			setC_Activity_ID(order.getC_Activity_ID());
+			setSalesRep_ID (order.getSalesRep_ID());
+			setUser1_ID(order.getUser1_ID());
+			setUser2_ID(order.getUser2_ID());
+
+			if ( order.isDropShip() )
+			{
+				setM_Warehouse_ID( order.getM_Warehouse_ID() );
+				setIsDropShip(order.isDropShip());
+				setDropShip_BPartner_ID(order.getDropShip_BPartner_ID());
+				setDropShip_Location_ID(order.getDropShip_Location_ID());
+				setDropShip_User_ID(order.getDropShip_User_ID());
+				if (MOrder.DELIVERYVIARULE_Shipper.equals(order.getDeliveryViaRule()) && order.getM_Shipper_ID() > 0)
+				{
+					setDeliveryViaRule(order.getDeliveryViaRule());
+					setM_Shipper_ID(order.getM_Shipper_ID());
+				}
+			}
+		}
+		if (invoice != null && invoice.getC_Invoice_ID() != 0)
+		{
+			if (getC_Order_ID() == 0)
+				setC_Order_ID (invoice.getC_Order_ID());
+			setC_Invoice_ID (invoice.getC_Invoice_ID());
+			setAD_OrgTrx_ID(invoice.getAD_OrgTrx_ID());
+			setC_Project_ID(invoice.getC_Project_ID());
+			setC_Campaign_ID(invoice.getC_Campaign_ID());
+			setC_Activity_ID(invoice.getC_Activity_ID());
+			setUser1_ID(invoice.getUser1_ID());
+			setUser2_ID(invoice.getUser2_ID());
+		}
+		if (rma != null && rma.getM_RMA_ID() != 0)
+		{
+			MInOut originalIO = rma.getShipment();
+			setIsSOTrx(rma.isSOTrx());
+			setC_Order_ID(0);
+			setC_Invoice_ID(0);
+			setM_RMA_ID(rma.getM_RMA_ID());
+			setAD_OrgTrx_ID(originalIO.getAD_OrgTrx_ID());
+			setC_Project_ID(originalIO.getC_Project_ID());
+			setC_Campaign_ID(originalIO.getC_Campaign_ID());
+			setC_Activity_ID(originalIO.getC_Activity_ID());
+			setUser1_ID(originalIO.getUser1_ID());
+			setUser2_ID(originalIO.getUser2_ID());
+		}
+		saveEx();
+	}
+	
+	/**
+	 * Stock Coverage Check for Back-Date Transaction
+	 * - A reversal should not be possible if there is insufficient stock coverage
+	 * - A shipment should not be allowed if there is insufficient stock coverage
+	 * @param reversalDate reversal date - null when it is not a reversal
+	 * @return false when there is insufficient stock coverage
+	 */
+	private boolean stockCoverageCheckForBackDateTrx(Timestamp reversalDate)
+	{
+		MClientInfo info = MClientInfo.get(getCtx(), getAD_Client_ID(), get_TrxName()); 
+		MAcctSchema as = info.getMAcctSchema1();
+		if (!MAcctSchema.COSTINGMETHOD_AveragePO.equals(as.getCostingMethod()) 
+				&& !MAcctSchema.COSTINGMETHOD_AverageInvoice.equals(as.getCostingMethod()))
+			return true;
+		as.load(get_TrxName());
+		if (as.getBackDateDay() == 0)
+			return true;
+		
+		String MovementType = getMovementType();
+		if (reversalDate != null && MovementType.equals(MOVEMENTTYPE_VendorReceipts)) {
+			final StringBuilder whereClause = new StringBuilder();
+			whereClause.append("AD_Client_ID=? ");
+			whereClause.append("AND C_AcctSchema_ID=? ");
+			whereClause.append("AND M_Product_ID=? ");
+			whereClause.append("AND (DateAcct, COALESCE(Ref_CostDetail_ID,M_CostDetail_ID), M_CostDetail_ID) > ("); 
+			whereClause.append(" SELECT cd.DateAcct, ");
+			whereClause.append(" CASE WHEN COALESCE(refcd.DateAcct,cd.DateAcct) = cd.DateAcct THEN COALESCE(cd.Ref_CostDetail_ID,cd.M_CostDetail_ID) ELSE cd.M_CostDetail_ID END, ");
+			whereClause.append(" cd.M_CostDetail_ID ");
+			whereClause.append(" FROM M_CostDetail cd ");
+			whereClause.append(" LEFT JOIN M_CostDetail refcd ON (refcd.M_CostDetail_ID=cd.Ref_CostDetail_ID) ");
+			whereClause.append(" WHERE cd.M_CostDetail_ID=? ");
+			whereClause.append(") ");
+			whereClause.append("AND DateAcct >= ? ");
+			whereClause.append("AND Processed='Y' ");
+			whereClause.append("AND (M_InOutLine_ID <> 0 OR C_ProjectIssue_ID <> 0) ");
+			
+			MMatchPO[] mMatchPOList = MMatchPO.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+			for (MMatchPO mMatchPO : mMatchPOList)
+			{
+				if (mMatchPO.getReversal_ID() > 0)
+					continue;
+				
+				MCostDetail cd = MCostDetail.getOrder (as, mMatchPO.getM_Product_ID(), mMatchPO.getM_AttributeSetInstance_ID(),
+						mMatchPO.getC_OrderLine_ID(), 0, reversalDate, get_TrxName());
+				if (cd == null)
+					continue;
+				
+				BigDecimal qty = cd.getQty().negate();
+				
+				List<MCostDetail> costDetailList = new Query(getCtx(), I_M_CostDetail.Table_Name, whereClause.toString(), get_TrxName())
+						.setParameters(getAD_Client_ID(), as.getC_AcctSchema_ID(), cd.getM_Product_ID(), cd.getM_CostDetail_ID(), cd.getDateAcct())
+						.list();
+				for (MCostDetail costDetail : costDetailList) {
+					if (costDetail.getM_InOutLine_ID() > 0) {
+						if (costDetail.getM_InOutLine().getM_InOut().getReversal_ID() > 0)
+							continue;
+					} else if (costDetail.getC_ProjectIssue_ID() > 0) {
+						if (costDetail.getC_ProjectIssue().getReversal_ID() > 0)
+							continue;
+					} else {
+						continue;
+					}
+					if (costDetail.getCurrentQty().add(qty).signum() < 0) {
+						log.log(Level.SEVERE, "Insufficient stock coverage" + costDetail);
+						return false;
+					}
+				}
+			}
+		} else if (reversalDate == null && MovementType.equals(MOVEMENTTYPE_CustomerShipment)) {
+ 			MInOutLine[] sLines = getLines(false);
+			for (MInOutLine sLine : sLines) {
+				int AD_Org_ID = sLine.getAD_Org_ID();
+				int M_AttributeSetInstance_ID = sLine.getM_AttributeSetInstance_ID();
+
+				if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
+				{
+					AD_Org_ID = 0;
+					M_AttributeSetInstance_ID = 0;
+				}
+				else if (MAcctSchema.COSTINGLEVEL_Organization.equals(as.getCostingLevel()))
+					M_AttributeSetInstance_ID = 0;
+				else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
+					AD_Org_ID = 0;
+				
+				MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), as.getCostingMethod(), AD_Org_ID);
+				
+				BigDecimal qty = sLine.getMovementQty();
+				if (MovementType.charAt(1) == '-')	//	C- Customer Shipment - V- Vendor Return
+					qty = qty.negate();
+				
+				ICostInfo costInfo = MCost.getCostInfo(getCtx(), getAD_Client_ID(), AD_Org_ID, sLine.getM_Product_ID(),
+						as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(),
+						M_AttributeSetInstance_ID, 
+						getDateAcct(), null, get_TrxName());
+				if (costInfo != null && costInfo.getCurrentQty().add(qty).signum() < 0) {
+					log.log(Level.SEVERE, "Insufficient stock coverage" + MProduct.get(getCtx(), sLine.getM_Product_ID(), get_TrxName()));
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Period Closed Check for Back-Date Transaction
+	 * @param reversalDate reversal date - null when it is not a reversal
+	 * @return false when failed the period closed check
+	 */
+	private boolean periodClosedCheckForBackDateTrx(Timestamp reversalDate)
+	{
+		MClientInfo info = MClientInfo.get(getCtx(), getAD_Client_ID(), get_TrxName()); 
+		MAcctSchema as = info.getMAcctSchema1();
+		if (!MAcctSchema.COSTINGMETHOD_AveragePO.equals(as.getCostingMethod()) 
+				&& !MAcctSchema.COSTINGMETHOD_AverageInvoice.equals(as.getCostingMethod()))
+			return true;
+		
+		if (as.getBackDateDay() == 0)
+			return true;
+		
+		Timestamp dateAcct = reversalDate != null ? reversalDate : getDateAcct();
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(*) FROM M_CostDetail ");
+		sql.append("WHERE M_Product_ID IN (SELECT M_Product_ID FROM M_InOutLine WHERE M_InOut_ID=?) ");
+		sql.append("AND Processed='Y' ");
+		sql.append(reversalDate != null ? "AND DateAcct>=? " : "AND DateAcct>? ");
+		int no = DB.getSQLValueEx(get_TrxName(), sql.toString(), get_ID(), dateAcct);
+		if (no <= 0)
+			return true;
+		
+		MInOutLine[] sLines = getLines(false);
+		for (MInOutLine sLine : sLines) {
+			int AD_Org_ID = sLine.getAD_Org_ID();
+			int M_AttributeSetInstance_ID = sLine.getM_AttributeSetInstance_ID();
+
+			if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
+			{
+				AD_Org_ID = 0;
+				M_AttributeSetInstance_ID = 0;
+			}
+			else if (MAcctSchema.COSTINGLEVEL_Organization.equals(as.getCostingLevel()))
+				M_AttributeSetInstance_ID = 0;
+			else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
+				AD_Org_ID = 0;
+			
+			MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), as.getCostingMethod(), AD_Org_ID);
+			
+			int M_CostDetail_ID = 0;
+			if (!isSOTrx()) {
+				MMatchPO[] mMatchPOList = MMatchPO.get(getCtx(), sLine.getM_InOutLine_ID(), get_TrxName());
+				for (MMatchPO mMatchPO : mMatchPOList)
+				{
+					int C_OrderLine_ID = mMatchPO.getC_OrderLine_ID();
+					Timestamp dateAcct0 = mMatchPO.getDateAcct();
+					if (mMatchPO.getReversal_ID() > 0 && mMatchPO.get_ID() > mMatchPO.getReversal_ID()) {
+						C_OrderLine_ID = mMatchPO.getReversal().getC_OrderLine_ID();
+						dateAcct0 = mMatchPO.getReversal().getDateAcct();
+					}
+					MCostDetail cd = MCostDetail.getOrder(as, mMatchPO.getM_Product_ID(), mMatchPO.getM_AttributeSetInstance_ID(),
+							C_OrderLine_ID, 0, dateAcct0, get_TrxName());
+					if (cd != null)
+						M_CostDetail_ID = cd.getM_CostDetail_ID();
+				}
+				
+				if (M_CostDetail_ID == 0) 
+				{
+					MCostHistory history = MCostHistory.get(getCtx(), getAD_Client_ID(), AD_Org_ID, sLine.getM_Product_ID(), 
+							as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getCostingMethod(), ce.getM_CostElement_ID(),
+							M_AttributeSetInstance_ID, dateAcct, get_TrxName());
+					if (history != null)
+						M_CostDetail_ID = history.getM_CostDetail_ID();
+				}
+				
+				if (M_CostDetail_ID > 0) {
+					MCostDetail.periodClosedCheckForDocsAfterBackDateTrx(getAD_Client_ID(), as.getC_AcctSchema_ID(), 
+							sLine.getM_Product_ID(), M_CostDetail_ID, dateAcct, get_TrxName());
+				}
+			} else {
+				int M_InOutLine_ID = sLine.getM_InOutLine_ID();
+				if (sLine.getReversalLine_ID() > 0 && sLine.get_ID() > sLine.getReversalLine_ID())
+					M_InOutLine_ID = sLine.getReversalLine_ID();
+				MCostDetail cd = MCostDetail.getShipment(as, sLine.getM_Product_ID(), M_AttributeSetInstance_ID, 
+						M_InOutLine_ID, 0, get_TrxName());
+				if (cd != null)
+					M_CostDetail_ID = cd.getM_CostDetail_ID();
+				else {
+					MCostHistory history = MCostHistory.get(getCtx(), getAD_Client_ID(), AD_Org_ID, sLine.getM_Product_ID(), 
+							as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getCostingMethod(), ce.getM_CostElement_ID(),
+							M_AttributeSetInstance_ID, dateAcct, get_TrxName());
+					if (history != null)
+						M_CostDetail_ID = history.getM_CostDetail_ID();
+				}
+				
+				if (M_CostDetail_ID > 0) {
+					MCostDetail.periodClosedCheckForDocsAfterBackDateTrx(getAD_Client_ID(), as.getC_AcctSchema_ID(), 
+							sLine.getM_Product_ID(), M_CostDetail_ID, dateAcct, get_TrxName());
+				}
+			}
+		}
+		return true;
 	}
 }	//	MInOut

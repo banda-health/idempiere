@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for B_BuyerFunds
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="B_BuyerFunds")
-public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent 
+public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_B_BuyerFunds (Properties ctx, int B_BuyerFunds_ID, String trxName)
@@ -61,6 +61,32 @@ public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_B_BuyerFunds (Properties ctx, String B_BuyerFunds_UU, String trxName)
+    {
+      super (ctx, B_BuyerFunds_UU, trxName);
+      /** if (B_BuyerFunds_UU == null)
+        {
+			setAD_User_ID (0);
+			setB_BuyerFunds_ID (0);
+			setCommittedAmt (Env.ZERO);
+			setNonCommittedAmt (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_B_BuyerFunds (Properties ctx, String B_BuyerFunds_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, B_BuyerFunds_UU, trxName, virtualColumns);
+      /** if (B_BuyerFunds_UU == null)
+        {
+			setAD_User_ID (0);
+			setB_BuyerFunds_ID (0);
+			setCommittedAmt (Env.ZERO);
+			setNonCommittedAmt (Env.ZERO);
+        } */
+    }
+
     /** Load Constructor */
     public X_B_BuyerFunds (Properties ctx, ResultSet rs, String trxName)
     {
@@ -68,7 +94,7 @@ public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -120,7 +146,7 @@ public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getAD_User_ID()));
     }
@@ -160,25 +186,6 @@ public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent
 	public String getB_BuyerFunds_UU()
 	{
 		return (String)get_Value(COLUMNNAME_B_BuyerFunds_UU);
-	}
-
-	/** Set Committed Amount.
-		@param CommittedAmt The (legal) commitment amount
-	*/
-	public void setCommittedAmt (BigDecimal CommittedAmt)
-	{
-		set_Value (COLUMNNAME_CommittedAmt, CommittedAmt);
-	}
-
-	/** Get Committed Amount.
-		@return The (legal) commitment amount
-	  */
-	public BigDecimal getCommittedAmt()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_CommittedAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
 	}
 
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
@@ -237,7 +244,26 @@ public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Not Committed Aount.
+	/** Set Committed Amount.
+		@param CommittedAmt The (legal) commitment amount
+	*/
+	public void setCommittedAmt (BigDecimal CommittedAmt)
+	{
+		set_Value (COLUMNNAME_CommittedAmt, CommittedAmt);
+	}
+
+	/** Get Committed Amount.
+		@return The (legal) commitment amount
+	  */
+	public BigDecimal getCommittedAmt()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_CommittedAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Not Committed Amount.
 		@param NonCommittedAmt Amount not committed yet
 	*/
 	public void setNonCommittedAmt (BigDecimal NonCommittedAmt)
@@ -245,7 +271,7 @@ public class X_B_BuyerFunds extends PO implements I_B_BuyerFunds, I_Persistent
 		set_Value (COLUMNNAME_NonCommittedAmt, NonCommittedAmt);
 	}
 
-	/** Get Not Committed Aount.
+	/** Get Not Committed Amount.
 		@return Amount not committed yet
 	  */
 	public BigDecimal getNonCommittedAmt()

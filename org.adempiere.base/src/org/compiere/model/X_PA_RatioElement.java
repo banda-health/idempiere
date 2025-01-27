@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PA_RatioElement
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="PA_RatioElement")
-public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persistent 
+public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_PA_RatioElement (Properties ctx, int PA_RatioElement_ID, String trxName)
@@ -67,6 +67,38 @@ public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persis
         } */
     }
 
+    /** Standard Constructor */
+    public X_PA_RatioElement (Properties ctx, String PA_RatioElement_UU, String trxName)
+    {
+      super (ctx, PA_RatioElement_UU, trxName);
+      /** if (PA_RatioElement_UU == null)
+        {
+			setName (null);
+			setPA_RatioElement_ID (0);
+			setPA_Ratio_ID (0);
+			setRatioElementType (null);
+			setRatioOperand (null);
+// P
+			setSeqNo (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_RatioElement (Properties ctx, String PA_RatioElement_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_RatioElement_UU, trxName, virtualColumns);
+      /** if (PA_RatioElement_UU == null)
+        {
+			setName (null);
+			setPA_RatioElement_ID (0);
+			setPA_Ratio_ID (0);
+			setRatioElementType (null);
+			setRatioOperand (null);
+// P
+			setSeqNo (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_PA_RatioElement (Properties ctx, ResultSet rs, String trxName)
     {
@@ -74,7 +106,7 @@ public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persis
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -239,34 +271,6 @@ public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persis
 		return (String)get_Value(COLUMNNAME_PA_RatioElement_UU);
 	}
 
-	public org.compiere.model.I_PA_Ratio getPA_Ratio() throws RuntimeException
-	{
-		return (org.compiere.model.I_PA_Ratio)MTable.get(getCtx(), org.compiere.model.I_PA_Ratio.Table_ID)
-			.getPO(getPA_Ratio_ID(), get_TrxName());
-	}
-
-	/** Set Ratio.
-		@param PA_Ratio_ID Performance Ratio
-	*/
-	public void setPA_Ratio_ID (int PA_Ratio_ID)
-	{
-		if (PA_Ratio_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_PA_Ratio_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_PA_Ratio_ID, Integer.valueOf(PA_Ratio_ID));
-	}
-
-	/** Get Ratio.
-		@return Performance Ratio
-	  */
-	public int getPA_Ratio_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PA_Ratio_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_PA_Ratio getPA_RatioUsed() throws RuntimeException
 	{
 		return (org.compiere.model.I_PA_Ratio)MTable.get(getCtx(), org.compiere.model.I_PA_Ratio.Table_ID)
@@ -295,6 +299,34 @@ public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persis
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_PA_Ratio getPA_Ratio() throws RuntimeException
+	{
+		return (org.compiere.model.I_PA_Ratio)MTable.get(getCtx(), org.compiere.model.I_PA_Ratio.Table_ID)
+			.getPO(getPA_Ratio_ID(), get_TrxName());
+	}
+
+	/** Set Ratio.
+		@param PA_Ratio_ID Performance Ratio
+	*/
+	public void setPA_Ratio_ID (int PA_Ratio_ID)
+	{
+		if (PA_Ratio_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_PA_Ratio_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_PA_Ratio_ID, Integer.valueOf(PA_Ratio_ID));
+	}
+
+	/** Get Ratio.
+		@return Performance Ratio
+	  */
+	public int getPA_Ratio_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PA_Ratio_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** PostingType AD_Reference_ID=125 */
 	public static final int POSTINGTYPE_AD_Reference_ID=125;
 	/** Actual = A */
@@ -307,7 +339,7 @@ public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persis
 	public static final String POSTINGTYPE_Reservation = "R";
 	/** Statistical = S */
 	public static final String POSTINGTYPE_Statistical = "S";
-	/** Set PostingType.
+	/** Set Posting Type.
 		@param PostingType The type of posted amount for the transaction
 	*/
 	public void setPostingType (String PostingType)
@@ -316,7 +348,7 @@ public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persis
 		set_Value (COLUMNNAME_PostingType, PostingType);
 	}
 
-	/** Get PostingType.
+	/** Get Posting Type.
 		@return The type of posted amount for the transaction
 	  */
 	public String getPostingType()
@@ -400,7 +432,7 @@ public class X_PA_RatioElement extends PO implements I_PA_RatioElement, I_Persis
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getSeqNo()));
     }

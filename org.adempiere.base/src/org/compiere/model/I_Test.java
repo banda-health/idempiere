@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for Test
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_Test 
 {
@@ -35,11 +35,47 @@ public interface I_Test
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
 
-    /** AccessLevel = 4 - System 
+    /** AccessLevel = 7 - System - Client - Org 
      */
-    BigDecimal accessLevel = BigDecimal.valueOf(4);
+    BigDecimal accessLevel = BigDecimal.valueOf(7);
 
     /** Load Meta Data */
+
+    /** Column name AD_Client_ID */
+    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+
+	/** Get Tenant.
+	  * Tenant for this installation.
+	  */
+	public int getAD_Client_ID();
+
+    /** Column name AD_Org_ID */
+    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
+
+	/** Set Organization.
+	  * Organizational entity within tenant
+	  */
+	public void setAD_Org_ID (int AD_Org_ID);
+
+	/** Get Organization.
+	  * Organizational entity within tenant
+	  */
+	public int getAD_Org_ID();
+
+    /** Column name AD_Table_ID */
+    public static final String COLUMNNAME_AD_Table_ID = "AD_Table_ID";
+
+	/** Set Table.
+	  * Database Table information
+	  */
+	public void setAD_Table_ID (int AD_Table_ID);
+
+	/** Get Table.
+	  * Database Table information
+	  */
+	public int getAD_Table_ID();
+
+	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
     /** Column name Account_Acct */
     public static final String COLUMNNAME_Account_Acct = "Account_Acct";
@@ -52,39 +88,18 @@ public interface I_Test
 
 	public I_C_ValidCombination getAccount_A() throws RuntimeException;
 
-    /** Column name AD_Client_ID */
-    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
-
-	/** Get Client.
-	  * Client/Tenant for this installation.
-	  */
-	public int getAD_Client_ID();
-
-    /** Column name AD_Org_ID */
-    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
-
-	/** Set Organization.
-	  * Organizational entity within client
-	  */
-	public void setAD_Org_ID (int AD_Org_ID);
-
-	/** Get Organization.
-	  * Organizational entity within client
-	  */
-	public int getAD_Org_ID();
-
     /** Column name BinaryData */
     public static final String COLUMNNAME_BinaryData = "BinaryData";
 
 	/** Set Binary Data.
 	  * Binary Data
 	  */
-	public void setBinaryData (int BinaryData);
+	public void setBinaryData (byte[] BinaryData);
 
 	/** Get Binary Data.
 	  * Binary Data
 	  */
-	public int getBinaryData();
+	public byte[] getBinaryData();
 
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
@@ -116,19 +131,6 @@ public interface I_Test
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
-    /** Column name CharacterData */
-    public static final String COLUMNNAME_CharacterData = "CharacterData";
-
-	/** Set Character Data.
-	  * Long Character Field
-	  */
-	public void setCharacterData (String CharacterData);
-
-	/** Get Character Data.
-	  * Long Character Field
-	  */
-	public String getCharacterData();
-
     /** Column name C_Location_ID */
     public static final String COLUMNNAME_C_Location_ID = "C_Location_ID";
 
@@ -143,15 +145,6 @@ public interface I_Test
 	public int getC_Location_ID();
 
 	public I_C_Location getC_Location() throws RuntimeException;
-
-    /** Column name Color */
-    public static final String COLUMNNAME_Color = "Color";
-
-	/** Set Color	  */
-	public void setColor (String Color);
-
-	/** Get Color	  */
-	public String getColor();
 
     /** Column name C_Payment_ID */
     public static final String COLUMNNAME_C_Payment_ID = "C_Payment_ID";
@@ -168,6 +161,43 @@ public interface I_Test
 
 	public org.compiere.model.I_C_Payment getC_Payment() throws RuntimeException;
 
+    /** Column name C_UOM_ID */
+    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
+
+	/** Set UOM.
+	  * Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID);
+
+	/** Get UOM.
+	  * Unit of Measure
+	  */
+	public int getC_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
+
+    /** Column name CharacterData */
+    public static final String COLUMNNAME_CharacterData = "CharacterData";
+
+	/** Set Character Data.
+	  * Long Character Field
+	  */
+	public void setCharacterData (String CharacterData);
+
+	/** Get Character Data.
+	  * Long Character Field
+	  */
+	public String getCharacterData();
+
+    /** Column name Color */
+    public static final String COLUMNNAME_Color = "Color";
+
+	/** Set Color	  */
+	public void setColor (String Color);
+
+	/** Get Color	  */
+	public String getColor();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -183,21 +213,6 @@ public interface I_Test
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_UOM_ID */
-    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
-
-	/** Set UOM.
-	  * Unit of Measure
-	  */
-	public void setC_UOM_ID (int C_UOM_ID);
-
-	/** Get UOM.
-	  * Unit of Measure
-	  */
-	public int getC_UOM_ID();
-
-	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
@@ -237,6 +252,19 @@ public interface I_Test
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name JsonData */
+    public static final String COLUMNNAME_JsonData = "JsonData";
+
+	/** Set JSON Data.
+	  * The json field stores json data.
+	  */
+	public void setJsonData (String JsonData);
+
+	/** Get JSON Data.
+	  * The json field stores json data.
+	  */
+	public String getJsonData();
 
     /** Column name M_Locator_ID */
     public static final String COLUMNNAME_M_Locator_ID = "M_Locator_ID";
@@ -303,6 +331,28 @@ public interface I_Test
 	/** Get Process Now	  */
 	public boolean isProcessing();
 
+    /** Column name Record_ID */
+    public static final String COLUMNNAME_Record_ID = "Record_ID";
+
+	/** Set Record ID.
+	  * Direct internal record ID
+	  */
+	public void setRecord_ID (int Record_ID);
+
+	/** Get Record ID.
+	  * Direct internal record ID
+	  */
+	public int getRecord_ID();
+
+    /** Column name Record_UU */
+    public static final String COLUMNNAME_Record_UU = "Record_UU";
+
+	/** Set Record UUID	  */
+	public void setRecord_UU (String Record_UU);
+
+	/** Get Record UUID	  */
+	public String getRecord_UU();
+
     /** Column name T_Amount */
     public static final String COLUMNNAME_T_Amount = "T_Amount";
 
@@ -330,37 +380,6 @@ public interface I_Test
 	/** Get DateTime	  */
 	public Timestamp getT_DateTime();
 
-    /** Column name Test_ID */
-    public static final String COLUMNNAME_Test_ID = "Test_ID";
-
-	/** Set Test ID	  */
-	public void setTest_ID (int Test_ID);
-
-	/** Get Test ID	  */
-	public int getTest_ID();
-
-    /** Column name Test_UU */
-    public static final String COLUMNNAME_Test_UU = "Test_UU";
-
-	/** Set Test_UU	  */
-	public void setTest_UU (String Test_UU);
-
-	/** Get Test_UU	  */
-	public String getTest_UU();
-
-    /** Column name TestVirtualQty */
-    public static final String COLUMNNAME_TestVirtualQty = "TestVirtualQty";
-
-	/** Set Virtual Quantity.
-	  * Used only for testing purposes
-	  */
-	public void setTestVirtualQty (BigDecimal TestVirtualQty);
-
-	/** Get Virtual Quantity.
-	  * Used only for testing purposes
-	  */
-	public BigDecimal getTestVirtualQty();
-
     /** Column name T_Integer */
     public static final String COLUMNNAME_T_Integer = "T_Integer";
 
@@ -387,6 +406,50 @@ public interface I_Test
 
 	/** Get Qty	  */
 	public BigDecimal getT_Qty();
+
+    /** Column name T_Timestamp */
+    public static final String COLUMNNAME_T_Timestamp = "T_Timestamp";
+
+	/** Set Timestamp.
+	  * Timestamp with time zone
+	  */
+	public void setT_Timestamp (Timestamp T_Timestamp);
+
+	/** Get Timestamp.
+	  * Timestamp with time zone
+	  */
+	public Timestamp getT_Timestamp();
+
+    /** Column name TestVirtualQty */
+    public static final String COLUMNNAME_TestVirtualQty = "TestVirtualQty";
+
+	/** Set Virtual Quantity.
+	  * Used only for testing purposes
+	  */
+	public void setTestVirtualQty (BigDecimal TestVirtualQty);
+
+	/** Get Virtual Quantity.
+	  * Used only for testing purposes
+	  */
+	public BigDecimal getTestVirtualQty();
+
+    /** Column name Test_ID */
+    public static final String COLUMNNAME_Test_ID = "Test_ID";
+
+	/** Set Test ID	  */
+	public void setTest_ID (int Test_ID);
+
+	/** Get Test ID	  */
+	public int getTest_ID();
+
+    /** Column name Test_UU */
+    public static final String COLUMNNAME_Test_UU = "Test_UU";
+
+	/** Set Test_UU	  */
+	public void setTest_UU (String Test_UU);
+
+	/** Get Test_UU	  */
+	public String getTest_UU();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

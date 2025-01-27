@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for PP_Product_Planning
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_PP_Product_Planning 
@@ -46,8 +46,8 @@ public interface I_PP_Product_Planning
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_PP_Product_Planning
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -281,17 +281,6 @@ public interface I_PP_Product_Planning
 	/** Get Order Qty	  */
 	public BigDecimal getOrder_Qty();
 
-    /** Column name Planner_ID */
-    public static final String COLUMNNAME_Planner_ID = "Planner_ID";
-
-	/** Set Planner	  */
-	public void setPlanner_ID (int Planner_ID);
-
-	/** Get Planner	  */
-	public int getPlanner_ID();
-
-	public org.compiere.model.I_AD_User getPlanner() throws RuntimeException;
-
     /** Column name PP_Product_BOM_ID */
     public static final String COLUMNNAME_PP_Product_BOM_ID = "PP_Product_BOM_ID";
 
@@ -329,18 +318,16 @@ public interface I_PP_Product_Planning
 	/** Get PP_Product_Planning_UU	  */
 	public String getPP_Product_Planning_UU();
 
-    /** Column name SafetyStock */
-    public static final String COLUMNNAME_SafetyStock = "SafetyStock";
+    /** Column name Planner_ID */
+    public static final String COLUMNNAME_Planner_ID = "Planner_ID";
 
-	/** Set Safety Stock Qty.
-	  * Safety stock is a term used to describe a level of stock that is maintained below the cycle stock to buffer against stock-outs
-	  */
-	public void setSafetyStock (BigDecimal SafetyStock);
+	/** Set Planner	  */
+	public void setPlanner_ID (int Planner_ID);
 
-	/** Get Safety Stock Qty.
-	  * Safety stock is a term used to describe a level of stock that is maintained below the cycle stock to buffer against stock-outs
-	  */
-	public BigDecimal getSafetyStock();
+	/** Get Planner	  */
+	public int getPlanner_ID();
+
+	public org.compiere.model.I_AD_User getPlanner() throws RuntimeException;
 
     /** Column name S_Resource_ID */
     public static final String COLUMNNAME_S_Resource_ID = "S_Resource_ID";
@@ -357,6 +344,19 @@ public interface I_PP_Product_Planning
 
 	public org.compiere.model.I_S_Resource getS_Resource() throws RuntimeException;
 
+    /** Column name SafetyStock */
+    public static final String COLUMNNAME_SafetyStock = "SafetyStock";
+
+	/** Set Safety Stock Qty.
+	  * Safety stock is a term used to describe a level of stock that is maintained below the cycle stock to buffer against stock-outs
+	  */
+	public void setSafetyStock (BigDecimal SafetyStock);
+
+	/** Get Safety Stock Qty.
+	  * Safety stock is a term used to describe a level of stock that is maintained below the cycle stock to buffer against stock-outs
+	  */
+	public BigDecimal getSafetyStock();
+
     /** Column name TimeFence */
     public static final String COLUMNNAME_TimeFence = "TimeFence";
 
@@ -369,10 +369,10 @@ public interface I_PP_Product_Planning
     /** Column name TransfertTime */
     public static final String COLUMNNAME_TransfertTime = "TransfertTime";
 
-	/** Set Transfert Time	  */
+	/** Set Transfer Time	  */
 	public void setTransfertTime (BigDecimal TransfertTime);
 
-	/** Get Transfert Time	  */
+	/** Get Transfer Time	  */
 	public BigDecimal getTransfertTime();
 
     /** Column name Updated */

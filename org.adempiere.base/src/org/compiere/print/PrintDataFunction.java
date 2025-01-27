@@ -16,14 +16,16 @@
  *****************************************************************************/
 package org.compiere.print;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 
 /**
- * Print Data Function
+ * Print Data Function (Sum, Count, Average, etc) Node
  *
  * @author 	Jorg Janke
  * @version $Id: PrintDataFunction.java,v 1.3 2006/07/30 00:53:02 jjanke Exp $
@@ -40,7 +42,6 @@ public class PrintDataFunction
 	{
 	}	//	PrintDataFunction
 
-
 	/** The Sum				*/
 	private BigDecimal	m_sum = Env.ZERO;
 	/** The Count			*/
@@ -51,6 +52,10 @@ public class PrintDataFunction
 	private BigDecimal	m_min = null;
 	/** Maximum				*/
 	private BigDecimal	m_max = null;
+	/** Minimum Date		*/
+	private Timestamp	m_minDate = null;
+	/** Maximum	Date		*/
+	private Timestamp	m_maxDate = null;
 	/** Sum of Squares		*/
 	private BigDecimal	m_sumSquare = Env.ZERO;
 
@@ -69,7 +74,6 @@ public class PrintDataFunction
 	/** Deviation	*/
 	static public final char		F_DEVIATION = 'D';	//	sigma
 
-
 	/** Function Keys							*/
 	static private final char[]		FUNCTIONS = new char[]
 		{F_SUM,     F_MEAN,    F_COUNT,   F_MIN,     F_MAX,     F_VARIANCE, F_DEVIATION};
@@ -82,45 +86,65 @@ public class PrintDataFunction
 
 	/**
 	 * 	Add Value to Counter
-	 * 	@param bd data
+	 * 	@param s data
 	 */
-	public void addValue (BigDecimal bd)
+	public void addValue (Serializable s)
 	{
-		if (bd != null)
+		if (s != null)
 		{
-			//	Sum
-			m_sum = m_sum.add(bd);
 			//	Count
 			m_count++;
-			//	Min
-			if (m_min == null)
-				m_min = bd;
-			m_min = m_min.min(bd);
-			//	Max
-			if (m_max == null)
-				m_max = bd;
-			m_max = m_max.max(bd);
-			//	Sum of Squares
-			m_sumSquare = m_sumSquare.add (bd.multiply(bd));
+			if(s instanceof BigDecimal) {
+				BigDecimal bdVaue =(BigDecimal)s;
+				//	Sum
+				m_sum = m_sum.add(bdVaue);
+				//	Min
+				if (m_min == null)
+					m_min = bdVaue;
+				m_min = m_min.min(bdVaue);
+				//	Max
+				if (m_max == null)
+					m_max = bdVaue;
+				m_max = m_max.max(bdVaue);
+				//	Sum of Squares
+				m_sumSquare = m_sumSquare.add (bdVaue.multiply(bdVaue));
+			}
+			else if(s instanceof Timestamp) {
+				Timestamp t = (Timestamp) s;
+				//	Min Timestamp
+				if ((m_minDate == null) || (m_minDate.after(t)))
+					m_minDate = t;
+				//	Max Timestamp
+				if ((m_maxDate == null) || (m_maxDate.before(t)))
+					m_maxDate = t;
+			}
 		}
 		m_totalCount++;
 	}	//	addValue
 
 	/**
 	 * 	Get Function Value
-	 *  @param function function
+	 *  @param function function constant (F_*)
 	 *  @return function value
 	 */
-	public BigDecimal getValue(char function)
+	public Serializable getValue(char function)
 	{
 		//	Sum
 		if (function == F_SUM)
 			return m_sum;
 		//	Min/Max
-		if (function == F_MIN)
-			return m_min;
-		if (function == F_MAX)
-			return m_max;
+		if (function == F_MIN) {
+			if(m_minDate != null)
+				return m_minDate;
+			else
+				return m_min;
+		}
+		if (function == F_MAX) {
+			if(m_maxDate != null)
+				return m_maxDate;
+			else
+				return m_max;
+		}
 		//	Count
 		BigDecimal count = new BigDecimal(m_count);
 		if (function == F_COUNT)
@@ -166,12 +190,15 @@ public class PrintDataFunction
 		m_sumSquare = Env.ZERO;
 		m_min = null;
 		m_max = null;
+		m_minDate = null;
+		m_maxDate = null;
 	}	//	reset
 
 	/**
 	 * 	String Representation
 	 * 	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder("[")
@@ -184,11 +211,9 @@ public class PrintDataFunction
 		return sb.toString();
 	}	//	toString
 
-	/*************************************************************************/
-
 	/**
-	 * 	Get Function Symbol of function
-	 * 	@param function function
+	 * 	Get Symbol of function
+	 * 	@param function function constant (F_*)
 	 * 	@return function symbol
 	 */
 	static public String getFunctionSymbol (char function)
@@ -202,8 +227,8 @@ public class PrintDataFunction
 	}	//	getFunctionSymbol
 
 	/**
-	 * 	Get Function Name of function
-	 * 	@param function function
+	 * 	Get Name of function
+	 * 	@param function function constant (F_*)
 	 * 	@return function name
 	 */
 	static public String getFunctionName (char function)
@@ -218,9 +243,9 @@ public class PrintDataFunction
 
 	/**
 	 * Get DisplayType of function
-	 * @param function function
+	 * @param function function constant (F_*)
 	 * @param displayType columns display type
-	 * @return function name
+	 * @return display type for function
 	 */
 	static public int getFunctionDisplayType (char function, int displayType)
 	{

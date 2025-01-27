@@ -24,10 +24,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import org.adempiere.base.IModelFactory;
@@ -36,6 +37,7 @@ import org.adempiere.base.Service;
 import org.adempiere.model.GenericPO;
 import org.compiere.db.AdempiereDatabase;
 import org.compiere.db.Database;
+import org.compiere.db.partition.ITablePartitionService;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -67,12 +69,12 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7981455044208282721L;
+	private static final long serialVersionUID = 6774131577483620665L;
 
 	public final static int MAX_OFFICIAL_ID = 999999;
 
 	/**
-	 * 	Get Table from Cache (immutable)
+	 * 	Get MTable from Cache (immutable)
 	 *	@param AD_Table_ID id
 	 *	@return MTable
 	 */
@@ -82,7 +84,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}
 	
 	/** 
-	 * 	Get Table from Cache (immutable)
+	 * 	Get MTable from Cache (immutable)
 	 *	@param ctx context
 	 *	@param AD_Table_ID id
 	 *	@return MTable
@@ -93,7 +95,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	get
 
 	/**
-	 * 	Get Table from Cache (immutable)
+	 * 	Get MTable from Cache (immutable)
 	 *	@param ctx context
 	 *	@param AD_Table_ID id
 	 *	@param trxName transaction
@@ -131,10 +133,10 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}
 	
 	/**
-	 * 	Get Table from Cache
+	 * 	Get MTable from Cache
 	 *	@param ctx context
 	 *	@param tableName case insensitive table name
-	 *	@return Table
+	 *	@return MTable
 	 */
 	public static synchronized MTable get (Properties ctx, String tableName)
 	{
@@ -142,19 +144,19 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	get
 	
 	/**
-	 * 	Get Table from Cache
+	 * 	Get MTable from Cache
 	 *	@param ctx context
 	 *	@param tableName case insensitive table name
-	 *	@return Table
+	 *  @param trxName
+	 *	@return MTable
 	 */
 	public static synchronized MTable get (Properties ctx, String tableName, String trxName)
 	{
 		if (tableName == null)
 			return null;
-		Iterator<MTable> it = s_cache.values().iterator();
-		while (it.hasNext())
+		MTable[] tables = s_cache.values().toArray(new MTable[0]);
+		for (MTable retValue : tables)
 		{
-			MTable retValue = it.next();
 			if (tableName.equalsIgnoreCase(retValue.getTableName()))
 			{
 				return s_cache.get (ctx, retValue.get_ID(), e -> new MTable(ctx, e));
@@ -195,16 +197,37 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	 * 	Get Table Name
 	 *	@param ctx context
 	 *	@param AD_Table_ID table
-	 *	@return tavle name
+	 *	@return table name
 	 */
 	public static String getTableName (Properties ctx, int AD_Table_ID)
 	{
 		return MTable.get(ctx, AD_Table_ID).getTableName();
 	}	//	getTableName
 
-
+	/**
+	 * Get table accessible by current effective role (via window access).<br/>
+	 * @param withEmptyElement if true, first element of the return array is an empty element with (-1,"")
+	 * @param trxName optional transaction name
+	 * @return table records (AD_Table_ID, translated Name), order by translated name
+	 */
+	public static KeyNamePair[] getWithWindowAccessKeyNamePairs(boolean withEmptyElement, String trxName)
+	{
+		final MRole role = MRole.getDefault(); 
+		boolean trl = !Env.isBaseLanguage(Env.getCtx(), "AD_Table");
+		String lang = Env.getAD_Language(Env.getCtx());
+		String sql = "SELECT DISTINCT t.AD_Table_ID,"
+				+ (trl ? "trl.Name" : "t.Name")
+			+ " FROM AD_Table t INNER JOIN AD_Tab tab ON (tab.AD_Table_ID=t.AD_Table_ID)"
+			+ " INNER JOIN AD_Window_Access wa ON (tab.AD_Window_ID=wa.AD_Window_ID) "
+			+ (trl ? "LEFT JOIN AD_Table_Trl trl on (trl.AD_Table_ID=t.AD_Table_ID and trl.AD_Language=" + DB.TO_STRING(lang) + ")" : "") 
+			+ " WHERE "+role.getIncludedRolesWhereClause("wa.AD_Role_ID", null) 
+			+ " AND t.IsActive='Y' AND tab.IsActive='Y' "
+			+ "ORDER BY 2";
+		return DB.getKeyNamePairsEx(trxName, sql, withEmptyElement);			
+	}
+	
 	/**	Cache						*/
-	private static ImmutableIntPOCache<Integer,MTable> s_cache = new ImmutableIntPOCache<Integer,MTable>(Table_Name, 20);
+	private static ImmutableIntPOCache<Integer,MTable> s_cache = new ImmutableIntPOCache<Integer,MTable>(Table_Name, Table_Name, 20, 0, false, 0);
 
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MTable.class);
@@ -212,9 +235,9 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	private static final CCache<String, IServiceReferenceHolder<IModelFactory>> s_modelFactoryCache = new CCache<>(null, "IModelFactory", 100, 120, false, 2000);
 
 	/**
-	 * 	Get Persistence Class for Table
+	 * 	Get Java Model Class for Table
 	 *	@param tableName table name
-	 *	@return class or null
+	 *	@return Java model class or null
 	 */
 	public static Class<?> getClass (String tableName)
 	{
@@ -248,7 +271,19 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 		return null;
 	}	//	getClass
 
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_Table_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MTable(Properties ctx, String AD_Table_UU, String trxName) {
+        super(ctx, AD_Table_UU, trxName);
+		if (Util.isEmpty(AD_Table_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param AD_Table_ID id
@@ -258,17 +293,22 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	{
 		super (ctx, AD_Table_ID, trxName);
 		if (AD_Table_ID == 0)
-		{
-			setAccessLevel (ACCESSLEVEL_SystemOnly);	// 4
-			setEntityType (ENTITYTYPE_UserMaintained);	// U
-			setIsChangeLog (false);
-			setIsDeleteable (false);
-			setIsHighVolume (false);
-			setIsSecurityEnabled (false);
-			setIsView (false);	// N
-			setReplicationType (REPLICATIONTYPE_Local);
-		}
+			setInitialDefaults();
 	}	//	MTable
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setAccessLevel (ACCESSLEVEL_SystemOnly);	// 4
+		setEntityType (ENTITYTYPE_UserMaintained);	// U
+		setIsChangeLog (false);
+		setIsDeleteable (false);
+		setIsHighVolume (false);
+		setIsSecurityEnabled (false);
+		setIsView (false);	// N
+		setReplicationType (REPLICATIONTYPE_Local);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -282,7 +322,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	MTable
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MTable(MTable copy) 
@@ -291,7 +331,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -301,7 +341,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -312,32 +352,33 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 		this(ctx, -1, trxName);
 		copyPO(copy);
 		this.m_columns = copy.m_columns != null ? Arrays.stream(copy.m_columns).map(e -> {return new MColumn(ctx, e, trxName);}).toArray(MColumn[]::new): null;
-		this.m_columnNameMap = copy.m_columnNameMap != null ? new HashMap<String, Integer>(copy.m_columnNameMap) : null;
-		this.m_columnIdMap = copy.m_columnIdMap != null ? new HashMap<Integer, Integer>(copy.m_columnIdMap) : null;
+		this.m_columnNameMap = copy.m_columnNameMap != null ? new ConcurrentHashMap<String, Integer>(copy.m_columnNameMap) : null;
+		this.m_columnIdMap = copy.m_columnIdMap != null ? new ConcurrentHashMap<Integer, Integer>(copy.m_columnIdMap) : null;
 		this.m_viewComponents = copy.m_viewComponents != null ? Arrays.stream(copy.m_viewComponents).map(e -> {return new MViewComponent(ctx, e, trxName);}).toArray(MViewComponent[]::new) : null;
 	}
 
-
 	/**	Columns				*/
 	private MColumn[]	m_columns = null;
-	/** column name to index map **/
-	private Map<String, Integer> m_columnNameMap;
-	/** ad_column_id to index map **/
-	private Map<Integer, Integer> m_columnIdMap;
+	/** Key Columns					*/
+	private String[]	m_KeyColumns = null;
+	/** column name to column index map **/
+	private ConcurrentMap<String, Integer> m_columnNameMap;
+	/** ad_column_id to column index map **/
+	private ConcurrentMap<Integer, Integer> m_columnIdMap;
 	/** View Components		*/
 	private MViewComponent[]	m_viewComponents = null;
 
 	/**
 	 * 	Get Columns
-	 *	@param requery requery
-	 *	@return array of columns
+	 *	@param requery true to re-query from DB
+	 *	@return array of column
 	 */
 	public synchronized MColumn[] getColumns (boolean requery)
 	{
 		if (m_columns != null && !requery)
 			return m_columns;
-		m_columnNameMap = new HashMap<String, Integer>();
-		m_columnIdMap = new HashMap<Integer, Integer>();
+		m_columnNameMap = new ConcurrentHashMap<String, Integer>();
+		m_columnIdMap = new ConcurrentHashMap<Integer, Integer>();
 		String sql = "SELECT * FROM AD_Column WHERE AD_Table_ID=? AND IsActive='Y' ORDER BY ColumnName";
 		ArrayList<MColumn> list = new ArrayList<MColumn>();
 		PreparedStatement pstmt = null;
@@ -374,9 +415,9 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	getColumns
 
 	/**
-	 * 	Get Column
+	 * 	Get Column via column name
 	 *	@param columnName (case insensitive)
-	 *	@return column if found
+	 *	@return MColumn if found, null otherwise
 	 */
 	public MColumn getColumn (String columnName)
 	{
@@ -389,8 +430,8 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	getColumn
 
 	/**
-	 *  Get Column Index
-	 *  @param ColumnName column name
+	 *  Get Column Index via column name
+	 *  @param ColumnName column name (case insensitive)
 	 *  @return index of column with ColumnName or -1 if not found
 	 */
 	public synchronized int getColumnIndex (String ColumnName)
@@ -405,9 +446,9 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}   //  getColumnIndex
 
 	/**
-	 *  Column exists and is not virtual?
-	 *  @param ColumnName column name
-	 *  @return boolean - true indicating that the column exists in the table and is not virtual
+	 *  Is column exists and is not virtual ?
+	 *  @param ColumnName column name (case insensitive)
+	 *  @return true if column exists and is not virtual
 	 */
 	public synchronized boolean columnExistsInDB (String ColumnName)
 	{
@@ -417,8 +458,8 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 
 	/**
 	 *  Column exists?
-	 *  @param ColumnName column name
-	 *  @return boolean - true indicating that the column exists in dictionary
+	 *  @param ColumnName column name (case insensitive)
+	 *  @return true if column exists in dictionary
 	 */
 	public synchronized boolean columnExistsInDictionary (String ColumnName)
 	{
@@ -427,8 +468,8 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 
 	/**
 	 *  Get Column Index
-	 *  @param AD_Column_ID column
-	 *  @return index of column with ColumnName or -1 if not found
+	 *  @param AD_Column_ID column id
+	 *  @return index of column with AD_Column_ID or -1 if not found
 	 */
 	public synchronized int getColumnIndex (int AD_Column_ID)
 	{
@@ -442,8 +483,8 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}   //  getColumnIndex
 
 	/**
-	 * 	Table has a single Key
-	 *	@return true if table has single key column
+	 * 	Table is with single primary key
+	 *	@return true if table has single primary key column
 	 */
 	public boolean isSingleKey()
 	{
@@ -453,29 +494,71 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 
 	/**
 	 * 	Get Key Columns of Table
-	 *	@return key columns
+	 *	@return array of key column name
 	 */
 	public String[] getKeyColumns()
 	{
+		if (m_KeyColumns != null)
+			return m_KeyColumns;
 		getColumns(false);
 		ArrayList<String> list = new ArrayList<String>();
 		//
 		for (int i = 0; i < m_columns.length; i++)
 		{
 			MColumn column = m_columns[i];
-			if (column.isKey())
-				return new String[]{column.getColumnName()};
+			if (column.isKey()) {
+				m_KeyColumns = new String[]{column.getColumnName()};
+				return m_KeyColumns;
+			}
 			if (column.isParent())
 				list.add(column.getColumnName());
 		}
+		//check uuid key
+		if (list.isEmpty()) {
+			MColumn uuColumn = getColumn(PO.getUUIDColumnName(getTableName()));
+			if (uuColumn != null) {
+				m_KeyColumns = new String[]{uuColumn.getColumnName()};
+				return m_KeyColumns;
+			}
+		}
 		String[] retValue = new String[list.size()];
 		retValue = list.toArray(retValue);
-		return retValue;
+		m_KeyColumns = retValue;
+		return m_KeyColumns;
 	}	//	getKeyColumns
 	
 	/**
-	 * 	Get Identifier Columns of Table
-	 *	@return Identifier columns
+	 * @return true if table has single key column and the key column name is the same as the table name plus _ID.
+	 */
+	public boolean isIDKeyTable()
+	{
+		String idColName = getTableName() + "_ID";
+		return (getKeyColumns() != null && getKeyColumns().length == 1 && getKeyColumns()[0].equals(idColName));
+	}
+
+	/**
+	 * @return true if table has single key column and the key column name ends with _UU.
+	 */
+	public boolean isUUIDKeyTable()
+	{
+		String uuColName = PO.getUUIDColumnName(getTableName());
+		return (getKeyColumns() != null && getKeyColumns().length == 1 && getKeyColumns()[0].equals(uuColName));
+	}
+	
+	/**
+	 * @return true if table has a UUID column (column name ends with _UU)
+	 */
+	public boolean hasUUIDKey()
+	{
+		String uuColName = PO.getUUIDColumnName(getTableName());
+		if (m_columns == null)
+			getColumns(false);
+		return m_columnNameMap.get(uuColName.toUpperCase()) != null;
+	}
+
+	/**
+	 * 	Get Identifier Columns of Table (IsIdentifier=Y)
+	 *	@return array of identifier column name
 	 */
 	public String[] getIdentifierColumns() {
 		ArrayList<KeyNamePair> listkn = new ArrayList<KeyNamePair>();
@@ -500,12 +583,11 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 		return retValue;
 	}	//	getIdentifierColumns
 
-
-	/**************************************************************************
-	 * 	Get PO Class Instance
-	 *	@param Record_ID record
+	/**
+	 * 	Get PO Instance for this table
+	 *	@param Record_ID record id. 0 to create new record instance, > 0 to load existing record instance.
 	 *	@param trxName
-	 *	@return PO for Record or null
+	 *	@return PO for Record_ID or null
 	 */
 	public PO getPO (int Record_ID, String trxName)
 	{
@@ -528,8 +610,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 				{
 					if (po.get_ID() != Record_ID && Record_ID > 0)
 						po = null;
-					else
-						return po;
+					return po;
 				}
 			}
 			s_modelFactoryCache.remove(tableName);
@@ -548,31 +629,63 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 					{
 						if (po.get_ID() != Record_ID && Record_ID > 0)
 							po = null;
-						else
-						{
-							s_modelFactoryCache.put(tableName, factory);
-							break;
-						}
+						s_modelFactoryCache.put(tableName, factory);
+						break;
 					}
 				}
 			}
 		}
 
-		if (po == null)
+		if (po == null && s_modelFactoryCache.get(tableName) == null)
 		{
 			po = new GenericPO(tableName, getCtx(), Record_ID, trxName);
 			if (po.get_ID() != Record_ID && Record_ID > 0)
 				po = null;
+			// TODO: how to add GenericPO to the s_modelFactoryCache ??
 		}
 
 		return po;
 	}	//	getPO
 
+	private static final ThreadLocal<Map<Integer, String[]>> partialPOResultSetColumns = new ThreadLocal<>();
+	
 	/**
-	 * 	Get PO Class Instance
+	 * Get columns included in result set of {@link #getPO(int, String)} call.<br/>
+	 * Use by {@link #getPartialPO(ResultSet, String[], String)}.
+	 * @param rs result set
+	 * @return columns included in result set of {@link #getPO(int, String)} call
+	 */
+	protected static final String[] getPartialPOResultSetColumns(ResultSet rs) {
+		Map<Integer, String[]> map = partialPOResultSetColumns.get();
+		return map != null ? map.get(rs.hashCode()) : null;
+	}
+	
+	/**
+	 * 	Get PO Instance from result set that only include some of the columns of the PO model.
+	 *	@param rs result set
+	 *  @param selectColumns 
+	 *	@param trxName transaction
+	 *	@return immutable PO instance
+	 */
+	public final PO getPartialPO (ResultSet rs, String[] selectColumns, String trxName)
+	{
+		try {
+			HashMap<Integer, String[]> map = new HashMap<Integer, String[]>();
+			map.put(rs.hashCode(), selectColumns);
+			partialPOResultSetColumns.set(map);
+			PO po = getPO(rs, trxName);
+			po.makeImmutable();
+			return po;
+		} finally {
+			partialPOResultSetColumns.remove();
+		}
+	}
+	
+	/**
+	 * 	Get PO Instance from result set
 	 *	@param rs result set
 	 *	@param trxName transaction
-	 *	@return PO for Record or null
+	 *	@return PO instance
 	 */
 	public PO getPO (ResultSet rs, String trxName)
 	{
@@ -617,11 +730,11 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	getPO
 
 	/**
-	 * Get PO Class Instance
+	 * Get PO Instance
 	 * 
-	 * @param  uuID    UUID
+	 * @param  uuID  UUID. Throw IllegalArgumentException if this is null or empty string.
 	 * @param  trxName transaction
-	 * @return         PO for Record
+	 * @return PO for uuID
 	 */
 	public PO getPOByUU (String uuID, String trxName)
 	{
@@ -632,10 +745,10 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	} // getPOByUU
 
 	/**
-	 * 	Get PO Class Instance
-	 *	@param whereClause where clause
+	 * 	Get PO Instance
+	 *	@param whereClause SQL where clause
 	 *	@param trxName transaction
-	 *	@return PO for Record or null
+	 *	@return PO for whereClause or null
 	 */
 	public PO getPO (String whereClause, String trxName)
 	{
@@ -643,11 +756,11 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	getPO
 
 	/**
-	 * Get PO class instance
-	 * @param whereClause
-	 * @param params
+	 * Get PO instance
+	 * @param whereClause SQL where clause
+	 * @param params parameters for whereClause
 	 * @param trxName
-	 * @return
+	 * @return PO instance or null
 	 */
 	public PO getPO(String whereClause, Object[] params, String trxName)
 	{
@@ -692,43 +805,52 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 		return po;
 	}
 
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (isView() && isDeleteable())
 			setIsDeleteable(false);
-		//
+		// Validate table name is valid DB identifier
 		String error = Database.isValidIdentifier(getTableName());
 		if (!Util.isEmpty(error)) {
 			log.saveError("Error", Msg.getMsg(getCtx(), error) + " [TableName]");
 			return false;
 		}
+				
+		// Validate table partition configuration
+		if (is_ValueChanged(COLUMNNAME_IsPartition)) {
+			ITablePartitionService service = DB.getDatabase().getTablePartitionService();
+			if (service == null) {
+				log.saveError("Error", Msg.getMsg(getCtx(), "DBAdapterNoTablePartitionSupport"));
+				return false;
+			}
+			error = service.isValidConfiguration(this);
+			if (!Util.isEmpty(error)) {
+				log.saveError("Error", Msg.getMsg(getCtx(), error));
+				return false;				
+			}
+		}
+		
 		return true;
 	}	//	beforeSave
 
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
 			return success;
-		//	Sync Table ID
-		MSequence seq = MSequence.get(getCtx(), getTableName(), get_TrxName());
-		if (seq == null || seq.get_ID() == 0)
-			MSequence.createTableSequence(getCtx(), getTableName(), get_TrxName());
-		else if (!seq.getName().equals(getTableName()))
-		{
-			seq.setName(getTableName());
-			seq.saveEx();
+		if(!isView()) {
+			// Create or update table sequence
+			MSequence seq = MSequence.get(getCtx(), getTableName(), get_TrxName());
+			if (seq == null || seq.get_ID() == 0)
+				MSequence.createTableSequence(getCtx(), getTableName(), get_TrxName());
+			else if (!seq.getName().equals(getTableName()))
+			{
+				seq.setName(getTableName());
+				seq.saveEx();
+			}
 		}
+		// Reset logged table list
 		if (newRecord || is_ValueChanged(COLUMNNAME_IsChangeLog)) {
 			MChangeLog.resetLoggedList();
 		}
@@ -737,7 +859,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	afterSave
 
 	/**
-	 * 	Get SQL Create
+	 * 	Get Create table DDL
 	 *	@return create table DDL
 	 */
 	public String getSQLCreate()
@@ -749,15 +871,20 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 			return Database.getDatabase(Database.DB_ORACLE).getSQLCreate(this);
 	}	//	getSQLCreate
 
-	// globalqss
+	/**
+	 * Get AD_Table_ID via table name
+	 * @param tableName
+	 * @return AD_Table_ID
+	 */
 	public static int getTable_ID(String tableName) {
 		return getTable_ID(tableName, null);
 	}
+	
 	/**
-	 * 	Grant independence to GenerateModel from AD_Table_ID
+	 * 	Get AD_Table_ID via table name
 	 *	@param tableName String
 	 *  @param trxName
-	 *	@return int retValue
+	 *	@return AD_Table_ID
 	 */
 	public static int getTable_ID(String tableName, String trxName) {
 		MTable table = get(Env.getCtx(), tableName, trxName);
@@ -765,10 +892,10 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}
 
 	/**
-	 * Create query to retrieve one or more PO.
-	 * @param whereClause
+	 * Create new query for whereClause
+	 * @param whereClause SQL whereClause
 	 * @param trxName
-	 * @return Query
+	 * @return new Query instance
 	 */
 	public Query createQuery(String whereClause, String trxName)
 	{
@@ -776,8 +903,8 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}
 	
 	/**
-	 * 	Get view components
-	 *  @param reload reload data
+	 * 	Get active view components
+	 *  @param reload true to reload from DB
 	 *	@return array of view component
 	 */
 	public MViewComponent[] getViewComponent(boolean reload)
@@ -805,6 +932,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder ("MTable[");
@@ -813,19 +941,19 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	toString
 
 	/**
-	 * 	Verify if the table contains ID=0
-	 *	@return true if table has zero ID
+	 * 	Verify if the table has record with ID=0
+	 *	@return true if table has record with ID=0
 	 */
 	public static boolean isZeroIDTable(String tablename) {
 		return (tablename.equals("AD_Org") ||
 				tablename.equals("AD_OrgInfo") ||
 				tablename.equals("AD_Client") || // IDEMPIERE-668
+				tablename.equals("AD_ClientInfo") ||
 				tablename.equals("AD_AllClients_V") ||
 				tablename.equals("AD_ReportView") ||
 				tablename.equals("AD_Role") ||
 				tablename.equals("AD_AllRoles_V") ||
 				tablename.equals("AD_System") ||
-				tablename.equals("AD_User") ||
 				tablename.equals("AD_AllUsers_V") ||
 				tablename.equals("C_DocType") ||
 				tablename.equals("GL_Category") ||
@@ -846,5 +974,213 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 		return this;
 	}
 
+	/**
+	 * Get first AD_Window that's using this table from AD_Menu.
+	 * @return AD_Window_ID or -1 if not found
+	 */
+	public int getWindowIDFromMenu() {
+		return DB.getSQLValueEx(null, "SELECT a.AD_Window_ID FROM AD_Window a "
+				+ "INNER JOIN AD_Tab b ON (a.AD_Window_ID=b.AD_Window_ID) "
+				+ "INNER JOIN AD_Menu m ON (a.AD_Window_ID=m.AD_Window_ID AND m.IsActive='Y' AND m.Action='W') "
+				+ "WHERE a.IsActive='Y' AND b.IsActive='Y' AND b.AD_Table_ID=? ORDER BY b.TabLevel, a.AD_Window_ID", getAD_Table_ID());
+	}
+
+	/**
+	 * Get the UUID of Zero ID record
+	 * @return UUID or null
+	 */
+	public String getUUIDFromZeroID() {
+		if (! MTable.isZeroIDTable(getTableName()))
+			return null;
+		StringBuilder sqluu = new StringBuilder()
+				.append("SELECT ")
+				.append(PO.getUUIDColumnName(getTableName()))
+				.append(" FROM ")
+				.append(getTableName())
+				.append(" WHERE ")
+				.append(getKeyColumns()[0])
+				.append("=0");
+		String uuidFromZeroID = DB.getSQLValueStringEx(get_TrxName(), sqluu.toString());
+		return uuidFromZeroID;
+	}
+
+	private List<MColumn> partitionKeyColumns;
+	private List<String> partitionKeyColumnNames;
 	
+	/**
+	 * @param requery true to reload from DB
+	 * @return partition key columns
+	 */
+	public List<MColumn> getPartitionKeyColumns(boolean requery)
+	{
+		if (partitionKeyColumns != null && !requery)
+			return partitionKeyColumns;
+		
+		partitionKeyColumnNames = null;
+		
+		String whereClause = MColumn.COLUMNNAME_AD_Table_ID + "=? AND " + MColumn.COLUMNNAME_IsPartitionKey + "='Y'";
+		partitionKeyColumns = new Query(getCtx(), MColumn.Table_Name, whereClause, null)
+				.setParameters(getAD_Table_ID())
+				.setOnlyActiveRecords(true)
+				.setOrderBy(MColumn.COLUMNNAME_SeqNoPartition)
+				.list();
+		return partitionKeyColumns;
+	}
+	
+	/**
+	 * Update {@link #partitionKeyColumnNames} and {@link #partitionKeyColumnNamesAsString}
+	 */
+	private void populatePartitionKeyColumnNames()
+	{
+		List<MColumn> keyColumns = getPartitionKeyColumns(false);
+		partitionKeyColumnNames = new ArrayList<String>();
+		StringBuilder keyColumnsString = new StringBuilder();
+		int columnCount = 0;
+		for (MColumn keyColumn : keyColumns) 
+		{
+			if (columnCount > 0)
+				keyColumnsString.append(",");
+			keyColumnsString.append(keyColumn.getColumnName());			
+			partitionKeyColumnNames.add(keyColumn.getColumnName());
+			++columnCount;
+		}
+	}
+	
+	/**
+	 * @return partition key column names
+	 */
+	public List<String> getPartitionKeyColumnNames()
+	{
+		if (partitionKeyColumnNames != null)
+			return partitionKeyColumnNames;
+		
+		populatePartitionKeyColumnNames();
+		return partitionKeyColumnNames;
+	}
+	
+	/**
+	 * Create and save new X_AD_TablePartition record.
+	 * @param name
+	 * @param expression
+	 * @param trxName
+	 * @param column
+	 * @return new X_AD_TablePartition record
+	 */
+	public X_AD_TablePartition createTablePartition(String name, String expression, String trxName, MColumn column)
+	{
+		return createTablePartition(name, expression, trxName, column, null);
+	}
+	
+	/**
+	 * Create and save new X_AD_TablePartition record.
+	 * @param name
+	 * @param expression
+	 * @param trxName
+	 * @param column
+	 * @param parentPartition
+	 * @return new X_AD_TablePartition record
+	 */
+	public X_AD_TablePartition createTablePartition(String name, String expression, String trxName, MColumn column, X_AD_TablePartition parentPartition)
+	{
+		X_AD_TablePartition partition = new X_AD_TablePartition(Env.getCtx(), 0, trxName);
+		partition.setAD_Table_ID(getAD_Table_ID());
+		partition.setName(name);
+		partition.setExpressionPartition(expression);
+		partition.setAD_Column_ID(column.getAD_Column_ID());
+		if (parentPartition != null)
+			partition.setParent_TablePartition_ID(parentPartition.getAD_TablePartition_ID());
+		partition.saveEx();
+		return partition;
+	}
+	
+	private List<X_AD_TablePartition> tablePartitions;
+	private List<String> tablePartitionNames;
+	
+	/**
+	 * @param requery true to reload from DB
+	 * @param trxName
+	 * @return X_AD_TablePartition records of this table
+	 */
+	public List<X_AD_TablePartition> getTablePartitions(boolean requery, String trxName)
+	{
+		if (tablePartitions != null && !requery)
+			return tablePartitions;
+		
+		tablePartitionNames = null;
+		
+		String whereClause = X_AD_TablePartition.COLUMNNAME_AD_Table_ID + "=?";
+		tablePartitions = new Query(getCtx(), X_AD_TablePartition.Table_Name, whereClause, trxName)
+				.setParameters(getAD_Table_ID())
+				.setOnlyActiveRecords(true)
+				.setOrderBy(X_AD_TablePartition.COLUMNNAME_Name)
+				.list();
+		return tablePartitions;
+	}
+	
+	/**
+	 * @param trxName
+	 * @return list of table partition name
+	 */
+	public List<String> getTablePartitionNames(String trxName)
+	{
+		if (tablePartitionNames != null)
+			return tablePartitionNames;
+		
+		List<X_AD_TablePartition> partitions = getTablePartitions(false, trxName);
+		tablePartitionNames = new ArrayList<String>();
+		for (X_AD_TablePartition partition : partitions)
+			tablePartitionNames.add(partition.getName());
+		return tablePartitionNames;
+	}
+
+	/**
+	 * Get the Unique UU Index name
+	 * @return indexName
+	 */
+	public static String getUUIDIndexName(String tableName) {
+
+		StringBuilder indexName = new StringBuilder().append(PO.getUUIDColumnName(tableName)).append("_idx");
+		if (indexName.length() > AdempiereDatabase.MAX_OBJECT_NAME_LENGTH)
+			indexName = new StringBuilder().append(PO.getUUIDColumnName(tableName).substring(0, AdempiereDatabase.MAX_OBJECT_NAME_LENGTH - 5)).append("uuidx");
+
+		return indexName.toString();
+	}
+
+	private Boolean hasCustomTree = null;
+
+	/**
+	 * If the table has a custom tree defined
+	 * @return
+	 */
+	public boolean hasCustomTree() {
+		if (hasCustomTree == null) {
+			int exists = DB.getSQLValueEx(get_TrxName(), "SELECT 1 FROM AD_Tree WHERE TreeType=? AND AD_Table_ID=? AND IsActive='Y'", MTree_Base.TREETYPE_CustomTable, getAD_Table_ID());
+			hasCustomTree = Boolean.valueOf(exists == 1);
+		}
+		return hasCustomTree.booleanValue();
+	}
+
+	/**
+	 * Get Partition Name of the table of the given level
+	 * @param tableName
+	 * @param primaryLevelOnly - if true, ignore the sub-partition, if exists
+	 * @return table partition name, or empty
+	 */
+	public static String getPartitionName(Properties ctx, String tableName, boolean primaryLevelOnly, String trxName) {
+		if(Util.isEmpty(tableName))
+			return "";
+		
+		String[] partitionColsAll = MTablePartition.getPartitionKeyColumns(ctx, tableName, trxName);
+		
+		if(partitionColsAll.length == 0)
+			return tableName;
+		
+		int level = primaryLevelOnly ? 1 : partitionColsAll.length;
+		StringBuilder partitionName = new StringBuilder();
+		partitionName.append(tableName);
+		for(int i = 0; i < level; i++) {
+			partitionName.append("_").append(partitionColsAll[i]);
+		}
+		return partitionName.toString();
+	}
 }	//	MTable

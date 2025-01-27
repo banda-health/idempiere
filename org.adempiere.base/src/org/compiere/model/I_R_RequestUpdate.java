@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for R_RequestUpdate
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_R_RequestUpdate 
 {
@@ -44,8 +44,8 @@ public interface I_R_RequestUpdate
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_R_RequestUpdate
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -158,34 +158,6 @@ public interface I_R_RequestUpdate
 	  */
 	public BigDecimal getQtySpent();
 
-    /** Column name Result */
-    public static final String COLUMNNAME_Result = "Result";
-
-	/** Set Result.
-	  * Result of the action taken
-	  */
-	public void setResult (String Result);
-
-	/** Get Result.
-	  * Result of the action taken
-	  */
-	public String getResult();
-
-    /** Column name R_Request_ID */
-    public static final String COLUMNNAME_R_Request_ID = "R_Request_ID";
-
-	/** Set Request.
-	  * Request from a Business Partner or Prospect
-	  */
-	public void setR_Request_ID (int R_Request_ID);
-
-	/** Get Request.
-	  * Request from a Business Partner or Prospect
-	  */
-	public int getR_Request_ID();
-
-	public org.compiere.model.I_R_Request getR_Request() throws RuntimeException;
-
     /** Column name R_RequestUpdate_ID */
     public static final String COLUMNNAME_R_RequestUpdate_ID = "R_RequestUpdate_ID";
 
@@ -207,6 +179,34 @@ public interface I_R_RequestUpdate
 
 	/** Get R_RequestUpdate_UU	  */
 	public String getR_RequestUpdate_UU();
+
+    /** Column name R_Request_ID */
+    public static final String COLUMNNAME_R_Request_ID = "R_Request_ID";
+
+	/** Set Request.
+	  * Request from a Business Partner or Prospect
+	  */
+	public void setR_Request_ID (int R_Request_ID);
+
+	/** Get Request.
+	  * Request from a Business Partner or Prospect
+	  */
+	public int getR_Request_ID();
+
+	public org.compiere.model.I_R_Request getR_Request() throws RuntimeException;
+
+    /** Column name Result */
+    public static final String COLUMNNAME_Result = "Result";
+
+	/** Set Result.
+	  * Result of the action taken
+	  */
+	public void setResult (String Result);
+
+	/** Get Result.
+	  * Result of the action taken
+	  */
+	public String getResult();
 
     /** Column name StartTime */
     public static final String COLUMNNAME_StartTime = "StartTime";

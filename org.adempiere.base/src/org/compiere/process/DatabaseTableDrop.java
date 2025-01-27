@@ -22,17 +22,20 @@
  * Contributors:                                                       *
  * - Carlos Ruiz - globalqss                                           *
  **********************************************************************/
-
 package org.compiere.process;
 
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTable;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+/**
+ * Process to drop a DB table.
+ */
 @org.adempiere.base.annotation.Process
 public class DatabaseTableDrop extends SvrProcess {
 
@@ -51,8 +54,7 @@ public class DatabaseTableDrop extends SvrProcess {
 			} else if ("IsEvenWithData".equals(name)) {
 				p_IsEvenWithData = para.getParameterAsBoolean();
 			} else {
-				if (log.isLoggable(Level.INFO))
-					log.log(Level.INFO, "Custom Parameter: " + name + "=" + para.getInfo());
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para);
 			}
 		}
 		p_AD_Table_ID = getRecord_ID();
@@ -61,7 +63,7 @@ public class DatabaseTableDrop extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception {
 		MTable table = new MTable(getCtx(), p_AD_Table_ID, get_TrxName());
-		log.info(table.toString());
+		if (log.isLoggable(Level.INFO)) log.info(table.toString());
 		if (!p_AreYouSure) {
 			throw new AdempiereException(Util.cleanAmp(Msg.getMsg(getCtx(), "Cancel")));
 		}

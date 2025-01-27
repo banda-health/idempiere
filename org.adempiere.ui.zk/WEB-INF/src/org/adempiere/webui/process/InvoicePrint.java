@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MMailText;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.MUser;
@@ -48,7 +49,6 @@ import org.compiere.util.Util;
  *	Print Invoices on Paper or send PDFs
  *
  * 	@author 	Jorg Janke
- * 	@version 	$Id: InvoicePrint.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
 @org.adempiere.base.annotation.Process
 public class InvoicePrint extends SvrProcess
@@ -77,6 +77,7 @@ public class InvoicePrint extends SvrProcess
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
+	@Override
 	protected void prepare()
 	{
 		ProcessInfoParameter[] para = getParameter();
@@ -116,7 +117,7 @@ public class InvoicePrint extends SvrProcess
 			else if (name.equals("DocStatus"))
 				m_DocStatus = (String)para[i].getParameter();
 			else
-				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		if (m_DocumentNo_From != null && m_DocumentNo_From.length() == 0)
 			m_DocumentNo_From = null;
@@ -129,6 +130,7 @@ public class InvoicePrint extends SvrProcess
 	 *  @return Message
 	 *  @throws Exception
 	 */
+	@Override
 	protected String doIt() throws java.lang.Exception
 	{
 		//	Need to have Template

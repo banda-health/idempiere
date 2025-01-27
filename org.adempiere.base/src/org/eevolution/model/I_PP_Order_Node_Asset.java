@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for PP_Order_Node_Asset
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_PP_Order_Node_Asset 
@@ -43,6 +43,27 @@ public interface I_PP_Order_Node_Asset
 
     /** Load Meta Data */
 
+    /** Column name AD_Client_ID */
+    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+
+	/** Get Tenant.
+	  * Tenant for this installation.
+	  */
+	public int getAD_Client_ID();
+
+    /** Column name AD_Org_ID */
+    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
+
+	/** Set Organization.
+	  * Organizational entity within tenant
+	  */
+	public void setAD_Org_ID (int AD_Org_ID);
+
+	/** Get Organization.
+	  * Organizational entity within tenant
+	  */
+	public int getAD_Org_ID();
+
     /** Column name A_Asset_ID */
     public static final String COLUMNNAME_A_Asset_ID = "A_Asset_ID";
 
@@ -57,27 +78,6 @@ public interface I_PP_Order_Node_Asset
 	public int getA_Asset_ID();
 
 	public org.compiere.model.I_A_Asset getA_Asset() throws RuntimeException;
-
-    /** Column name AD_Client_ID */
-    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
-
-	/** Get Client.
-	  * Client/Tenant for this installation.
-	  */
-	public int getAD_Client_ID();
-
-    /** Column name AD_Org_ID */
-    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
-
-	/** Set Organization.
-	  * Organizational entity within client
-	  */
-	public void setAD_Org_ID (int AD_Org_ID);
-
-	/** Get Organization.
-	  * Organizational entity within client
-	  */
-	public int getAD_Org_ID();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

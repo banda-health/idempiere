@@ -1,3 +1,24 @@
+/***********************************************************************
+ * This file is part of iDempiere ERP Open Source                      *
+ * http://www.idempiere.org                                            *
+ *                                                                     *
+ * Copyright (C) Contributors                                          *
+ *                                                                     *
+ * This program is free software; you can redistribute it and/or       *
+ * modify it under the terms of the GNU General Public License         *
+ * as published by the Free Software Foundation; either version 2      *
+ * of the License, or (at your option) any later version.              *
+ *                                                                     *
+ * This program is distributed in the hope that it will be useful,     *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of      *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the        *
+ * GNU General Public License for more details.                        *
+ *                                                                     *
+ * You should have received a copy of the GNU General Public License   *
+ * along with this program; if not, write to the Free Software         *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,          *
+ * MA 02110-1301, USA.                                                 *
+ **********************************************************************/
 package org.compiere.print;
 
 import static org.compiere.model.SystemIDs.PROCESS_RPT_C_DUNNING;
@@ -15,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MPInstance;
 import org.compiere.model.MProcess;
 import org.compiere.model.MQuery;
 import org.compiere.model.MTable;
@@ -26,8 +48,9 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 
-
-
+/**
+ * Static method for running of report at server side
+ */
 public class ServerReportCtl {
 
 	/**
@@ -42,11 +65,11 @@ public class ServerReportCtl {
 	
 	/**
 	 * Start Document Print for Type with specified printer.
-	 * @param type
+	 * @param type report engine document type
 	 * @param customPrintFormat
 	 * @param Record_ID
 	 * @param printerName
-	 * @return
+	 * @return true if success
 	 */
 	public static boolean startDocumentPrint (int type, MPrintFormat customPrintFormat, int Record_ID, String printerName)
 	{
@@ -84,7 +107,10 @@ public class ServerReportCtl {
 			// ==============================
 			if(format.getJasperProcess_ID() > 0)	
 			{
-				boolean result = runJasperProcess(Record_ID, re, true, printerName, pi);
+				int jasperRecordId = Record_ID;
+				if (re.getPrintInfo() != null && re.getPrintInfo().getRecord_ID() > 0)
+					jasperRecordId = re.getPrintInfo().getRecord_ID();
+				boolean result = runJasperProcess(jasperRecordId, re, true, printerName, pi);
 				return(result);
 			}
 			else
@@ -93,6 +119,7 @@ public class ServerReportCtl {
 			{
 				if (pi != null && pi.isBatch() && pi.isPrintPreview())
 				{
+					re.setProcessInfo(pi);
 					if ("HTML".equals(pi.getReportType())) 
 					{
 						pi.setExport(true);
@@ -158,13 +185,17 @@ public class ServerReportCtl {
 	public static boolean runJasperProcess(int Record_ID, ReportEngine re, boolean IsDirectPrint, String printerName, ProcessInfo pi) {
 		MPrintFormat format = re.getPrintFormat();
 		ProcessInfo jasperProcessInfo = new ProcessInfo ("", format.getJasperProcess_ID());
+		PrintInfo printInfo = re.getPrintInfo();
 		if (pi != null) {
 			jasperProcessInfo.setPrintPreview(pi.isPrintPreview());
 			jasperProcessInfo.setIsBatch(pi.isBatch());
+		    jasperProcessInfo.setPDFFileName(pi.getPDFFileName());
 		} else {
 			jasperProcessInfo.setPrintPreview( !IsDirectPrint );
 		}
 		jasperProcessInfo.setRecord_ID ( Record_ID );
+		jasperProcessInfo.setTable_ID(printInfo.getAD_Table_ID());
+		jasperProcessInfo.setSerializableObject(format);
 		ArrayList<ProcessInfoParameter> jasperPrintParams = new ArrayList<ProcessInfoParameter>();
 		ProcessInfoParameter pip;
 		if (printerName!=null && printerName.trim().length()>0) {
@@ -179,7 +210,7 @@ public class ServerReportCtl {
 		
 		jasperProcessInfo.setParameter(jasperPrintParams.toArray(new ProcessInfoParameter[]{}));
 		
-		ServerProcessCtl.process(jasperProcessInfo, pi != null ? Trx.get(pi.getTransactionName(),false) : null); 		
+		ServerProcessCtl.process(jasperProcessInfo, pi != null && pi.getTransactionName() != null ? Trx.get(pi.getTransactionName(),false) : null); 		
 		
 		boolean result = !jasperProcessInfo.isError();
 		if (result && pi != null && pi.isBatch())
@@ -202,12 +233,11 @@ public class ServerReportCtl {
 		}
 		re.print();
 	}
-	
-	
+		
 	/**
-	 *	Create Report.
-	 *	Called from ProcessCtl.
-	 *	- Check special reports first, if not, create standard Report
+	 *	Create Report.<br/>
+	 *	Called from ProcessCtl.<br/>
+	 *	- Check special reports first (via AD_ProcesS_ID), if not, create standard Report
 	 *
 	 *  @param pi process info
 	 *  @return true if created
@@ -215,40 +245,50 @@ public class ServerReportCtl {
 	static public boolean start (ProcessInfo pi)
 	{
 
-		/**
-		 *	Order Print
-		 */
-		if (pi.getAD_Process_ID() == PROCESS_RPT_C_ORDER)			//	C_Order
-			return startDocumentPrint(ReportEngine.ORDER, null, pi.getRecord_ID(), null, pi);
-		if (pi.getAD_Process_ID() ==  MProcess.getProcess_ID("Rpt PP_Order", null))			//	C_Order
-			return startDocumentPrint(ReportEngine.MANUFACTURING_ORDER, null, pi.getRecord_ID(), null, pi);
-		if (pi.getAD_Process_ID() ==  MProcess.getProcess_ID("Rpt DD_Order", null))			//	C_Order
-			return startDocumentPrint(ReportEngine.DISTRIBUTION_ORDER, null, pi.getRecord_ID(), null, pi);
-		else if (pi.getAD_Process_ID() == PROCESS_RPT_C_INVOICE)		//	C_Invoice
-			return startDocumentPrint(ReportEngine.INVOICE, null, pi.getRecord_ID(), null, pi);
-		else if (pi.getAD_Process_ID() == PROCESS_RPT_M_INOUT)		//	M_InOut
-			return startDocumentPrint(ReportEngine.SHIPMENT, null, pi.getRecord_ID(), null, pi);
-		else if (pi.getAD_Process_ID() == PROCESS_RPT_C_PROJECT)		//	C_Project
-			return startDocumentPrint(ReportEngine.PROJECT, null, pi.getRecord_ID(), null, pi);
-		else if (pi.getAD_Process_ID() == PROCESS_RPT_C_RFQRESPONSE)		//	C_RfQResponse
-			return startDocumentPrint(ReportEngine.RFQ, null, pi.getRecord_ID(), null, pi);
-		else if (pi.getAD_Process_ID() == PROCESS_RPT_C_DUNNING)		//	Dunning
-			return startDocumentPrint(ReportEngine.DUNNING, null, pi.getRecord_ID(), null, pi);
- 	    else if (pi.getAD_Process_ID() == PROCESS_RPT_FINREPORT			//	Financial Report
-			|| pi.getAD_Process_ID() == PROCESS_RPT_FINSTATEMENT)			//	Financial Statement
-		   return startFinReport (pi);
-		else if (pi.getAD_Process_ID() == PROCESS_RPT_M_INVENTORY)			//	M_Inventory
-			return startDocumentPrint(ReportEngine.INVENTORY, null, pi.getRecord_ID(), null, pi);
-		else if (pi.getAD_Process_ID() == PROCESS_RPT_M_MOVEMENT)			//	M_Movement
-			return startDocumentPrint(ReportEngine.MOVEMENT, null, pi.getRecord_ID(), null, pi);
-		/********************
-		 *	Standard Report
-		 *******************/
-		return startStandardReport (pi);
+		MPInstance instance = new MPInstance(Env.getCtx(), pi.getAD_PInstance_ID(), null);
+		instance.setIsProcessing(true);
+		instance.saveEx();
+		
+		try {
+			/**
+			 *	Order Print
+			 */
+			if (pi.getAD_Process_ID() == PROCESS_RPT_C_ORDER)			//	C_Order
+				return startDocumentPrint(ReportEngine.ORDER, null, pi.getRecord_ID(), null, pi);
+			if (pi.getAD_Process_ID() ==  MProcess.getProcess_ID("Rpt PP_Order", null))			//	C_Order
+				return startDocumentPrint(ReportEngine.MANUFACTURING_ORDER, null, pi.getRecord_ID(), null, pi);
+			if (pi.getAD_Process_ID() ==  MProcess.getProcess_ID("Rpt DD_Order", null))			//	C_Order
+				return startDocumentPrint(ReportEngine.DISTRIBUTION_ORDER, null, pi.getRecord_ID(), null, pi);
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_INVOICE)		//	C_Invoice
+				return startDocumentPrint(ReportEngine.INVOICE, null, pi.getRecord_ID(), null, pi);
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_INOUT)		//	M_InOut
+				return startDocumentPrint(ReportEngine.SHIPMENT, null, pi.getRecord_ID(), null, pi);
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_PROJECT)		//	C_Project
+				return startDocumentPrint(ReportEngine.PROJECT, null, pi.getRecord_ID(), null, pi);
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_RFQRESPONSE)		//	C_RfQResponse
+				return startDocumentPrint(ReportEngine.RFQ, null, pi.getRecord_ID(), null, pi);
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_C_DUNNING)		//	Dunning
+				return startDocumentPrint(ReportEngine.DUNNING, null, pi.getRecord_ID(), null, pi);
+	 	    else if (pi.getAD_Process_ID() == PROCESS_RPT_FINREPORT			//	Financial Report
+				|| pi.getAD_Process_ID() == PROCESS_RPT_FINSTATEMENT)			//	Financial Statement
+			   return startFinReport (pi);
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_INVENTORY)			//	M_Inventory
+				return startDocumentPrint(ReportEngine.INVENTORY, null, pi.getRecord_ID(), null, pi);
+			else if (pi.getAD_Process_ID() == PROCESS_RPT_M_MOVEMENT)			//	M_Movement
+				return startDocumentPrint(ReportEngine.MOVEMENT, null, pi.getRecord_ID(), null, pi);
+			/********************
+			 *	Standard Report
+			 *******************/
+			return startStandardReport (pi);
+		}
+		finally {
+			instance.setIsProcessing(false);
+			instance.saveEx();
+		}
 	}	//	create
 
-	/**************************************************************************
-	 *	Start Standard Report.
+	/**
+	 *	Start Standard Report.<br/>
 	 *  - Get Table Info and submit
 	 *  @param pi Process Info
 	 *  @param IsDirectPrint if true, prints directly - otherwise View
@@ -260,8 +300,8 @@ public class ServerReportCtl {
 		return startStandardReport(pi);
 	}
 	
-	/**************************************************************************
-	 *	Start Standard Report.
+	/**
+	 *	Start Standard Report.<br/>
 	 *  - Get Table Info and submit.<br>
 	 *  A report can be created from:
 	 *  <ol>
@@ -435,6 +475,5 @@ public class ServerReportCtl {
 		}
 		return true;
 	}	//	startFinReport
-	
-	
+		
 }

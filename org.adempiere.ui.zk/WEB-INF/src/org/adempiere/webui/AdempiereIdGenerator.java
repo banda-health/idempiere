@@ -30,15 +30,14 @@ import org.zkoss.zk.ui.metainfo.ComponentInfo;
 import org.zkoss.zk.ui.sys.IdGenerator;
 
 /**
- * Id generator for selenium ide recording. 
- * You don't need this to run ztl or zk jq selector based test script but if would help to 
+ * Id generator for selenium ide recording.<br/>
+ * You don't need this to run ztl or zk jq selector based test script but it would help to 
  * code or troubleshoot the test script. 
- * 
+ * <p>
  * DON'T use this for other purpose, you have been warned :)
  * 
  * @author Carlos Ruiz
  * @author hengsin
- *
  */
 public class AdempiereIdGenerator implements IdGenerator {
 
@@ -105,6 +104,14 @@ public class AdempiereIdGenerator implements IdGenerator {
 		return name.toLowerCase();
 	}
 
+	/**
+	 * Generate an id with just alphanumeric characters
+	 * This is used for ZkUnitTest that requires predictable iDs, f.e. Selenium
+	 * WARNING: it doesn't work well with non-alphanumeric languages
+	 *   f.e. in Russian the translation for bank and account lead to the same id ____
+	 * @param prefix
+	 * @return
+	 */
 	public static String escapeId(String prefix) {
 		Pattern pattern = Pattern.compile("[^a-zA-Z_0-9]");
 		Matcher matcher = pattern.matcher(prefix);

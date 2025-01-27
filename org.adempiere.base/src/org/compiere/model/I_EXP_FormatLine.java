@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for EXP_FormatLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_EXP_FormatLine 
 {
@@ -44,8 +44,8 @@ public interface I_EXP_FormatLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -68,12 +68,12 @@ public interface I_EXP_FormatLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -145,17 +145,6 @@ public interface I_EXP_FormatLine
 
 	public org.compiere.model.I_EXP_Format getEXP_EmbeddedFormat() throws RuntimeException;
 
-    /** Column name EXP_Format_ID */
-    public static final String COLUMNNAME_EXP_Format_ID = "EXP_Format_ID";
-
-	/** Set Export Format	  */
-	public void setEXP_Format_ID (int EXP_Format_ID);
-
-	/** Get Export Format	  */
-	public int getEXP_Format_ID();
-
-	public org.compiere.model.I_EXP_Format getEXP_Format() throws RuntimeException;
-
     /** Column name EXP_FormatLine_ID */
     public static final String COLUMNNAME_EXP_FormatLine_ID = "EXP_FormatLine_ID";
 
@@ -173,6 +162,17 @@ public interface I_EXP_FormatLine
 
 	/** Get EXP_FormatLine_UU	  */
 	public String getEXP_FormatLine_UU();
+
+    /** Column name EXP_Format_ID */
+    public static final String COLUMNNAME_EXP_Format_ID = "EXP_Format_ID";
+
+	/** Set Export Format	  */
+	public void setEXP_Format_ID (int EXP_Format_ID);
+
+	/** Get Export Format	  */
+	public int getEXP_Format_ID();
+
+	public org.compiere.model.I_EXP_Format getEXP_Format() throws RuntimeException;
 
     /** Column name Help */
     public static final String COLUMNNAME_Help = "Help";

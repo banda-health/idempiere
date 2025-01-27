@@ -15,6 +15,7 @@ package org.adempiere.webui.component;
 
 import java.util.Map;
 
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.event.ZoomEvent;
 import org.compiere.model.MQuery;
 import org.compiere.model.MWindow;
@@ -25,11 +26,14 @@ import org.zkoss.zk.au.AuRequest;
 import org.zkoss.zk.au.AuService;
 import org.zkoss.zk.mesg.MZk;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.UiException;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.util.Clients;
 
 /**
- * 
+ * {@link Desktop} listener for onZoom {@link AuRequest} command.<br/>
+ * Create {@link ZoomEvent} from {@link AuRequest} and post to the component that send the {@link AuRequest}.
  * @author hengsin
  *
  */
@@ -38,6 +42,7 @@ public class ZoomCommand implements AuService {
 	public ZoomCommand() {
 	}
 
+	@Override
 	public boolean service(AuRequest request, boolean everError) {
 		if (!ZoomEvent.EVENT_NAME.equals(request.getCommand()))
 			return false;
@@ -46,8 +51,6 @@ public class ZoomCommand implements AuService {
 		JSONArray data = (JSONArray) map.get("data");
 		
 		final Component comp = request.getComponent();
-		if (comp == null)
-			throw new UiException(MZk.ILLEGAL_REQUEST_COMPONENT_REQUIRED, this);
 		
 		if (data == null || data.size() < 2)
 			throw new UiException(MZk.ILLEGAL_REQUEST_WRONG_DATA, new Object[] {
@@ -87,7 +90,15 @@ public class ZoomCommand implements AuService {
 		query.setZoomValue(code);
 		query.setZoomWindowID(windowID);
 
-		Events.postEvent(new ZoomEvent(comp, query));
+		if (comp != null)
+		{
+			Events.postEvent(new ZoomEvent(comp, query));
+		}
+		else
+		{
+			AEnv.zoom(query);
+			Clients.clearBusy();
+		}
 
 		return true;
 	}

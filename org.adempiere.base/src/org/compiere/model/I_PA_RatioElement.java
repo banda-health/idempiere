@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for PA_RatioElement
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_PA_RatioElement 
 {
@@ -41,6 +41,27 @@ public interface I_PA_RatioElement
 
     /** Load Meta Data */
 
+    /** Column name AD_Client_ID */
+    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+
+	/** Get Tenant.
+	  * Tenant for this installation.
+	  */
+	public int getAD_Client_ID();
+
+    /** Column name AD_Org_ID */
+    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
+
+	/** Set Organization.
+	  * Organizational entity within tenant
+	  */
+	public void setAD_Org_ID (int AD_Org_ID);
+
+	/** Get Organization.
+	  * Organizational entity within tenant
+	  */
+	public int getAD_Org_ID();
+
     /** Column name Account_ID */
     public static final String COLUMNNAME_Account_ID = "Account_ID";
 
@@ -55,27 +76,6 @@ public interface I_PA_RatioElement
 	public int getAccount_ID();
 
 	public org.compiere.model.I_C_ElementValue getAccount() throws RuntimeException;
-
-    /** Column name AD_Client_ID */
-    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
-
-	/** Get Client.
-	  * Client/Tenant for this installation.
-	  */
-	public int getAD_Client_ID();
-
-    /** Column name AD_Org_ID */
-    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
-
-	/** Set Organization.
-	  * Organizational entity within client
-	  */
-	public void setAD_Org_ID (int AD_Org_ID);
-
-	/** Get Organization.
-	  * Organizational entity within client
-	  */
-	public int getAD_Org_ID();
 
     /** Column name ConstantValue */
     public static final String COLUMNNAME_ConstantValue = "ConstantValue";
@@ -182,21 +182,6 @@ public interface I_PA_RatioElement
 	/** Get PA_RatioElement_UU	  */
 	public String getPA_RatioElement_UU();
 
-    /** Column name PA_Ratio_ID */
-    public static final String COLUMNNAME_PA_Ratio_ID = "PA_Ratio_ID";
-
-	/** Set Ratio.
-	  * Performance Ratio
-	  */
-	public void setPA_Ratio_ID (int PA_Ratio_ID);
-
-	/** Get Ratio.
-	  * Performance Ratio
-	  */
-	public int getPA_Ratio_ID();
-
-	public org.compiere.model.I_PA_Ratio getPA_Ratio() throws RuntimeException;
-
     /** Column name PA_RatioUsed_ID */
     public static final String COLUMNNAME_PA_RatioUsed_ID = "PA_RatioUsed_ID";
 
@@ -212,15 +197,30 @@ public interface I_PA_RatioElement
 
 	public org.compiere.model.I_PA_Ratio getPA_RatioUsed() throws RuntimeException;
 
+    /** Column name PA_Ratio_ID */
+    public static final String COLUMNNAME_PA_Ratio_ID = "PA_Ratio_ID";
+
+	/** Set Ratio.
+	  * Performance Ratio
+	  */
+	public void setPA_Ratio_ID (int PA_Ratio_ID);
+
+	/** Get Ratio.
+	  * Performance Ratio
+	  */
+	public int getPA_Ratio_ID();
+
+	public org.compiere.model.I_PA_Ratio getPA_Ratio() throws RuntimeException;
+
     /** Column name PostingType */
     public static final String COLUMNNAME_PostingType = "PostingType";
 
-	/** Set PostingType.
+	/** Set Posting Type.
 	  * The type of posted amount for the transaction
 	  */
 	public void setPostingType (String PostingType);
 
-	/** Get PostingType.
+	/** Get Posting Type.
 	  * The type of posted amount for the transaction
 	  */
 	public String getPostingType();

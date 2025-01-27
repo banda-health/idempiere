@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_Freight
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_Freight 
 {
@@ -44,8 +44,8 @@ public interface I_M_Freight
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_Freight
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -92,6 +92,21 @@ public interface I_M_Freight
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
+    /** Column name C_Region_ID */
+    public static final String COLUMNNAME_C_Region_ID = "C_Region_ID";
+
+	/** Set Region.
+	  * Identifies a geographical Region
+	  */
+	public void setC_Region_ID (int C_Region_ID);
+
+	/** Get Region.
+	  * Identifies a geographical Region
+	  */
+	public int getC_Region_ID();
+
+	public org.compiere.model.I_C_Region getC_Region() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -107,21 +122,6 @@ public interface I_M_Freight
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_Region_ID */
-    public static final String COLUMNNAME_C_Region_ID = "C_Region_ID";
-
-	/** Set Region.
-	  * Identifies a geographical Region
-	  */
-	public void setC_Region_ID (int C_Region_ID);
-
-	/** Get Region.
-	  * Identifies a geographical Region
-	  */
-	public int getC_Region_ID();
-
-	public org.compiere.model.I_C_Region getC_Region() throws RuntimeException;
 
     /** Column name FreightAmt */
     public static final String COLUMNNAME_FreightAmt = "FreightAmt";
@@ -148,24 +148,6 @@ public interface I_M_Freight
 	  * The record is active in the system
 	  */
 	public boolean isActive();
-
-    /** Column name MaxDimension */
-    public static final String COLUMNNAME_MaxDimension = "MaxDimension";
-
-	/** Set Max Dimension	  */
-	public void setMaxDimension (BigDecimal MaxDimension);
-
-	/** Get Max Dimension	  */
-	public BigDecimal getMaxDimension();
-
-    /** Column name MaxWeight */
-    public static final String COLUMNNAME_MaxWeight = "MaxWeight";
-
-	/** Set Max Weight	  */
-	public void setMaxWeight (BigDecimal MaxWeight);
-
-	/** Get Max Weight	  */
-	public BigDecimal getMaxWeight();
 
     /** Column name M_FreightCategory_ID */
     public static final String COLUMNNAME_M_FreightCategory_ID = "M_FreightCategory_ID";
@@ -218,6 +200,24 @@ public interface I_M_Freight
 	public int getM_Shipper_ID();
 
 	public org.compiere.model.I_M_Shipper getM_Shipper() throws RuntimeException;
+
+    /** Column name MaxDimension */
+    public static final String COLUMNNAME_MaxDimension = "MaxDimension";
+
+	/** Set Max Dimension	  */
+	public void setMaxDimension (BigDecimal MaxDimension);
+
+	/** Get Max Dimension	  */
+	public BigDecimal getMaxDimension();
+
+    /** Column name MaxWeight */
+    public static final String COLUMNNAME_MaxWeight = "MaxWeight";
+
+	/** Set Max Weight	  */
+	public void setMaxWeight (BigDecimal MaxWeight);
+
+	/** Get Max Weight	  */
+	public BigDecimal getMaxWeight();
 
     /** Column name To_Country_ID */
     public static final String COLUMNNAME_To_Country_ID = "To_Country_ID";

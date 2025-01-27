@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_TaxCategory
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_TaxCategory 
 {
@@ -44,8 +44,8 @@ public interface I_C_TaxCategory
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,14 +53,36 @@ public interface I_C_TaxCategory
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
+
+    /** Column name C_TaxCategory_ID */
+    public static final String COLUMNNAME_C_TaxCategory_ID = "C_TaxCategory_ID";
+
+	/** Set Tax Category.
+	  * Tax Category
+	  */
+	public void setC_TaxCategory_ID (int C_TaxCategory_ID);
+
+	/** Get Tax Category.
+	  * Tax Category
+	  */
+	public int getC_TaxCategory_ID();
+
+    /** Column name C_TaxCategory_UU */
+    public static final String COLUMNNAME_C_TaxCategory_UU = "C_TaxCategory_UU";
+
+	/** Set C_TaxCategory_UU	  */
+	public void setC_TaxCategory_UU (String C_TaxCategory_UU);
+
+	/** Get C_TaxCategory_UU	  */
+	public String getC_TaxCategory_UU();
 
     /** Column name CommodityCode */
     public static final String COLUMNNAME_CommodityCode = "CommodityCode";
@@ -90,28 +112,6 @@ public interface I_C_TaxCategory
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_TaxCategory_ID */
-    public static final String COLUMNNAME_C_TaxCategory_ID = "C_TaxCategory_ID";
-
-	/** Set Tax Category.
-	  * Tax Category
-	  */
-	public void setC_TaxCategory_ID (int C_TaxCategory_ID);
-
-	/** Get Tax Category.
-	  * Tax Category
-	  */
-	public int getC_TaxCategory_ID();
-
-    /** Column name C_TaxCategory_UU */
-    public static final String COLUMNNAME_C_TaxCategory_UU = "C_TaxCategory_UU";
-
-	/** Set C_TaxCategory_UU	  */
-	public void setC_TaxCategory_UU (String C_TaxCategory_UU);
-
-	/** Get C_TaxCategory_UU	  */
-	public String getC_TaxCategory_UU();
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";

@@ -25,9 +25,10 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+import org.compiere.model.SystemProperties;
 
 /**
- *	idempiere Log Formatter
+ *	iDempiere Log Formatter
  *	
  *  @author Jorg Janke
  *  @version $Id: CLogFormatter.java,v 1.2 2006/07/30 00:54:36 jjanke Exp $
@@ -50,7 +51,7 @@ public class CLogFormatter extends Formatter
     /**	New Line				*/
     public static String	NL = System.getProperty("line.separator");
 	
-	/**************************************************************************
+	/**
 	 * 	CLogFormatter
 	 */
 	private CLogFormatter()
@@ -66,6 +67,7 @@ public class CLogFormatter extends Formatter
 	 *	@param record log record
 	 *	@return formatted string
 	 */
+	@Override
 	public String format (LogRecord record)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -89,7 +91,6 @@ public class CLogFormatter extends Formatter
 			tsStr = "_________________________";
 		}
 			
-
 		/**	Time/Error		*/
 		if (record.getLevel() == Level.SEVERE)
 		{	//		   12:12:12.123
@@ -119,6 +120,7 @@ public class CLogFormatter extends Formatter
 				spaces = 9;
 			sb.append("                          ".substring(0, spaces));
 		}
+		sb.append(getPrefix());
 		
 		/**	Class.method	**/
 		if (!m_shortFormat)
@@ -131,12 +133,9 @@ public class CLogFormatter extends Formatter
 		if (parameters.length() > 0)
 			sb.append(" (").append(parameters).append(")");
 		
-		/**	Level			** 
-		sb.append(" ")
-			.append(record.getLevel().getLocalizedName());
 		/**	Thread			**/
-		if (record.getThreadID() != 10)
-			sb.append(" [").append(record.getThreadID()).append("]");
+		if (record.getLongThreadID() != 10)
+			sb.append(" [").append(record.getLongThreadID()).append("]");
 		
 		//
 		sb.append(NL);
@@ -147,10 +146,11 @@ public class CLogFormatter extends Formatter
 
 	
     /**
-     * Return the header string for a set of formatted records.
+     * Get the header string for a set of formatted records.
      * @param   h  The target handler.
      * @return  header string
      */
+	@Override
     public String getHead(Handler h) 
     {
 		String className = h.getClass().getName();
@@ -166,10 +166,11 @@ public class CLogFormatter extends Formatter
     }	//	getHead
 
     /**
-     * Return the tail string for a set of formatted records.
+     * Get the tail string for a set of formatted records.
      * @param   h  The target handler.
      * @return  tail string
      */
+	@Override
     public String getTail(Handler h) 
     {
 		String className = h.getClass().getName();
@@ -186,15 +187,15 @@ public class CLogFormatter extends Formatter
     }	//	getTail
 	
     /**
-     * 	Set Format
-     *	@param shortFormat format
+     * 	Set using long or short Format
+     *	@param shortFormat true to use short format
      */
     public void setFormat (boolean shortFormat)
     {
     	m_shortFormat = shortFormat;
     }	//	setFormat
     
-    /**************************************************************************
+    /**
      * 	Get Class Method from Log Record
      *	@param record record
      *	@return class.method
@@ -228,7 +229,7 @@ public class CLogFormatter extends Formatter
     /**
      * 	Get Log Parameters
      *	@param record log record
-     *	@return parameters empty string or parameters
+     *	@return empty string or parameters
      */
     public static String getParameters (LogRecord record)
     {
@@ -249,7 +250,7 @@ public class CLogFormatter extends Formatter
     /**
      * 	Get Log Exception
      *	@param record log record
-     *	@return null if exists or string
+     *	@return null if not exists or exception trace text
      */
     public static String getExceptionTrace (LogRecord record)
     {
@@ -260,12 +261,6 @@ public class CLogFormatter extends Formatter
     	StringBuffer sb = new StringBuffer();
 	    try 
 	    {
-	    	/** Print Stack		**
-	        StringWriter sw = new StringWriter();
-	        PrintWriter pw = new PrintWriter(sw);
-	        thrown.printStackTrace(pw);
-	        pw.close();
-	        sb.append(sw.toString());
 	        /**	Create Stack	**/
 	        fillExceptionTrace(sb, "", thrown);
 	    } 
@@ -298,15 +293,14 @@ public class CLogFormatter extends Formatter
 		int adempiereTraceNo = 0;
         for (int i=0; i < trace.length; i++)
         {
-        	adempiereTrace = trace[i].getClassName().startsWith("org.compiere.");
+        	adempiereTrace = trace[i].getClassName().startsWith("org.compiere.") || trace[i].getClassName().startsWith("org.adempiere.") || trace[i].getClassName().startsWith("org.idempiere.");
         	if (thrown instanceof ServerException	//	RMI
         		|| adempiereTrace)
         	{
         		if (adempiereTrace)
                 	sb.append("\tat ").append(trace[i]).append(NL);
         	}
-        	else if (i > 20
-        		|| (i > 10 && adempiereTraceNo > 8))
+        	else if (!SystemProperties.isFullExceptionTraceInLog() && (i > 20 || (i > 10 && adempiereTraceNo > 8)))
         		break;
         	else
         		sb.append("\tat ").append(trace[i]).append(NL);
@@ -318,5 +312,26 @@ public class CLogFormatter extends Formatter
         if (cause != null)
         	fillExceptionTrace(sb, "caused by: ", cause);
     }	//	fillExceptionTrace
-    
+
+	/**
+	 * Get the Prefix to write in file log from VM variable org.idempiere.FileLogPrefix
+	 * @return log prefix
+	 */
+	private String getPrefix()
+	{
+		String prefix = null;
+		try
+		{
+			prefix = SystemProperties.getFileLogPrefix();
+			if (!Util.isEmpty(prefix))
+				return Env.parseContext(Env.getCtx(), 0, prefix, false);
+		}
+		catch (Exception ex)
+		{
+			System.out.println("Parsing error in org.idempiere.FileLogPrefix - setting back to empty from " + prefix);
+			SystemProperties.setFileLogPrefix("");
+		}
+		return "";
+	}
+
 }	//	CLogFormatter

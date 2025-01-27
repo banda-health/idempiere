@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_Replenish
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_Replenish 
 {
@@ -44,8 +44,8 @@ public interface I_M_Replenish
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_Replenish
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -156,21 +156,6 @@ public interface I_M_Replenish
 	/** Get M_Replenish_UU	  */
 	public String getM_Replenish_UU();
 
-    /** Column name M_Warehouse_ID */
-    public static final String COLUMNNAME_M_Warehouse_ID = "M_Warehouse_ID";
-
-	/** Set Warehouse.
-	  * Storage Warehouse and Service Point
-	  */
-	public void setM_Warehouse_ID (int M_Warehouse_ID);
-
-	/** Get Warehouse.
-	  * Storage Warehouse and Service Point
-	  */
-	public int getM_Warehouse_ID();
-
-	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
-
     /** Column name M_WarehouseSource_ID */
     public static final String COLUMNNAME_M_WarehouseSource_ID = "M_WarehouseSource_ID";
 
@@ -185,6 +170,21 @@ public interface I_M_Replenish
 	public int getM_WarehouseSource_ID();
 
 	public org.compiere.model.I_M_Warehouse getM_WarehouseSource() throws RuntimeException;
+
+    /** Column name M_Warehouse_ID */
+    public static final String COLUMNNAME_M_Warehouse_ID = "M_Warehouse_ID";
+
+	/** Set Warehouse.
+	  * Storage Warehouse and Service Point
+	  */
+	public void setM_Warehouse_ID (int M_Warehouse_ID);
+
+	/** Get Warehouse.
+	  * Storage Warehouse and Service Point
+	  */
+	public int getM_Warehouse_ID();
+
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
 
     /** Column name QtyBatchSize */
     public static final String COLUMNNAME_QtyBatchSize = "QtyBatchSize";

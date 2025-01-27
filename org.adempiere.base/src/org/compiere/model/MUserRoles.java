@@ -33,9 +33,9 @@ import org.compiere.util.Msg;
 public class MUserRoles extends X_AD_User_Roles
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = 5850010835736994376L;
+	private static final long serialVersionUID = 2957269818448823135L;
 
 	/**
 	 * 	Get User Roles Of Role
@@ -74,10 +74,19 @@ public class MUserRoles extends X_AD_User_Roles
 	/**	Static Logger	*/
 	@SuppressWarnings("unused")
 	private static CLogger	s_log	= CLogger.getCLogger (MUserRoles.class);
-
 	
-	/**************************************************************************
-	 * 	Persistence Constructor
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_User_Roles_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MUserRoles(Properties ctx, String AD_User_Roles_UU, String trxName) {
+        super(ctx, AD_User_Roles_UU, trxName);
+    }
+
+	/**
+	 * 	New Record Constructor
 	 *	@param ctx context
 	 *	@param ignored invalid
 	 *	@param trxName transaction
@@ -114,20 +123,6 @@ public class MUserRoles extends X_AD_User_Roles
 		setAD_Role_ID(AD_Role_ID);
 	}	//	MUserRoles
 
-	/** Set User/Contact.
-        @param AD_User_ID
-        User within the system - Internal or Business Partner Contact
-        Overridden to allow saving System record (zero ID)
-	 */
-	@Override
-	public void setAD_User_ID (int AD_User_ID)
-	{
-		if (AD_User_ID == 0) 
-			set_ValueNoCheck (COLUMNNAME_AD_User_ID, AD_User_ID);
-		else 
-			super.setAD_User_ID(AD_User_ID);
-	} //setAD_User_ID
-
 	/** 
 	 * 	Set Role.
 	 * 	Responsibility Role
@@ -144,10 +139,12 @@ public class MUserRoles extends X_AD_User_Roles
 		// IDEMPIERE-1410
 		if (! MRole.getDefault().isAccessAdvanced()) {
 			MRole role = new MRole(getCtx(), getAD_Role_ID(), get_TrxName());
+			// Disallow non-advanced role to edit advanced role record
 			if (role.isAccessAdvanced()) {
 				log.saveError("Error", Msg.getMsg(getCtx(), "ActionNotAllowedHere"));
 				return false;
 			}
+			// Disallow non-advanced role to remove assignment of advanced role to user
 			if (! newRecord && is_ValueChanged(COLUMNNAME_AD_Role_ID)) {
 				MRole oldrole = new MRole(getCtx(), get_ValueOldAsInt(COLUMNNAME_AD_Role_ID), get_TrxName());
 				if (oldrole.isAccessAdvanced()) {
@@ -163,6 +160,7 @@ public class MUserRoles extends X_AD_User_Roles
 	@Override
 	protected boolean beforeDelete() {
 		// IDEMPIERE-1410
+		// Can't delete advanced role if current login role is not an advanced role
 		if (! MRole.getDefault().isAccessAdvanced()) {
 			MRole role = new MRole(getCtx(), getAD_Role_ID(), get_TrxName());
 			if (role.isAccessAdvanced()) {

@@ -31,6 +31,7 @@ import org.apache.ecs.xhtml.tr;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.GridWindow;
+import org.compiere.model.MEntityType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.WebDoc;
@@ -38,15 +39,21 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Html;
 
+/**
+ * Help for AD Window with contents generated from AD definition.
+ */
 public class HelpWindow extends Window {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -7353411576541612026L;
 
 	private GridWindow gridWindow;
 	private String winpref;
 	
+	/**
+	 * @param gridWindow
+	 */
 	public HelpWindow(GridWindow gridWindow)
 	{
 		super();
@@ -95,6 +102,9 @@ public class HelpWindow extends Window {
 		html.setContent(doc.toString());
 	}
 	
+	/**
+	 * @return header {@link table}
+	 */
 	private table getHeader()
 	{
 		table table = new table("0", "0", "0", "100%", null);
@@ -160,6 +170,29 @@ public class HelpWindow extends Window {
 			td.addElement(WebDoc.NBSP);
 		}
 
+		//window entity type information
+		if (Env.IsShowTechnicalInfOnHelp(Env.getCtx())) {
+			tr = new tr();
+			table.addElement(tr);
+			td = new td();
+			td.setClass("help-window-entitytype-help");
+			tr.addElement(td);
+
+			title = new StringBuilder(Msg.getElement(Env.getCtx(), "EntityType")).append(": ")
+					.append(MEntityType.get(Env.getCtx(), gridWindow.getEntityType()).getName());
+			title.append(" [ ").append(gridWindow.getEntityType()).append(" ]");
+			p p = new p().addElement(title.toString());
+			td.addElement(p);
+		}
+
+			tr = new tr();
+			table.addElement(tr);
+
+			td = new td();
+			tr.addElement(td);
+			td.addElement(WebDoc.NBSP);
+			// end window entity type information
+
 		tr = new tr();
 		table.addElement(tr);
 		
@@ -180,6 +213,9 @@ public class HelpWindow extends Window {
 		return table;
 	}
 	
+	/**
+	 * @return content {@link table}
+	 */
 	private table getContent()
 	{
 		table table = new table("0", "0", "0", "100%", null);
@@ -202,6 +238,9 @@ public class HelpWindow extends Window {
 		return table;
 	}
 	
+	/**
+	 * @return content {@link table} for left pane
+	 */
 	private table getLeftContent()
 	{
 		table table = new table("0", "0", "0", "100%", null);
@@ -223,6 +262,9 @@ public class HelpWindow extends Window {
 		return table;
 	}
 	
+	/**
+	 * @return content {@link table} for right pane
+	 */
 	private table getRightContent()
 	{
 		table table = new table("0", "0", "0", "100%", null);
@@ -273,6 +315,12 @@ public class HelpWindow extends Window {
 		return table;
 	}
 	
+	/**
+	 * Name, description and help text for AD_Tab
+	 * @param tab
+	 * @param tabIndex
+	 * @return {@link table} with name, description and help text
+	 */
 	private table getTabBox(GridTab tab, int tabIndex)
 	{
 		table table = new table("0", "0", "0", "100%", null);
@@ -323,9 +371,37 @@ public class HelpWindow extends Window {
 			td.addElement(WebDoc.NBSP);
 		}
 		
+		// tab entity type information
+		if(Env.IsShowTechnicalInfOnHelp(Env.getCtx())) {
+			tr = new tr();
+			table.addElement(tr);
+			td = new td();
+			td.setClass("help-window-tab-entitytype-help");
+			tr.addElement(td);
+
+			StringBuilder entityType = new StringBuilder(Msg.getElement(Env.getCtx(), "EntityType")).append(": ").append(MEntityType.get(Env.getCtx(), tab.getEntityType()).getName());
+			entityType.append(" [").append(tab.getEntityType()).append(" ]");
+			p p = new p().addElement(entityType.toString());
+			td.addElement(p);
+		}
+
+			tr = new tr();
+			table.addElement(tr);
+
+			td = new td();
+			tr.addElement(td);
+			td.addElement(WebDoc.NBSP);
+				// end tab entity type information
+		
 		return table;
 	}
 	
+	/**
+	 * Links for all display field
+	 * @param tab
+	 * @param tabIndex
+	 * @return {@link table} with link for all display fields
+	 */
 	private table getFieldsBox(GridTab tab, int tabIndex)
 	{
 		table table = new table("0", "0", "0", "100%", null);
@@ -383,6 +459,13 @@ public class HelpWindow extends Window {
 		return table;
 	}
 	
+	/**
+	 * header/label, description and help text for a field.
+	 * @param field
+	 * @param tabIndex
+	 * @param fieldIndex
+	 * @return {@link table} with header/label, description and help text
+	 */
 	private table getFieldBox(GridField field, int tabIndex, int fieldIndex)
 	{
 		table table = new table("0", "0", "0", "100%", null);
@@ -443,6 +526,33 @@ public class HelpWindow extends Window {
 			td.addElement(WebDoc.NBSP);
 		}
 		
+		// field entity type information
+		if (Env.IsShowTechnicalInfOnHelp(Env.getCtx())) {
+			String eType = field.getEntityType();
+
+			MEntityType et = MEntityType.get(Env.getCtx(), eType.replace("**U**", ""));
+			if (et != null) {
+				tr = new tr();
+				table.addElement(tr);
+				td = new td();
+				td.setClass("help-window-field-entitytype-help");
+				tr.addElement(td);
+				StringBuilder entityType = new StringBuilder(Msg.getElement(Env.getCtx(), "EntityType")).append(": ")
+						.append(et.getName());
+				entityType.append(" [ ").append(eType).append(" ]");
+				p p = new p().addElement(entityType.toString());
+				td.addElement(p);
+			}
+		}
+
+			tr = new tr();
+			table.addElement(tr);
+
+			td = new td();
+			tr.addElement(td);
+			td.addElement(WebDoc.NBSP);
+			// field tab entity type information
+
 		return table;
 	}
 }

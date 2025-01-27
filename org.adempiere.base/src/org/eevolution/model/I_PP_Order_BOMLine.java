@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for PP_Order_BOMLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_PP_Order_BOMLine 
@@ -46,8 +46,8 @@ public interface I_PP_Order_BOMLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_PP_Order_BOMLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -105,6 +105,21 @@ public interface I_PP_Order_BOMLine
 	  */
 	public String getBackflushGroup();
 
+    /** Column name C_UOM_ID */
+    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
+
+	/** Set UOM.
+	  * Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID);
+
+	/** Get UOM.
+	  * Unit of Measure
+	  */
+	public int getC_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
+
     /** Column name ComponentType */
     public static final String COLUMNNAME_ComponentType = "ComponentType";
 
@@ -146,21 +161,6 @@ public interface I_PP_Order_BOMLine
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_UOM_ID */
-    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
-
-	/** Set UOM.
-	  * Unit of Measure
-	  */
-	public void setC_UOM_ID (int C_UOM_ID);
-
-	/** Get UOM.
-	  * Unit of Measure
-	  */
-	public int getC_UOM_ID();
-
-	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name DateDelivered */
     public static final String COLUMNNAME_DateDelivered = "DateDelivered";
@@ -380,17 +380,6 @@ public interface I_PP_Order_BOMLine
 
 	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
 
-    /** Column name PP_Order_BOM_ID */
-    public static final String COLUMNNAME_PP_Order_BOM_ID = "PP_Order_BOM_ID";
-
-	/** Set Manufacturing Order BOM	  */
-	public void setPP_Order_BOM_ID (int PP_Order_BOM_ID);
-
-	/** Get Manufacturing Order BOM	  */
-	public int getPP_Order_BOM_ID();
-
-	public org.eevolution.model.I_PP_Order_BOM getPP_Order_BOM() throws RuntimeException;
-
     /** Column name PP_Order_BOMLine_ID */
     public static final String COLUMNNAME_PP_Order_BOMLine_ID = "PP_Order_BOMLine_ID";
 
@@ -409,6 +398,17 @@ public interface I_PP_Order_BOMLine
 	/** Get PP_Order_BOMLine_UU	  */
 	public String getPP_Order_BOMLine_UU();
 
+    /** Column name PP_Order_BOM_ID */
+    public static final String COLUMNNAME_PP_Order_BOM_ID = "PP_Order_BOM_ID";
+
+	/** Set Manufacturing Order BOM	  */
+	public void setPP_Order_BOM_ID (int PP_Order_BOM_ID);
+
+	/** Get Manufacturing Order BOM	  */
+	public int getPP_Order_BOM_ID();
+
+	public org.eevolution.model.I_PP_Order_BOM getPP_Order_BOM() throws RuntimeException;
+
     /** Column name PP_Order_ID */
     public static final String COLUMNNAME_PP_Order_ID = "PP_Order_ID";
 
@@ -424,6 +424,19 @@ public interface I_PP_Order_BOMLine
 
 	public org.eevolution.model.I_PP_Order getPP_Order() throws RuntimeException;
 
+    /** Column name QtyBOM */
+    public static final String COLUMNNAME_QtyBOM = "QtyBOM";
+
+	/** Set Quantity.
+	  * Indicate the Quantity use in this BOM
+	  */
+	public void setQtyBOM (BigDecimal QtyBOM);
+
+	/** Get Quantity.
+	  * Indicate the Quantity use in this BOM
+	  */
+	public BigDecimal getQtyBOM();
+
     /** Column name QtyBatch */
     public static final String COLUMNNAME_QtyBatch = "QtyBatch";
 
@@ -436,19 +449,6 @@ public interface I_PP_Order_BOMLine
 	  * Indicate the Quantity % use in this Formula
 	  */
 	public BigDecimal getQtyBatch();
-
-    /** Column name QtyBOM */
-    public static final String COLUMNNAME_QtyBOM = "QtyBOM";
-
-	/** Set Quantity.
-	  * Indicate the Quantity  use in this BOM
-	  */
-	public void setQtyBOM (BigDecimal QtyBOM);
-
-	/** Get Quantity.
-	  * Indicate the Quantity  use in this BOM
-	  */
-	public BigDecimal getQtyBOM();
 
     /** Column name QtyDelivered */
     public static final String COLUMNNAME_QtyDelivered = "QtyDelivered";
@@ -497,10 +497,10 @@ public interface I_PP_Order_BOMLine
     /** Column name QtyRequiered */
     public static final String COLUMNNAME_QtyRequiered = "QtyRequiered";
 
-	/** Set Qty Requiered	  */
+	/** Set Qty Required	  */
 	public void setQtyRequiered (BigDecimal QtyRequiered);
 
-	/** Get Qty Requiered	  */
+	/** Get Qty Required	  */
 	public BigDecimal getQtyRequiered();
 
     /** Column name QtyReserved */
@@ -520,12 +520,12 @@ public interface I_PP_Order_BOMLine
     public static final String COLUMNNAME_QtyScrap = "QtyScrap";
 
 	/** Set Scrap %.
-	  * Scrap % Quantity for this componet
+	  * Scrap % Quantity for this component
 	  */
 	public void setQtyScrap (BigDecimal QtyScrap);
 
 	/** Get Scrap %.
-	  * Scrap % Quantity for this componet
+	  * Scrap % Quantity for this component
 	  */
 	public BigDecimal getQtyScrap();
 

@@ -47,6 +47,7 @@ import org.apache.ecs.xhtml.tr;
 import org.compiere.Adempiere;
 import org.compiere.model.MClient;
 import org.compiere.model.MSystem;
+import org.compiere.model.SystemIDs;
 
 /**
  *  Web Environment and debugging
@@ -150,7 +151,7 @@ public class WebEnv
 
 		Properties ctx = new Properties();
 		Env.setContext(ctx, Env.AD_CLIENT_ID, 0);
-		Env.setContext(ctx, Env.AD_USER_ID, 0);
+		Env.setContext(ctx, Env.AD_USER_ID, SystemIDs.USER_SYSTEM);
 		ServerContext.setCurrentInstance(ctx);
 		
 		//  Load Environment Variables (serverApps/src/web/WEB-INF/web.xml)
@@ -194,8 +195,7 @@ public class WebEnv
 		return s_initOK;
 	}	//	initWeb
 
-
-	/**************************************************************************
+	/**
 	 *  Get Base Directory entry.
 	 *  <br>
 	 *  /adempiere/
@@ -302,7 +302,7 @@ public class WebEnv
 		return String.valueOf(content);
 	}	//	getCellContent
 
-	/**************************************************************************
+	/**
 	 * 	Dump Servlet Config
 	 * 	@param config config
 	 */
@@ -479,14 +479,15 @@ public class WebEnv
 		log.finer("- Class=" + request.getClass().getName());
 	}	//	dump (Request)
 
-
-	/**************************************************************************
+	/**
 	 *  Add Footer (with diagnostics)
 	 *  @param request request
 	 *  @param response response
 	 *  @param servlet servlet
 	 *  @param body - Body to add footer
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static void addFooter(HttpServletRequest request, HttpServletResponse response,
 		HttpServlet servlet, body body)
 	{

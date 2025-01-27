@@ -25,13 +25,14 @@ import org.adempiere.process.UUIDGenerator;
 import org.compiere.model.MColumn;
 import org.compiere.model.MElementValue;
 import org.compiere.model.MFactReconciliation;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MRule;
 import org.compiere.model.MSequence;
 import org.compiere.model.PO;
 import org.compiere.util.DB;
 
 /**
- *	Suspense account reconciliation report
+ *	Account reconciliation process
  *  @author Paul Bowden (phib)
  */
 @org.adempiere.base.annotation.Process
@@ -43,6 +44,7 @@ public class FactReconcile extends SvrProcess
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
+	@Override
 	protected void prepare()
 	{
 		int accountID = 0;
@@ -57,7 +59,7 @@ public class FactReconcile extends SvrProcess
 			else if (name.equals("Account_ID"))
 				accountID = para[i].getParameterAsInt();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 			
 			if ( accountID > 0 )
 				account = new MElementValue(getCtx(), accountID, get_TrxName());
@@ -65,10 +67,11 @@ public class FactReconcile extends SvrProcess
 	}	//	prepare
 
 	/**
-	 * 	DoIt
+	 * 	Perform reconciliation using reconciliation rule and Fact_Reconciliation table.
 	 *	@return Message
 	 *	@throws Exception
 	 */
+	@Override
 	protected String doIt() throws Exception
 	{
 
@@ -128,10 +131,10 @@ public class FactReconcile extends SvrProcess
 		if (seq == null)
 			throw new AdempiereException("No sequence for Fact_Reconciliation table");
 		
-	  try
-	  {
+	    try
+	    {
 			// add new facts into reconciliation table
-			 sql = "INSERT into Fact_Reconciliation " +
+			sql = "INSERT into Fact_Reconciliation " +
 				"(Fact_Reconciliation_ID, AD_Client_ID, AD_Org_ID, Created, CreatedBy, Updated, UpdatedBy, " +
 				"IsActive, Fact_Acct_ID) " + 
 				"SELECT nextIDFunc(?, 'N'), AD_Client_ID, AD_Org_ID, Created, CreatedBy, " +
@@ -155,7 +158,7 @@ public class FactReconcile extends SvrProcess
 			
 			// set the matchcode based on the rule found in AD_Rule
 			// which is a sql fragment that returns a string based on the accounting fact
-			 sql = "UPDATE Fact_Reconciliation " +
+			sql = "UPDATE Fact_Reconciliation " +
 				"SET MatchCode = (" + subselect +
 				" ) " + 
 				"WHERE MatchCode is null " +
@@ -182,23 +185,23 @@ public class FactReconcile extends SvrProcess
 				"       AND f2.Account_ID = ?) <> 0 " +
 			" AND MatchCode IS NOT NULL";
 				
-		pstmt = DB.prepareStatement(sql, get_TrxName());
-		pstmt.setInt(1, account.get_ID());
-		pstmt.setInt(2, account.get_ID());
-		unmatched = pstmt.executeUpdate();
+		    pstmt = DB.prepareStatement(sql, get_TrxName());
+		    pstmt.setInt(1, account.get_ID());
+		    pstmt.setInt(2, account.get_ID());
+		    unmatched = pstmt.executeUpdate();
 		
-		if (log.isLoggable(Level.FINE))log.log(Level.FINE, "Cleared match codes from " + unmatched + " unreconciled facts.");
-	  }
-	  catch (SQLException e)
-	  {
+		    if (log.isLoggable(Level.FINE))log.log(Level.FINE, "Cleared match codes from " + unmatched + " unreconciled facts.");
+	    }
+	    catch (SQLException e)
+	    {
 			log.log(Level.SEVERE, sql, e);
 			return e.getLocalizedMessage();
-	  }
-	  finally
-	  {
+	    }
+	    finally
+	    {
 			DB.close(pstmt);
 			pstmt = null;
-	  }
+	    }
 		
 		return "Matched " + (count-unmatched) + " facts";
 	}	//	doIt

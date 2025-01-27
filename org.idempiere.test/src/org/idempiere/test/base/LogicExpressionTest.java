@@ -44,7 +44,6 @@ import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.compiere.util.DefaultEvaluatee;
 import org.compiere.util.Env;
-import org.compiere.util.Evaluatee;
 import org.compiere.util.LegacyLogicEvaluator;
 import org.compiere.util.TimeUtil;
 import org.idempiere.expression.logic.LogicEvaluator;
@@ -53,13 +52,12 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("deprecation")
 /**
- * 
+ * Unit test for logical expression using context variables 
  * @author hengsin
- *
  */
 public class LogicExpressionTest  extends AbstractTestCase {
 
-	private final static ContextEvaluatee evaluatee = new ContextEvaluatee();
+	private final static DefaultEvaluatee evaluatee = new DefaultEvaluatee();
 	
 	public LogicExpressionTest() {
 	}
@@ -96,8 +94,20 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 		Env.setContext(Env.getCtx(), "$Element_AY", "N");
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		
+		expr = "@LineType@=\"C\"&@CalculationType@='A,R,S'";
+		Env.setContext(Env.getCtx(), "LineType", "C");
+		Env.setContext(Env.getCtx(), "CalculationType", "B");
+		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "CalculationType", "A");
+		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "CalculationType", "A,R,S");
+		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test and (&)
+	 */
 	@Test
 	public void testAnd() {
 		String expr = "@$Element_BP@=Y & @AnyBPartner@=N";
@@ -126,9 +136,41 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test in operator (@...@=a,b)
+	 */
 	@Test
 	public void testIn() {
 		String expr = "@LineType@=C&@CalculationType@=A,R,S";
+		testInARS(expr);
+		expr = "@LineType@='C'&@CalculationType@='A','R','S'";
+		testInARS(expr);
+		expr = "@LineType@=\"C\"&@CalculationType@=\"A\",\"R\",\"S\"";
+		testInARS(expr);
+
+		expr = "@Name@='Name 1','Name 2','Name 3'";
+		testInName123(expr);
+		expr = "@Name@=\"Name 1\",\"Name 2\",\"Name 3\"";
+		testInName123(expr);
+	}
+
+	private void testInName123(String expr) {
+		Env.setContext(Env.getCtx(), "Name", (String)null);
+		assertFalse(LegacyLogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Name", "Name 2");
+		assertTrue(LegacyLogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Name", "Name 4");
+		assertFalse(LegacyLogicEvaluator.evaluateLogic(evaluatee, expr));
+		
+		Env.setContext(Env.getCtx(), "Name", (String)null);
+		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Name", "Name 2");
+		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Name", "Name 4");
+		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
+	}
+
+	private void testInARS(String expr) {
 		Env.setContext(Env.getCtx(), "LineType", (String)null);
 		Env.setContext(Env.getCtx(), "CalculationType", (String)null);
 		assertFalse(LegacyLogicEvaluator.evaluateLogic(evaluatee, expr));
@@ -160,6 +202,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test not equal (!)
+	 */
 	@Test
 	public void testNotEqual() {
 		String expr = "@C_Bpartner_ID@!0";
@@ -199,6 +244,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test the combine use of or (|) plus and (&) operator
+	 */
 	@Test
 	public void testOrAnd() {
 		String expr = "@IsSold@='Y' | @IsPurchased@='Y' & @IsSummary@='N'";
@@ -233,6 +281,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test the combine use of and (&) plus or (|) operator
+	 */
 	@Test
 	public void testAndOr() {
 		String expr = "@IsSummary@='N' & @ProductType@=I | @ProductType@=S";
@@ -263,6 +314,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test the use of and (&), parenthesis and or (|) operator
+	 */
 	@Test
 	public void testAndOrGroup() {
 		String expr = "@IsSummary@='N' & (@ProductType@=I | @ProductType@=S)";
@@ -280,6 +334,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test the use of or (|), parenthesis plus and (&) operator
+	 */
 	@Test
 	public void testOrAndGroup() {
 		String expr = "@IsSold@='Y' | (@IsPurchased@='Y' & @IsSummary@='N')";
@@ -299,6 +356,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test greater than (>)
+	 */
 	@Test
 	public void testGT() {
 		String expr = "@IsLot@=Y& @M_LotCtl_ID@ > 0";
@@ -327,6 +387,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test greater than or equal to (>=)
+	 */
 	@Test
 	public void testGE() {
 		String expr = "@IsLot@=Y& @M_LotCtl_ID@ >= 100";
@@ -343,6 +406,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test less than (<)
+	 */
 	@Test
 	public void testLT() {
 		String expr = "@A_Asset_ID@<1&@A_CreateAsset@='Y'";
@@ -367,6 +433,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test less than or equal to (<=)
+	 */
 	@Test
 	public void testLE() {
 		String expr = "@A_Asset_ID@<=1&@A_CreateAsset@='Y'";
@@ -381,6 +450,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test not operator ($!)
+	 */
 	@Test
 	public void testNegate() {
 		String expr = "$!(@IsLot@=Y & @M_LotCtl_ID@ > 0)";
@@ -395,6 +467,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test regular expression match (~)
+	 */
 	@Test
 	public void testRE() {
 		String expr = "@Identifier@ ~ '^([a-zA-Z_$][a-zA-Z\\d_$]*)$'";
@@ -412,8 +487,29 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 		Env.setContext(Env.getCtx(), "Identifier", "validIdentifier0");
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		
+		//test contains, useful for multiple selection choice
+		expr = "@Identifier@ ~ '.*\\b1\\b.*'";
+		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Identifier", "0");
+		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Identifier", "1");
+		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Identifier", "1,2");
+		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Identifier", "2,1");
+		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Identifier", "1,2");
+		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Identifier", "1,2,3");
+		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		Env.setContext(Env.getCtx(), "Identifier", "2,3");
+		assertFalse(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test syntax validation of expression
+	 */
 	@Test
 	public void testValidation() {
 		Exception ex = null;
@@ -434,6 +530,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		System.out.println(ex.getMessage());
 	}
 	
+	/**
+	 * Test default operator (:)
+	 */
 	@Test
 	public void testConditionalVariable() {
 		String expr = "@IsSOTrx:N@=N | @+IgnoreIsSOTrxInBPInfo:N@=Y";
@@ -454,6 +553,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Validate the syntax of all logical expression in AD
+	 */
 	@Test
 	public void testValidateAD() {
 		String[] columns = {"MandatoryLogic","DocValueLogic","ReadOnlyLogic","DisplayLogic","ZoomLogic"};
@@ -477,7 +579,7 @@ public class LogicExpressionTest  extends AbstractTestCase {
 					ResultSet rs = stmt.executeQuery();
 					while (rs.next()) {
 						String expr = rs.getString(mc.getColumnName());
-						if (expr.startsWith("@SQL=") || expr.startsWith("SQL="))
+						if (expr.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX) || expr.startsWith("SQL="))
 							continue;
 						try {
 							LogicEvaluator.validate(expr);
@@ -495,6 +597,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(exceptions.isEmpty(), "Found " + exceptions.size() + " logic expression with invalid syntax in AD");
 	}
 	
+	/**
+	 * Test comparison of date and timestamp values
+	 */
 	@Test
 	public void testDateExpression() {
 		String expr = "@DateAcct@<@DateOrdered@";
@@ -521,6 +626,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test comparison of numeric values
+	 */
 	@Test
 	public void testNumericExpression() {
 		String expr = "@QtyReserved@=0";
@@ -542,8 +650,14 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 		Env.setContext(Env.getCtx(), "QtyReserved", "0.00");
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
+		
+		expr = "1.50>1.00";
+		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 	
+	/**
+	 * Test the use of empty string literal ('')
+	 */
 	@Test
 	public void testEmptyStringExpression() {
 		String expr = "@ColumnSQL@=''";
@@ -566,6 +680,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 
+	/**
+	 * Test the use of $env to access environment variables
+	 */
 	@Test
 	public void testOSEnvVariable() {
 		String username = System.getenv("USER");
@@ -575,6 +692,9 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		assertTrue(LegacyLogicEvaluator.evaluateLogic(evaluatee, expr));
 	}
 
+	/**
+	 * Test nested property operator (.)
+	 */
 	@Test
 	public void testNestedProperty() {
 		String expr = "@Processed@=Y & @M_Product_ID.IsBOM@=Y";
@@ -592,14 +712,5 @@ public class LogicExpressionTest  extends AbstractTestCase {
 		Env.setContext(Env.getCtx(), 1, "Processed", "Y");
 		Env.setContext(Env.getCtx(), 1, "M_Product_ID", pchair);
 		assertTrue(LogicEvaluator.evaluateLogic(new DefaultEvaluatee(null, 1, 0), expr));
-	}
-	
-	private static class ContextEvaluatee implements Evaluatee {
-
-		@Override
-		public String get_ValueAsString(String variableName) {
-			return Env.getContext(Env.getCtx(), variableName);
-		}
-		
-	}
+	}	
 }

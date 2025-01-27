@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for CM_Chat
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_CM_Chat 
 {
@@ -44,8 +44,8 @@ public interface I_CM_Chat
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_CM_Chat
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -77,19 +77,6 @@ public interface I_CM_Chat
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
-    /** Column name CM_Chat_ID */
-    public static final String COLUMNNAME_CM_Chat_ID = "CM_Chat_ID";
-
-	/** Set Chat.
-	  * Chat or discussion thread
-	  */
-	public void setCM_Chat_ID (int CM_Chat_ID);
-
-	/** Get Chat.
-	  * Chat or discussion thread
-	  */
-	public int getCM_Chat_ID();
-
     /** Column name CM_ChatType_ID */
     public static final String COLUMNNAME_CM_ChatType_ID = "CM_ChatType_ID";
 
@@ -104,6 +91,19 @@ public interface I_CM_Chat
 	public int getCM_ChatType_ID();
 
 	public org.compiere.model.I_CM_ChatType getCM_ChatType() throws RuntimeException;
+
+    /** Column name CM_Chat_ID */
+    public static final String COLUMNNAME_CM_Chat_ID = "CM_Chat_ID";
+
+	/** Set Chat.
+	  * Chat or discussion thread
+	  */
+	public void setCM_Chat_ID (int CM_Chat_ID);
+
+	/** Get Chat.
+	  * Chat or discussion thread
+	  */
+	public int getCM_Chat_ID();
 
     /** Column name CM_Chat_UU */
     public static final String COLUMNNAME_CM_Chat_UU = "CM_Chat_UU";
@@ -194,6 +194,15 @@ public interface I_CM_Chat
 	  * Direct internal record ID
 	  */
 	public int getRecord_ID();
+
+    /** Column name Record_UU */
+    public static final String COLUMNNAME_Record_UU = "Record_UU";
+
+	/** Set Record UUID	  */
+	public void setRecord_UU (String Record_UU);
+
+	/** Get Record UUID	  */
+	public String getRecord_UU();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

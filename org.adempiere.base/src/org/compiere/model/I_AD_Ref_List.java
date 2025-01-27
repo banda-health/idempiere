@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Ref_List
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_Ref_List 
 {
@@ -44,8 +44,8 @@ public interface I_AD_Ref_List
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,29 +53,14 @@ public interface I_AD_Ref_List
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name AD_Reference_ID */
-    public static final String COLUMNNAME_AD_Reference_ID = "AD_Reference_ID";
-
-	/** Set Reference.
-	  * System Reference and Validation
-	  */
-	public void setAD_Reference_ID (int AD_Reference_ID);
-
-	/** Get Reference.
-	  * System Reference and Validation
-	  */
-	public int getAD_Reference_ID();
-
-	public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException;
 
     /** Column name AD_Ref_List_ID */
     public static final String COLUMNNAME_AD_Ref_List_ID = "AD_Ref_List_ID";
@@ -98,6 +83,21 @@ public interface I_AD_Ref_List
 
 	/** Get AD_Ref_List_UU	  */
 	public String getAD_Ref_List_UU();
+
+    /** Column name AD_Reference_ID */
+    public static final String COLUMNNAME_AD_Reference_ID = "AD_Reference_ID";
+
+	/** Set Reference.
+	  * System Reference and Validation
+	  */
+	public void setAD_Reference_ID (int AD_Reference_ID);
+
+	/** Get Reference.
+	  * System Reference and Validation
+	  */
+	public int getAD_Reference_ID();
+
+	public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

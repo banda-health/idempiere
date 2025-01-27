@@ -24,19 +24,20 @@
  * Contributors:                                                       *
  * - Carlos Ruiz                                                       *
  **********************************************************************/
-
 package org.compiere.process;
 
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.IMFAMechanism;
 import org.compiere.model.MMFAMethod;
 import org.compiere.model.MMFARegistration;
+import org.compiere.model.MProcessPara;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.Msg;
 
 /**
- *	IDEMPIERE-4782
+ *	IDEMPIERE-4782 Multi-factor authentication
  * 	@author Carlos Ruiz - globalqss - BX Service
  */
 @org.adempiere.base.annotation.Process
@@ -58,8 +59,7 @@ public class MFARegister extends SvrProcess {
 			case "MFA_Method_ID": p_MFA_Method_ID = para.getParameterAsInt(); break;
 			case "ParameterValue": p_ParameterValue = para.getParameterAsString(); break;
 			default:
-				if (log.isLoggable(Level.INFO))
-					log.log(Level.INFO, "Custom Parameter: " + name + "=" + para.getInfo());
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para);
 				break;
 			}
 		}
@@ -77,6 +77,9 @@ public class MFARegister extends SvrProcess {
 
 		MMFAMethod method = new MMFAMethod(getCtx(), p_MFA_Method_ID, get_TrxName());
 		IMFAMechanism mechanism = method.getMFAMechanism();
+
+		if (MMFARegistration.alreadyExistsValid(method, null))
+			throw new AdempiereException(Msg.getMsg(getCtx(), "MFAMethodAlreadyRegistered"));
 
 		retArray = mechanism.register(getCtx(), method, p_ParameterValue, get_TrxName());
 		if (retArray == null || retArray.length == 0 || ! (retArray[0] instanceof String) )

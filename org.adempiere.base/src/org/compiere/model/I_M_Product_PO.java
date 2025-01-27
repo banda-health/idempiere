@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_Product_PO
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_Product_PO 
 {
@@ -44,8 +44,8 @@ public interface I_M_Product_PO
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_Product_PO
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -92,6 +92,21 @@ public interface I_M_Product_PO
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
+    /** Column name C_UOM_ID */
+    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
+
+	/** Set UOM.
+	  * Unit of Measure
+	  */
+	public void setC_UOM_ID (int C_UOM_ID);
+
+	/** Get UOM.
+	  * Unit of Measure
+	  */
+	public int getC_UOM_ID();
+
+	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
+
     /** Column name CostPerOrder */
     public static final String COLUMNNAME_CostPerOrder = "CostPerOrder";
 
@@ -120,21 +135,6 @@ public interface I_M_Product_PO
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name C_UOM_ID */
-    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
-
-	/** Set UOM.
-	  * Unit of Measure
-	  */
-	public void setC_UOM_ID (int C_UOM_ID);
-
-	/** Get UOM.
-	  * Unit of Measure
-	  */
-	public int getC_UOM_ID();
-
-	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name DeliveryTime_Actual */
     public static final String COLUMNNAME_DeliveryTime_Actual = "DeliveryTime_Actual";
@@ -214,19 +214,6 @@ public interface I_M_Product_PO
 	  */
 	public boolean isCurrentVendor();
 
-    /** Column name Manufacturer */
-    public static final String COLUMNNAME_Manufacturer = "Manufacturer";
-
-	/** Set Manufacturer.
-	  * Manufacturer of the Product
-	  */
-	public void setManufacturer (String Manufacturer);
-
-	/** Get Manufacturer.
-	  * Manufacturer of the Product
-	  */
-	public String getManufacturer();
-
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
 
@@ -250,6 +237,19 @@ public interface I_M_Product_PO
 
 	/** Get M_Product_PO_UU	  */
 	public String getM_Product_PO_UU();
+
+    /** Column name Manufacturer */
+    public static final String COLUMNNAME_Manufacturer = "Manufacturer";
+
+	/** Set Manufacturer.
+	  * Manufacturer of the Product
+	  */
+	public void setManufacturer (String Manufacturer);
+
+	/** Get Manufacturer.
+	  * Manufacturer of the Product
+	  */
+	public String getManufacturer();
 
     /** Column name Order_Min */
     public static final String COLUMNNAME_Order_Min = "Order_Min";

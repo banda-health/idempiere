@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_CycleStep
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_CycleStep 
 {
@@ -44,8 +44,8 @@ public interface I_C_CycleStep
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,29 +53,14 @@ public interface I_C_CycleStep
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name C_Cycle_ID */
-    public static final String COLUMNNAME_C_Cycle_ID = "C_Cycle_ID";
-
-	/** Set Project Cycle.
-	  * Identifier for this Project Reporting Cycle
-	  */
-	public void setC_Cycle_ID (int C_Cycle_ID);
-
-	/** Get Project Cycle.
-	  * Identifier for this Project Reporting Cycle
-	  */
-	public int getC_Cycle_ID();
-
-	public org.compiere.model.I_C_Cycle getC_Cycle() throws RuntimeException;
 
     /** Column name C_CycleStep_ID */
     public static final String COLUMNNAME_C_CycleStep_ID = "C_CycleStep_ID";
@@ -98,6 +83,21 @@ public interface I_C_CycleStep
 
 	/** Get C_CycleStep_UU	  */
 	public String getC_CycleStep_UU();
+
+    /** Column name C_Cycle_ID */
+    public static final String COLUMNNAME_C_Cycle_ID = "C_Cycle_ID";
+
+	/** Set Project Cycle.
+	  * Identifier for this Project Reporting Cycle
+	  */
+	public void setC_Cycle_ID (int C_Cycle_ID);
+
+	/** Get Project Cycle.
+	  * Identifier for this Project Reporting Cycle
+	  */
+	public int getC_Cycle_ID();
+
+	public org.compiere.model.I_C_Cycle getC_Cycle() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

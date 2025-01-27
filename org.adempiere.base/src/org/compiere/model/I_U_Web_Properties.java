@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for U_Web_Properties
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_U_Web_Properties 
 {
@@ -44,8 +44,8 @@ public interface I_U_Web_Properties
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_U_Web_Properties
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -100,22 +100,6 @@ public interface I_U_Web_Properties
 	/** Get Key	  */
 	public String getU_Key();
 
-    /** Column name Updated */
-    public static final String COLUMNNAME_Updated = "Updated";
-
-	/** Get Updated.
-	  * Date this record was updated
-	  */
-	public Timestamp getUpdated();
-
-    /** Column name UpdatedBy */
-    public static final String COLUMNNAME_UpdatedBy = "UpdatedBy";
-
-	/** Get Updated By.
-	  * User who updated this records
-	  */
-	public int getUpdatedBy();
-
     /** Column name U_Value */
     public static final String COLUMNNAME_U_Value = "U_Value";
 
@@ -142,4 +126,20 @@ public interface I_U_Web_Properties
 
 	/** Get U_Web_Properties_UU	  */
 	public String getU_Web_Properties_UU();
+
+    /** Column name Updated */
+    public static final String COLUMNNAME_Updated = "Updated";
+
+	/** Get Updated.
+	  * Date this record was updated
+	  */
+	public Timestamp getUpdated();
+
+    /** Column name UpdatedBy */
+    public static final String COLUMNNAME_UpdatedBy = "UpdatedBy";
+
+	/** Get Updated By.
+	  * User who updated this records
+	  */
+	public int getUpdatedBy();
 }

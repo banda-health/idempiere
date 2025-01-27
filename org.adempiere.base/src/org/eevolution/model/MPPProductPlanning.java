@@ -47,6 +47,16 @@ public class MPPProductPlanning extends X_PP_Product_Planning
 	private static CLogger log = CLogger.getCLogger(MPPProductPlanning.class); 
 
 
+    /**
+    * UUID based Constructor
+    * @param ctx  Context
+    * @param PP_Product_Planning_UU  UUID key
+    * @param trxName Transaction
+    */
+    public MPPProductPlanning(Properties ctx, String PP_Product_Planning_UU, String trxName) {
+        super(ctx, PP_Product_Planning_UU, trxName);
+    }
+
 	/**************************************************************************
 	 * 	Default Constructor
 	 *	@param ctx context
@@ -56,9 +66,6 @@ public class MPPProductPlanning extends X_PP_Product_Planning
 	public MPPProductPlanning(Properties ctx, int pp_product_planning_id, String trxname)
 	{
 		super(ctx, pp_product_planning_id, trxname);
-		if (pp_product_planning_id == 0)
-		{    
-		}
 	}	//	MPPProductPlanning
 
 	/**
@@ -183,13 +190,12 @@ public class MPPProductPlanning extends X_PP_Product_Planning
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
-		//
-		// Set default : Order_Policy
+		// Set default Order_Policy
 		if (getOrder_Policy() == null)
 		{
 			setOrder_Policy(ORDER_POLICY_Lot_For_Lot);
 		}
-		//
+		
 		// Check Order_Min < Order_Max
 		if (getOrder_Min().signum() > 0
 				&& getOrder_Max().signum() > 0
@@ -197,14 +203,14 @@ public class MPPProductPlanning extends X_PP_Product_Planning
 		{
 			throw new AdempiereException("@Order_Min@ > @Order_Max@");
 		}
-		//
+		
 		// Check Order_Period
 		if (ORDER_POLICY_PeriodOrderQuantity.equals(getOrder_Policy())
 				&& getOrder_Period().signum() <= 0)
 		{
 			throw new AdempiereException("@Order_Period@ <= 0");
 		}
-		//
+		
 		// Check Order_Qty
 		if (ORDER_POLICY_FixedOrderQuantity.equals(getOrder_Policy())
 				&& getOrder_Qty().signum() <= 0)

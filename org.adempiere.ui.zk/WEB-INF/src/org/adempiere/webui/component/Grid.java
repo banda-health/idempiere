@@ -28,25 +28,38 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 
 /**
- *
+ * Extend {@link org.zkoss.zul.Grid}
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Feb 25, 2007
- * @version $Revision: 0.10 $
  */
 public class Grid extends org.zkoss.zul.Grid implements IdSpace
 {
+	/**
+	 * Generated serial id
+	 */
 	private static final long serialVersionUID = -4483759833677794926L;
+	/** Event Name:List&lt;EventListenerInfo&gt;, for implementation of {@link #copyEventListeners(Grid)} */
 	private transient Map<String, List<EventListenerInfo>> listeners;
 	
+	/**
+	 * Default constructor
+	 */
 	public Grid() {
 		super();
 		listeners = new HashMap<String, List<EventListenerInfo>>();
 	}
 
+	/**
+	 * Remove the alternate background color rendering of grid rows.
+	 */
 	public void makeNoStrip() {
     	setOddRowSclass("z-dummy");
     }
 
+	/**
+	 * Add and return new Rows instance
+	 * @return Rows
+	 */
 	public Rows newRows() {
 		Rows rows = new Rows();
 		appendChild(rows);
@@ -54,6 +67,9 @@ public class Grid extends org.zkoss.zul.Grid implements IdSpace
 		return rows;
 	}
 
+	/**
+	 * Override to maintain {@link #listeners}
+	 */
 	@Override
 	public boolean addEventListener(int priority, String evtnm,
 			EventListener<? extends Event> listener) {
@@ -81,6 +97,9 @@ public class Grid extends org.zkoss.zul.Grid implements IdSpace
 		return b;
 	}
 
+	/**
+	 * Override to maintain {@link #listeners}
+	 */
 	@Override
 	public boolean removeEventListener(String evtnm,
 			EventListener<? extends Event> listener) {
@@ -101,6 +120,11 @@ public class Grid extends org.zkoss.zul.Grid implements IdSpace
 		return b;
 	}
 	
+	/**
+	 * Copy event listeners from another grid.<br/>
+	 * Use in the re-initialization of grid view.
+	 * @param grid
+	 */
 	public void copyEventListeners(Grid grid) {
 		for(String evtnm : listeners.keySet()) {
 			if (evtnm.equals("onInitModel"))
@@ -112,6 +136,9 @@ public class Grid extends org.zkoss.zul.Grid implements IdSpace
 		}
 	}
 	
+	/**
+	 * Class to hold event listener details 
+	 */
 	private static class EventListenerInfo {
 		private final int priority;
 		private final EventListener<? extends Event> listener;

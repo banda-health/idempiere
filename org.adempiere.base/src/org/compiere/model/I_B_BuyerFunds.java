@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for B_BuyerFunds
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_B_BuyerFunds 
 {
@@ -44,8 +44,8 @@ public interface I_B_BuyerFunds
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_B_BuyerFunds
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -99,19 +99,6 @@ public interface I_B_BuyerFunds
 	/** Get B_BuyerFunds_UU	  */
 	public String getB_BuyerFunds_UU();
 
-    /** Column name CommittedAmt */
-    public static final String COLUMNNAME_CommittedAmt = "CommittedAmt";
-
-	/** Set Committed Amount.
-	  * The (legal) commitment amount
-	  */
-	public void setCommittedAmt (BigDecimal CommittedAmt);
-
-	/** Get Committed Amount.
-	  * The (legal) commitment amount
-	  */
-	public BigDecimal getCommittedAmt();
-
     /** Column name C_Order_ID */
     public static final String COLUMNNAME_C_Order_ID = "C_Order_ID";
 
@@ -141,6 +128,19 @@ public interface I_B_BuyerFunds
 	public int getC_Payment_ID();
 
 	public org.compiere.model.I_C_Payment getC_Payment() throws RuntimeException;
+
+    /** Column name CommittedAmt */
+    public static final String COLUMNNAME_CommittedAmt = "CommittedAmt";
+
+	/** Set Committed Amount.
+	  * The (legal) commitment amount
+	  */
+	public void setCommittedAmt (BigDecimal CommittedAmt);
+
+	/** Get Committed Amount.
+	  * The (legal) commitment amount
+	  */
+	public BigDecimal getCommittedAmt();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -174,12 +174,12 @@ public interface I_B_BuyerFunds
     /** Column name NonCommittedAmt */
     public static final String COLUMNNAME_NonCommittedAmt = "NonCommittedAmt";
 
-	/** Set Not Committed Aount.
+	/** Set Not Committed Amount.
 	  * Amount not committed yet
 	  */
 	public void setNonCommittedAmt (BigDecimal NonCommittedAmt);
 
-	/** Get Not Committed Aount.
+	/** Get Not Committed Amount.
 	  * Amount not committed yet
 	  */
 	public BigDecimal getNonCommittedAmt();

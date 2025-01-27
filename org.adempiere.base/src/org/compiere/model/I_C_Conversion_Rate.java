@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_Conversion_Rate
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_Conversion_Rate 
 {
@@ -44,8 +44,8 @@ public interface I_C_Conversion_Rate
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,14 +53,29 @@ public interface I_C_Conversion_Rate
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
+
+    /** Column name C_ConversionType_ID */
+    public static final String COLUMNNAME_C_ConversionType_ID = "C_ConversionType_ID";
+
+	/** Set Currency Type.
+	  * Currency Conversion Rate Type
+	  */
+	public void setC_ConversionType_ID (int C_ConversionType_ID);
+
+	/** Get Currency Type.
+	  * Currency Conversion Rate Type
+	  */
+	public int getC_ConversionType_ID();
+
+	public org.compiere.model.I_C_ConversionType getC_ConversionType() throws RuntimeException;
 
     /** Column name C_Conversion_Rate_ID */
     public static final String COLUMNNAME_C_Conversion_Rate_ID = "C_Conversion_Rate_ID";
@@ -83,21 +98,6 @@ public interface I_C_Conversion_Rate
 
 	/** Get C_Conversion_Rate_UU	  */
 	public String getC_Conversion_Rate_UU();
-
-    /** Column name C_ConversionType_ID */
-    public static final String COLUMNNAME_C_ConversionType_ID = "C_ConversionType_ID";
-
-	/** Set Currency Type.
-	  * Currency Conversion Rate Type
-	  */
-	public void setC_ConversionType_ID (int C_ConversionType_ID);
-
-	/** Get Currency Type.
-	  * Currency Conversion Rate Type
-	  */
-	public int getC_ConversionType_ID();
-
-	public org.compiere.model.I_C_ConversionType getC_ConversionType() throws RuntimeException;
 
     /** Column name C_Currency_ID */
     public static final String COLUMNNAME_C_Currency_ID = "C_Currency_ID";

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for GL_FundRestriction
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_GL_FundRestriction 
 {
@@ -44,8 +44,8 @@ public interface I_GL_FundRestriction
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_GL_FundRestriction
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -106,21 +106,6 @@ public interface I_GL_FundRestriction
 	  */
 	public String getDescription();
 
-    /** Column name GL_Fund_ID */
-    public static final String COLUMNNAME_GL_Fund_ID = "GL_Fund_ID";
-
-	/** Set GL Fund.
-	  * General Ledger Funds Control
-	  */
-	public void setGL_Fund_ID (int GL_Fund_ID);
-
-	/** Get GL Fund.
-	  * General Ledger Funds Control
-	  */
-	public int getGL_Fund_ID();
-
-	public org.compiere.model.I_GL_Fund getGL_Fund() throws RuntimeException;
-
     /** Column name GL_FundRestriction_ID */
     public static final String COLUMNNAME_GL_FundRestriction_ID = "GL_FundRestriction_ID";
 
@@ -142,6 +127,21 @@ public interface I_GL_FundRestriction
 
 	/** Get GL_FundRestriction_UU	  */
 	public String getGL_FundRestriction_UU();
+
+    /** Column name GL_Fund_ID */
+    public static final String COLUMNNAME_GL_Fund_ID = "GL_Fund_ID";
+
+	/** Set GL Fund.
+	  * General Ledger Funds Control
+	  */
+	public void setGL_Fund_ID (int GL_Fund_ID);
+
+	/** Get GL Fund.
+	  * General Ledger Funds Control
+	  */
+	public int getGL_Fund_ID();
+
+	public org.compiere.model.I_GL_Fund getGL_Fund() throws RuntimeException;
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";

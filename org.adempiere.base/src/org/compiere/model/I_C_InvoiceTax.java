@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_InvoiceTax
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_InvoiceTax 
 {
@@ -44,8 +44,8 @@ public interface I_C_InvoiceTax
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,14 +53,23 @@ public interface I_C_InvoiceTax
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
+
+    /** Column name C_InvoiceTax_UU */
+    public static final String COLUMNNAME_C_InvoiceTax_UU = "C_InvoiceTax_UU";
+
+	/** Set C_InvoiceTax_UU	  */
+	public void setC_InvoiceTax_UU (String C_InvoiceTax_UU);
+
+	/** Get C_InvoiceTax_UU	  */
+	public String getC_InvoiceTax_UU();
 
     /** Column name C_Invoice_ID */
     public static final String COLUMNNAME_C_Invoice_ID = "C_Invoice_ID";
@@ -77,30 +86,16 @@ public interface I_C_InvoiceTax
 
 	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException;
 
-    /** Column name C_InvoiceTax_UU */
-    public static final String COLUMNNAME_C_InvoiceTax_UU = "C_InvoiceTax_UU";
+    /** Column name C_TaxProvider_ID */
+    public static final String COLUMNNAME_C_TaxProvider_ID = "C_TaxProvider_ID";
 
-	/** Set C_InvoiceTax_UU	  */
-	public void setC_InvoiceTax_UU (String C_InvoiceTax_UU);
+	/** Set Tax Provider	  */
+	public void setC_TaxProvider_ID (int C_TaxProvider_ID);
 
-	/** Get C_InvoiceTax_UU	  */
-	public String getC_InvoiceTax_UU();
+	/** Get Tax Provider	  */
+	public int getC_TaxProvider_ID();
 
-    /** Column name Created */
-    public static final String COLUMNNAME_Created = "Created";
-
-	/** Get Created.
-	  * Date this record was created
-	  */
-	public Timestamp getCreated();
-
-    /** Column name CreatedBy */
-    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
-
-	/** Get Created By.
-	  * User who created this records
-	  */
-	public int getCreatedBy();
+	public org.compiere.model.I_C_TaxProvider getC_TaxProvider() throws RuntimeException;
 
     /** Column name C_Tax_ID */
     public static final String COLUMNNAME_C_Tax_ID = "C_Tax_ID";
@@ -117,16 +112,21 @@ public interface I_C_InvoiceTax
 
 	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
 
-    /** Column name C_TaxProvider_ID */
-    public static final String COLUMNNAME_C_TaxProvider_ID = "C_TaxProvider_ID";
+    /** Column name Created */
+    public static final String COLUMNNAME_Created = "Created";
 
-	/** Set Tax Provider	  */
-	public void setC_TaxProvider_ID (int C_TaxProvider_ID);
+	/** Get Created.
+	  * Date this record was created
+	  */
+	public Timestamp getCreated();
 
-	/** Get Tax Provider	  */
-	public int getC_TaxProvider_ID();
+    /** Column name CreatedBy */
+    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
 
-	public org.compiere.model.I_C_TaxProvider getC_TaxProvider() throws RuntimeException;
+	/** Get Created By.
+	  * User who created this records
+	  */
+	public int getCreatedBy();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";

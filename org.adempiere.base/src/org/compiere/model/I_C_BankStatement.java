@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BankStatement
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_BankStatement 
 {
@@ -44,8 +44,8 @@ public interface I_C_BankStatement
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_C_BankStatement
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -112,6 +112,21 @@ public interface I_C_BankStatement
 	/** Get C_BankStatement_UU	  */
 	public String getC_BankStatement_UU();
 
+    /** Column name C_DocType_ID */
+    public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
+
+	/** Set Document Type.
+	  * Document type or rules
+	  */
+	public void setC_DocType_ID (int C_DocType_ID);
+
+	/** Get Document Type.
+	  * Document type or rules
+	  */
+	public int getC_DocType_ID();
+
+	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException;
+
     /** Column name CopyFrom */
     public static final String COLUMNNAME_CopyFrom = "CopyFrom";
 
@@ -124,22 +139,6 @@ public interface I_C_BankStatement
 	  * Copy From Record
 	  */
 	public String getCopyFrom();
-
-    /** Column name Created */
-    public static final String COLUMNNAME_Created = "Created";
-
-	/** Get Created.
-	  * Date this record was created
-	  */
-	public Timestamp getCreated();
-
-    /** Column name CreatedBy */
-    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
-
-	/** Get Created By.
-	  * User who created this records
-	  */
-	public int getCreatedBy();
 
     /** Column name CreateFrom */
     public static final String COLUMNNAME_CreateFrom = "CreateFrom";
@@ -162,6 +161,22 @@ public interface I_C_BankStatement
 
 	/** Get Create From Batch	  */
 	public String getCreateFromBatch();
+
+    /** Column name Created */
+    public static final String COLUMNNAME_Created = "Created";
+
+	/** Get Created.
+	  * Date this record was created
+	  */
+	public Timestamp getCreated();
+
+    /** Column name CreatedBy */
+    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
+
+	/** Get Created By.
+	  * User who created this records
+	  */
+	public int getCreatedBy();
 
     /** Column name DateAcct */
     public static final String COLUMNNAME_DateAcct = "DateAcct";
@@ -214,6 +229,19 @@ public interface I_C_BankStatement
 	  * The current status of the document
 	  */
 	public String getDocStatus();
+
+    /** Column name DocumentNo */
+    public static final String COLUMNNAME_DocumentNo = "DocumentNo";
+
+	/** Set Document No.
+	  * Document sequence number of the document
+	  */
+	public void setDocumentNo (String DocumentNo);
+
+	/** Get Document No.
+	  * Document sequence number of the document
+	  */
+	public String getDocumentNo();
 
     /** Column name EftStatementDate */
     public static final String COLUMNNAME_EftStatementDate = "EftStatementDate";

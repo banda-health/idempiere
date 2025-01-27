@@ -23,6 +23,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MColumn;
 import org.compiere.model.MField;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MTab;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
@@ -71,7 +72,7 @@ public class TabCreateFields extends SvrProcess
 			else if (name.equals("CreatedSince"))
 				p_CreatedSince = para[i].getParameterAsTimestamp();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		p_AD_Tab_ID = getRecord_ID();
 	}	//	prepare
@@ -99,11 +100,11 @@ public class TabCreateFields extends SvrProcess
 			+ " AND IsActive='Y' ";
 
 		if(!Util.isEmpty(p_EntityType))
-			sql += " AND c.entitytype = ?";
+			sql += " AND c.entitytype = ? ";
 		if(p_CreatedSince != null)
 			sql += " AND c.created >= ? ";
 
-		sql += "ORDER  BY CASE "
+		sql += " ORDER  BY CASE "
 			+ "            WHEN c.ColumnName = 'AD_Client_ID' THEN -100 "
 			+ "            WHEN c.ColumnName = 'AD_Org_ID' THEN -90 "
 			+ "            WHEN c.IsParent = 'Y' THEN -85 "
@@ -166,7 +167,7 @@ public class TabCreateFields extends SvrProcess
 				}
 				if (column.getAD_Reference_ID() == DisplayType.Text) {
 					field.setNumLines(3);
-				} else if (column.getAD_Reference_ID() == DisplayType.TextLong) {
+				} else if (column.getAD_Reference_ID() == DisplayType.TextLong || column.getAD_Reference_ID() == DisplayType.JSON) {
 					field.setNumLines(5);
 				} else if (column.getAD_Reference_ID() == DisplayType.Memo) {
 					field.setNumLines(8);

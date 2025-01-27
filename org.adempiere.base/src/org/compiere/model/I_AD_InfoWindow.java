@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_InfoWindow
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_InfoWindow 
 {
@@ -44,8 +44,8 @@ public interface I_AD_InfoWindow
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -86,12 +86,12 @@ public interface I_AD_InfoWindow
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -247,19 +247,6 @@ public interface I_AD_InfoWindow
 	  */
 	public boolean isDistinct();
 
-    /** Column name isLoadPageNum */
-    public static final String COLUMNNAME_isLoadPageNum = "isLoadPageNum";
-
-	/** Set Load Page Num.
-	  * When load data for info window, also load number of paging
-	  */
-	public void setisLoadPageNum (boolean isLoadPageNum);
-
-	/** Get Load Page Num.
-	  * When load data for info window, also load number of paging
-	  */
-	public boolean isLoadPageNum();
-
     /** Column name IsShowInDashboard */
     public static final String COLUMNNAME_IsShowInDashboard = "IsShowInDashboard";
 
@@ -338,15 +325,6 @@ public interface I_AD_InfoWindow
 	  */
 	public String getOtherClause();
 
-    /** Column name PagingSize */
-    public static final String COLUMNNAME_PagingSize = "PagingSize";
-
-	/** Set Paging Size	  */
-	public void setPagingSize (int PagingSize);
-
-	/** Get Paging Size	  */
-	public int getPagingSize();
-
     /** Column name PO_Window_ID */
     public static final String COLUMNNAME_PO_Window_ID = "PO_Window_ID";
 
@@ -361,6 +339,15 @@ public interface I_AD_InfoWindow
 	public int getPO_Window_ID();
 
 	public org.compiere.model.I_AD_Window getPO_Window() throws RuntimeException;
+
+    /** Column name PagingSize */
+    public static final String COLUMNNAME_PagingSize = "PagingSize";
+
+	/** Set Paging Size	  */
+	public void setPagingSize (int PagingSize);
+
+	/** Get Paging Size	  */
+	public int getPagingSize();
 
     /** Column name Processing */
     public static final String COLUMNNAME_Processing = "Processing";
@@ -414,4 +401,17 @@ public interface I_AD_InfoWindow
 	  * Fully qualified SQL WHERE clause
 	  */
 	public String getWhereClause();
+
+    /** Column name isLoadPageNum */
+    public static final String COLUMNNAME_isLoadPageNum = "isLoadPageNum";
+
+	/** Set Load Page Num.
+	  * When load data for info window, also load number of paging
+	  */
+	public void setisLoadPageNum (boolean isLoadPageNum);
+
+	/** Get Load Page Num.
+	  * When load data for info window, also load number of paging
+	  */
+	public boolean isLoadPageNum();
 }

@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for GL_JournalGenerator
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="GL_JournalGenerator")
-public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, I_Persistent 
+public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_GL_JournalGenerator (Properties ctx, int GL_JournalGenerator_ID, String trxName)
@@ -55,6 +55,28 @@ public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, 
         } */
     }
 
+    /** Standard Constructor */
+    public X_GL_JournalGenerator (Properties ctx, String GL_JournalGenerator_UU, String trxName)
+    {
+      super (ctx, GL_JournalGenerator_UU, trxName);
+      /** if (GL_JournalGenerator_UU == null)
+        {
+			setGL_JournalGenerator_ID (0);
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_GL_JournalGenerator (Properties ctx, String GL_JournalGenerator_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, GL_JournalGenerator_UU, trxName, virtualColumns);
+      /** if (GL_JournalGenerator_UU == null)
+        {
+			setGL_JournalGenerator_ID (0);
+			setName (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_GL_JournalGenerator (Properties ctx, ResultSet rs, String trxName)
     {
@@ -62,7 +84,7 @@ public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, 
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -209,21 +231,6 @@ public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, 
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	/** Set Generate GL Journal.
-		@param GenerateGLJournal Generate GL Journal
-	*/
-	public void setGenerateGLJournal (String GenerateGLJournal)
-	{
-		set_Value (COLUMNNAME_GenerateGLJournal, GenerateGLJournal);
-	}
-
-	/** Get Generate GL Journal.
-		@return Generate GL Journal	  */
-	public String getGenerateGLJournal()
-	{
-		return (String)get_Value(COLUMNNAME_GenerateGLJournal);
-	}
-
 	public org.compiere.model.I_GL_Category getGL_Category() throws RuntimeException
 	{
 		return (org.compiere.model.I_GL_Category)MTable.get(getCtx(), org.compiere.model.I_GL_Category.Table_ID)
@@ -288,6 +295,21 @@ public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, 
 		return (String)get_Value(COLUMNNAME_GL_JournalGenerator_UU);
 	}
 
+	/** Set Generate GL Journal.
+		@param GenerateGLJournal Generate GL Journal
+	*/
+	public void setGenerateGLJournal (String GenerateGLJournal)
+	{
+		set_Value (COLUMNNAME_GenerateGLJournal, GenerateGLJournal);
+	}
+
+	/** Get Generate GL Journal.
+		@return Generate GL Journal	  */
+	public String getGenerateGLJournal()
+	{
+		return (String)get_Value(COLUMNNAME_GenerateGLJournal);
+	}
+
 	/** Set Comment/Help.
 		@param Help Comment or Hint
 	*/
@@ -323,7 +345,7 @@ public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, 
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -340,7 +362,7 @@ public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, 
 	public static final String POSTINGTYPE_Reservation = "R";
 	/** Statistical = S */
 	public static final String POSTINGTYPE_Statistical = "S";
-	/** Set PostingType.
+	/** Set Posting Type.
 		@param PostingType The type of posted amount for the transaction
 	*/
 	public void setPostingType (String PostingType)
@@ -349,7 +371,7 @@ public class X_GL_JournalGenerator extends PO implements I_GL_JournalGenerator, 
 		set_Value (COLUMNNAME_PostingType, PostingType);
 	}
 
-	/** Get PostingType.
+	/** Get Posting Type.
 		@return The type of posted amount for the transaction
 	  */
 	public String getPostingType()

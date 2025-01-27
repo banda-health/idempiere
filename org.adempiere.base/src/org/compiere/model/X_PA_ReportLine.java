@@ -17,21 +17,23 @@
 /** Generated Model - DO NOT CHANGE */
 package org.compiere.model;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Properties;
+import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PA_ReportLine
- *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="PA_ReportLine")
-public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent 
+public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_PA_ReportLine (Properties ctx, int PA_ReportLine_ID, String trxName)
@@ -45,8 +47,8 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 // Y
 			setLineType (null);
 			setName (null);
-			setPA_ReportLine_ID (0);
 			setPA_ReportLineSet_ID (0);
+			setPA_ReportLine_ID (0);
 			setSeqNo (0);
 // @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM PA_ReportLine WHERE PA_ReportLineSet_ID=@PA_ReportLineSet_ID@
         } */
@@ -64,8 +66,46 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 // Y
 			setLineType (null);
 			setName (null);
-			setPA_ReportLine_ID (0);
 			setPA_ReportLineSet_ID (0);
+			setPA_ReportLine_ID (0);
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM PA_ReportLine WHERE PA_ReportLineSet_ID=@PA_ReportLineSet_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_ReportLine (Properties ctx, String PA_ReportLine_UU, String trxName)
+    {
+      super (ctx, PA_ReportLine_UU, trxName);
+      /** if (PA_ReportLine_UU == null)
+        {
+			setIsInverseDebitCreditOnly (false);
+// N
+			setIsPrinted (true);
+// Y
+			setLineType (null);
+			setName (null);
+			setPA_ReportLineSet_ID (0);
+			setPA_ReportLine_ID (0);
+			setSeqNo (0);
+// @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM PA_ReportLine WHERE PA_ReportLineSet_ID=@PA_ReportLineSet_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_ReportLine (Properties ctx, String PA_ReportLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_ReportLine_UU, trxName, virtualColumns);
+      /** if (PA_ReportLine_UU == null)
+        {
+			setIsInverseDebitCreditOnly (false);
+// N
+			setIsPrinted (true);
+// Y
+			setLineType (null);
+			setName (null);
+			setPA_ReportLineSet_ID (0);
+			setPA_ReportLine_ID (0);
 			setSeqNo (0);
 // @SQL=SELECT NVL(MAX(SeqNo),0)+10 AS DefaultValue FROM PA_ReportLine WHERE PA_ReportLineSet_ID=@PA_ReportLineSet_ID@
         } */
@@ -78,7 +118,7 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -183,10 +223,10 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public boolean isInverseDebitCreditOnly()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInverseDebitCreditOnly);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -206,10 +246,10 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -229,10 +269,10 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public boolean isShowOppositeSign()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowOppositeSign);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -262,6 +302,25 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 		return (String)get_Value(COLUMNNAME_LineType);
 	}
 
+	/** Set Multiplier.
+		@param Multiplier Type Multiplier (Credit = -1)
+	*/
+	public void setMultiplier (BigDecimal Multiplier)
+	{
+		set_Value (COLUMNNAME_Multiplier, Multiplier);
+	}
+
+	/** Get Multiplier.
+		@return Type Multiplier (Credit = -1)
+	  */
+	public BigDecimal getMultiplier()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Multiplier);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/
@@ -281,7 +340,7 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -430,27 +489,6 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 		return (String)get_Value(COLUMNNAME_PAPeriodType);
 	}
 
-	/** Set Report Line.
-		@param PA_ReportLine_ID Report Line
-	*/
-	public void setPA_ReportLine_ID (int PA_ReportLine_ID)
-	{
-		if (PA_ReportLine_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_PA_ReportLine_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_PA_ReportLine_ID, Integer.valueOf(PA_ReportLine_ID));
-	}
-
-	/** Get Report Line.
-		@return Report Line	  */
-	public int getPA_ReportLine_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportLine_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_PA_ReportLineSet getPA_ReportLineSet() throws RuntimeException
 	{
 		return (org.compiere.model.I_PA_ReportLineSet)MTable.get(getCtx(), org.compiere.model.I_PA_ReportLineSet.Table_ID)
@@ -473,6 +511,27 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public int getPA_ReportLineSet_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportLineSet_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Report Line.
+		@param PA_ReportLine_ID Report Line
+	*/
+	public void setPA_ReportLine_ID (int PA_ReportLine_ID)
+	{
+		if (PA_ReportLine_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_PA_ReportLine_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_PA_ReportLine_ID, Integer.valueOf(PA_ReportLine_ID));
+	}
+
+	/** Get Report Line.
+		@return Report Line	  */
+	public int getPA_ReportLine_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportLine_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -505,7 +564,7 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 	public static final String POSTINGTYPE_Reservation = "R";
 	/** Statistical = S */
 	public static final String POSTINGTYPE_Statistical = "S";
-	/** Set PostingType.
+	/** Set Posting Type.
 		@param PostingType The type of posted amount for the transaction
 	*/
 	public void setPostingType (String PostingType)
@@ -514,12 +573,30 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 		set_Value (COLUMNNAME_PostingType, PostingType);
 	}
 
-	/** Get PostingType.
+	/** Get Posting Type.
 		@return The type of posted amount for the transaction
 	  */
 	public String getPostingType()
 	{
 		return (String)get_Value(COLUMNNAME_PostingType);
+	}
+
+	/** Set Round Factor.
+		@param RoundFactor Round Factor
+	*/
+	public void setRoundFactor (int RoundFactor)
+	{
+		set_Value (COLUMNNAME_RoundFactor, Integer.valueOf(RoundFactor));
+	}
+
+	/** Get Round Factor.
+		@return Round Factor	  */
+	public int getRoundFactor()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_RoundFactor);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Sequence.

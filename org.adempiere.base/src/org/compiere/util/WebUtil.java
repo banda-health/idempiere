@@ -24,9 +24,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
@@ -70,8 +72,6 @@ public final class WebUtil
 	/**	Static Logger	*/
 	private static CLogger		log	= CLogger.getCLogger (WebUtil.class);
 	
-	
-
 	/**
 	 *  Create Exit Page "Log-off".
 	 *  <p>
@@ -85,7 +85,9 @@ public final class WebUtil
 	 *  @param AD_Message messahe
 	 *  @throws ServletException
 	 *  @throws IOException
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static void createLoginPage (HttpServletRequest request, HttpServletResponse response,
 		HttpServlet servlet, Properties ctx, String AD_Message) throws ServletException, IOException
 	{
@@ -110,7 +112,9 @@ public final class WebUtil
 	 *
 	 *  @param ctx context
 	 *  @return Button
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static input getLoginButton (Properties ctx)
 	{
 		String text = "Login";
@@ -126,14 +130,15 @@ public final class WebUtil
 		button.setOnClick(cmd.toString());
 		return button;
 	}   //  getLoginButton
-
 	
-	/**************************************************************************
+	/**
 	 *  Get Cookie Properties
 	 *
 	 *  @param request request
 	 *  @return Properties
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static Properties getCookieProprties(HttpServletRequest request)
 	{
 		//  Get Properties
@@ -228,17 +233,6 @@ public final class WebUtil
 
 		outStr.append(inStr);           					//	add remainder
 		String retValue = outStr.toString();
-		/**
-		StringBuilder debug = new StringBuilder();
-		char[] cc = data.toCharArray();
-		for (int j = 0; j < cc.length; j++)
-		{
-			debug.append(cc[j]);
-			int iii = (int)cc[j];
-			debug.append("[").append(iii).append("]");
-		}
-		log.finest(parameter + "=" + data + " -> " + retValue + " == " + debug);
-		**/
 		if (log.isLoggable(Level.FINEST)) log.finest(parameter + "=" + data + " -> " + retValue);
 		return retValue;
 	}   //  getParameter
@@ -411,7 +405,7 @@ public final class WebUtil
 	}   //  getParameterAsBoolean
 	
     /**
-     * 	get Parameter or Null fi empty
+     * 	Get Parameter or Null if empty
      *	@param request request
      *	@param parameter parameter
      *	@return Request Value or null
@@ -426,7 +420,7 @@ public final class WebUtil
         return value;
     }	//	getParamOrNull
     	
-	/**************************************************************************
+	/**
 	 *  Create Standard Response Header with optional Cookie and print document.
 	 *  D:\j2sdk1.4.0\docs\guide\intl\encoding.doc.html
 	 *
@@ -443,7 +437,6 @@ public final class WebUtil
 	{
 		response.setHeader("Cache-Control", "no-cache");
 		response.setContentType("text/html; charset=UTF-8");
-
 		//
 		//  Update Cookie - overwrite
 		if (cookieProperties != null)
@@ -458,15 +451,6 @@ public final class WebUtil
 				cookie.setMaxAge(2592000);      //  30 days in seconds   60*60*24*30
 			response.addCookie(cookie);
 		}
-		//  add diagnostics
-		if (debug && WebEnv.DEBUG)
-		{
-		//	doc.output(System.out);
-			WebEnv.addFooter(request, response, servlet, doc.getBody());
-		//	doc.output(System.out);
-		}
-	//	String content = doc.toString();
-	//  response.setContentLength(content.length());    //  causes problems at the end of the output
 
 		//  print document
 		PrintWriter out = response.getWriter();     //  with character encoding support
@@ -474,22 +458,17 @@ public final class WebUtil
 		out.flush();
 		if (out.checkError())
 			log.log(Level.SEVERE, "error writing");
-		//  binary output (is faster but does not do character set conversion)
-	//	OutputStream out = response.getOutputStream();
-	//	byte[] data = doc.toString().getBytes();
-	//	response.setContentLength(data.length);
-	//	out.write(doc.toString().getBytes());
-		//
 		out.close();
 	}   //  createResponse
 
-	
-	/**************************************************************************
+	/**
 	 *  Create Java Script to clear Target frame
 	 *
 	 *  @param targetFrame target frame
 	 *  @return Clear Frame Script
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static script getClearFrame (String targetFrame)
 	{
 		StringBuilder cmd = new StringBuilder();
@@ -506,13 +485,14 @@ public final class WebUtil
 		return new script(cmd.toString());
 	}   //  getClearFrame
 
-
 	/**
 	 * 	Return a link and script with new location.
 	 * 	@param url forward url
 	 * 	@param delaySec delay in seconds (default 3)
 	 * 	@return html
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static HtmlCode getForward (String url, int delaySec)
 	{
 		if (delaySec <= 0)
@@ -538,7 +518,9 @@ public final class WebUtil
 	 * 	@param delaySec delay in seconds (default 3)
 	 * 	@throws ServletException
 	 * 	@throws IOException
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static void createForwardPage (HttpServletResponse response,
 		String title, String forwardURL, int delaySec) throws ServletException, IOException
 	{
@@ -554,7 +536,6 @@ public final class WebUtil
 		out.close();
 		if (log.isLoggable(Level.FINE)) log.fine(forwardURL + " - " + title);
 	}	//	createForwardPage
-
 
 	/**
 	 * 	Does Test exist
@@ -591,7 +572,6 @@ public final class WebUtil
 		return exists (request.getParameter(parameter));
 	}	//	exists
 
-
 	/**
 	 *	Is EMail address valid
 	 * 	@param email mail address
@@ -615,8 +595,7 @@ public final class WebUtil
 		return false;
 	}	//	isEmailValid
 
-
-	/**************************************************************************
+	/**
 	 *  Decode Properties into String (URL encoded)
 	 *
 	 *  @param pp properties
@@ -634,7 +613,6 @@ public final class WebUtil
 			log.log(Level.SEVERE, "store", e);
 		}
 		String result = new String (bos.toByteArray());
-	//	System.out.println("String=" + result);
 		try
 		{
 			result = URLEncoder.encode(result, WebEnv.ENCODING);
@@ -653,7 +631,6 @@ public final class WebUtil
 				log.log(Level.SEVERE, "encode", ex);
 			}
 		}
-	//	System.out.println("String-Encoded=" + result);
 		return result;
 	}   //  propertiesEncode
 
@@ -666,7 +643,6 @@ public final class WebUtil
 	public static Properties propertiesDecode (String data)
 	{
 		String result = null;
-	//	System.out.println("String=" + data);
 		try
 		{
 			result = URLDecoder.decode(data, WebEnv.ENCODING);
@@ -685,7 +661,6 @@ public final class WebUtil
 				log.log(Level.SEVERE, "decode", ex);
 			}
 		}
-	//	System.out.println("String-Decoded=" + result);
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(result.getBytes());
 		Properties pp = new Properties();
@@ -699,9 +674,8 @@ public final class WebUtil
 		}
 		return pp;
 	}   //  propertiesDecode
-
 	
-	/**************************************************************************
+	/**
 	 *  Convert Array of NamePair to HTTP Option Array.
 	 *  <p>
 	 *  If the ArrayList does not contain NamePairs, the String value is used
@@ -733,7 +707,6 @@ public final class WebUtil
 		}		
 		return retValue;
 	}   //  convertToOption
-
 	
 	/**
 	 *  Create label/field table row
@@ -751,7 +724,9 @@ public final class WebUtil
 	 *  @param onChange onChange call
 	 *  @param script script
 	 *  @return tr table row
+	 *  @deprecated
 	 */
+	@Deprecated
 	static public tr createField (tr line, String FORMNAME, String PARAMETER,
 		String labelText, String inputType, Object value,
 		int sizeDisplay, int size, boolean longField, 
@@ -787,7 +762,9 @@ public final class WebUtil
 	/**
 	 * 	Get Close PopUp Buton
 	 *	@return button
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static input createClosePopupButton(Properties ctx)
 	{
 		String text = "Close";
@@ -875,7 +852,6 @@ public final class WebUtil
 		}
 		return null;
 	}	//	streamAttachment
-
 	
 	/**
 	 * 	Stream File
@@ -928,13 +904,14 @@ public final class WebUtil
 		}
 		return null;
 	}	//	streamFile
-	
-	
+		
 	/**
 	 * 	Remove Cookie with web user by setting user to _
 	 * 	@param request request (for context path)
 	 * 	@param response response to add cookie
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static void deleteCookieWebUser (HttpServletRequest request, HttpServletResponse response, String COOKIE_NAME)
 	{
 		Cookie cookie = new Cookie(COOKIE_NAME, " ");
@@ -963,7 +940,9 @@ public final class WebUtil
 	 * 	@param request request (for context path)
 	 * 	@param response response to add cookie
 	 * 	@param webUser email address
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static void addCookieWebUser (HttpServletRequest request, HttpServletResponse response, String webUser, String COOKIE_NAME)
 	{
 	  try {
@@ -984,7 +963,9 @@ public final class WebUtil
 	 * 	@param wu user
 	 * 	@param updateEMailPwd if true, change email/password
 	 * 	@return true if saved
+	 *  @deprecated
 	 */
+	@Deprecated
 	public static boolean updateFields (HttpServletRequest request, WebUser wu, boolean updateEMailPwd)
 	{
 		if (updateEMailPwd)
@@ -1072,8 +1053,8 @@ public final class WebUtil
 	}	//	updateFields
 	
 	/**
-	 * 
-	 * @return Servername including host name: IP : instance name
+	 * Get server name
+	 * @return Server name including host name: IP : instance name
 	 */
 	public static String getServerName(){
 		StringBuilder strBuilder = new StringBuilder();
@@ -1084,11 +1065,14 @@ public final class WebUtil
 			log.log(Level.WARNING, "Local host or IP not found", e);
 		}
 		strBuilder.append(":").append(getHostIP());
-		
-			
+					
 		return strBuilder.toString();
 	}
 	
+	/**
+	 * Get server ip
+	 * @return server ip
+	 */
 	public static String getHostIP() {
 		String retVal = null;
 		try {
@@ -1128,6 +1112,25 @@ public final class WebUtil
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * returns true if the URL exists and answer with a 200 code 
+	 * @param urlString
+	 * @return boolean
+	 */
+	public static boolean isUrlOk(String urlString) {
+		int responseCode = 0;
+		URL url;
+		try {
+			url = new URL(urlString);
+			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
+			huc.setRequestMethod("HEAD");
+			responseCode = huc.getResponseCode();
+		} catch (IOException e) {
+			responseCode = -1;
+		} 
+		return responseCode == HttpURLConnection.HTTP_OK;
 	}
 
 }   //  WebUtil

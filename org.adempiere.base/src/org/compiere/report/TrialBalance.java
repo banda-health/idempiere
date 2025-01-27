@@ -27,14 +27,15 @@ import java.util.logging.Level;
 import org.compiere.model.MAcctSchemaElement;
 import org.compiere.model.MElementValue;
 import org.compiere.model.MPeriod;
+import org.compiere.model.MProcessPara;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Language;
-
+import org.compiere.util.Msg;
 
 /**
- *	Trial Balance
+ *	Trial Balance Report
  *	
  *  @author Jorg Janke
  *
@@ -80,8 +81,8 @@ public class TrialBalance extends SvrProcess
 	private int					p_C_LocTo_ID = 0;
 	private int					p_User1_ID = 0;
 	private int					p_User2_ID = 0;
-	
-	
+	private boolean				p_IsGroupByOrg = false;
+
 	/**	Parameter Where Clause			*/
 	private StringBuffer		m_parameterWhere = new StringBuffer();
 	/**	Account							*/ 
@@ -100,12 +101,12 @@ public class TrialBalance extends SvrProcess
 		+ " AmtAcctDr, AmtAcctCr, AmtAcctBalance, C_UOM_ID, Qty,"
 		+ " M_Product_ID, C_BPartner_ID, AD_OrgTrx_ID, C_LocFrom_ID,C_LocTo_ID,"
 		+ " C_SalesRegion_ID, C_Project_ID, C_Campaign_ID, C_Activity_ID,"
-		+ " User1_ID, User2_ID, A_Asset_ID, Description)";
-
+		+ " User1_ID, User2_ID, A_Asset_ID, Description, LevelNo, T_TrialBalance_UU)";
 	
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
+	@Override
 	protected void prepare()
 	{
 		StringBuilder sb = new StringBuilder ("AD_PInstance_ID=")
@@ -151,8 +152,10 @@ public class TrialBalance extends SvrProcess
 				p_C_Campaign_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else if (name.equals("PostingType"))
 				p_PostingType = (String)para[i].getParameter();
+			else if (name.equals("IsGroupByOrg"))
+				p_IsGroupByOrg = para[i].getParameterAsBoolean();
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 		//	Mandatory C_AcctSchema_ID
 		m_parameterWhere.append("C_AcctSchema_ID=").append(p_C_AcctSchema_ID);
@@ -269,19 +272,22 @@ public class TrialBalance extends SvrProcess
 			pstmt = null;
 		}
 	}	//	setDateAcct
-
 	
-	/**************************************************************************
-	 *  Perform process.
-	 *  @return Message to be translated
+	/**
+	 *  Insert reporting data to T_TrialBalance
+	 *  @return empty string
 	 */
 	protected String doIt()
 	{
 		createBalanceLine();
 		createDetailLines();
 
-	//	int AD_PrintFormat_ID = 134;
-	//	getProcessInfo().setTransientObject (MPrintFormat.get (getCtx(), AD_PrintFormat_ID, false));
+		final String sql = """
+				DELETE FROM T_TrialBalance WHERE AD_PInstance_ID=?
+				 AND Account_ID IN (SELECT Account_ID FROM T_TrialBalance WHERE AD_PInstance_ID=? AND LevelNo=0 AND AmtAcctBalance = 0)
+				 AND NOT EXISTS (SELECT 1 FROM T_TrialBalance tbi WHERE AD_PInstance_ID=? AND tbi.Account_ID=T_TrialBalance.Account_ID AND LevelNo>0)""";
+
+		DB.executeUpdateEx(sql, new Object[] {getAD_PInstance_ID(),getAD_PInstance_ID(),getAD_PInstance_ID()}, get_TrxName());
 
 		if (log.isLoggable(Level.FINE)) log.fine((System.currentTimeMillis() - m_start) + " ms");
 		return "";
@@ -297,7 +303,9 @@ public class TrialBalance extends SvrProcess
 		sql.append("SELECT ").append(getAD_PInstance_ID()).append(",0,");
 		//	AD_Client_ID, AD_Org_ID, Created,CreatedBy, Updated,UpdatedBy,
 		sql.append(getAD_Client_ID()).append(",");
-		if (p_AD_Org_ID == 0)
+		if (p_IsGroupByOrg)
+			sql.append("AD_Org_ID");
+		else if (p_AD_Org_ID == 0)
 			sql.append("0");
 		else
 			sql.append(p_AD_Org_ID);
@@ -305,17 +313,14 @@ public class TrialBalance extends SvrProcess
 			.append(",getDate(),").append(getAD_User_ID()).append(",");
 		//	C_AcctSchema_ID, Account_ID, AccountValue, DateTrx, DateAcct, C_Period_ID,
 		sql.append(p_C_AcctSchema_ID).append(",");
-		if (p_Account_ID == 0)
-			sql.append ("null");
-		else
-			sql.append (p_Account_ID);
+		sql.append("Account_ID");
 		if (p_AccountValue_From != null)
 			sql.append(",").append(DB.TO_STRING(p_AccountValue_From));
 		else if (p_AccountValue_To != null)
 			sql.append(",' '");
 		else
 			sql.append(",null");
-		Timestamp balanceDay = p_DateAcct_From; // TimeUtil.addDays(p_DateAcct_From, -1);
+		Timestamp balanceDay = p_DateAcct_From;
 		sql.append(",null,").append(DB.TO_DATE(balanceDay, true)).append(",");
 		if (p_C_Period_ID == 0)
 			sql.append("null");
@@ -389,7 +394,8 @@ public class TrialBalance extends SvrProcess
 			sql.append ("null");
 		else
 			sql.append (p_User2_ID);
-		sql.append(", null,null");
+		sql.append(", null, '");
+		sql.append(Msg.getMsg(getCtx(), "opening.balance") + "', 0, generate_uuid() ");
 		//
 		sql.append(" FROM Fact_Acct WHERE AD_Client_ID=").append(getAD_Client_ID())
 			.append (" AND ").append(m_parameterWhere)
@@ -407,6 +413,10 @@ public class TrialBalance extends SvrProcess
 					log.log(Level.SEVERE, "first period not found");
 			}
 		}
+		sql.append(" GROUP BY Account_ID ");
+		if (p_IsGroupByOrg)
+			sql.append(", AD_Org_ID ");
+
 		//
 		int no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (no == 0)
@@ -415,7 +425,7 @@ public class TrialBalance extends SvrProcess
 	}	//	createBalanceLine
 
 	/**
-	 * 	Create Beginning Balance Line
+	 * 	Create Detail Lines
 	 */
 	private void createDetailLines()
 	{
@@ -439,7 +449,7 @@ public class TrialBalance extends SvrProcess
 		//	C_SalesRegion_ID, C_Project_ID, C_Campaign_ID, C_Activity_ID,
 		sql.append ("C_SalesRegion_ID, C_Project_ID, C_Campaign_ID, C_Activity_ID,");
 		//	User1_ID, User2_ID, A_Asset_ID, Description)
-		sql.append ("User1_ID, User2_ID, A_Asset_ID, Description");
+		sql.append ("User1_ID, User2_ID, A_Asset_ID, Description, 10, generate_uuid() ");
 		//
 		sql.append(" FROM Fact_Acct WHERE AD_Client_ID=").append(getAD_Client_ID())
 			.append (" AND ").append(m_parameterWhere)

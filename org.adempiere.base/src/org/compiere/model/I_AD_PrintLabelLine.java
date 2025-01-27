@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_PrintLabelLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_AD_PrintLabelLine 
 {
@@ -44,8 +44,8 @@ public interface I_AD_PrintLabelLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -83,29 +83,14 @@ public interface I_AD_PrintLabelLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name AD_PrintLabel_ID */
-    public static final String COLUMNNAME_AD_PrintLabel_ID = "AD_PrintLabel_ID";
-
-	/** Set Print Label.
-	  * Label Format to print
-	  */
-	public void setAD_PrintLabel_ID (int AD_PrintLabel_ID);
-
-	/** Get Print Label.
-	  * Label Format to print
-	  */
-	public int getAD_PrintLabel_ID();
-
-	public org.compiere.model.I_AD_PrintLabel getAD_PrintLabel() throws RuntimeException;
 
     /** Column name AD_PrintLabelLine_ID */
     public static final String COLUMNNAME_AD_PrintLabelLine_ID = "AD_PrintLabelLine_ID";
@@ -128,6 +113,21 @@ public interface I_AD_PrintLabelLine
 
 	/** Get AD_PrintLabelLine_UU	  */
 	public String getAD_PrintLabelLine_UU();
+
+    /** Column name AD_PrintLabel_ID */
+    public static final String COLUMNNAME_AD_PrintLabel_ID = "AD_PrintLabel_ID";
+
+	/** Set Print Label.
+	  * Label Format to print
+	  */
+	public void setAD_PrintLabel_ID (int AD_PrintLabel_ID);
+
+	/** Get Print Label.
+	  * Label Format to print
+	  */
+	public int getAD_PrintLabel_ID();
+
+	public org.compiere.model.I_AD_PrintLabel getAD_PrintLabel() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

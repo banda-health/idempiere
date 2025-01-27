@@ -18,7 +18,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Hashtable;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -30,15 +29,13 @@ import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.TrxRunnable;
 
 /**
- * 
+ * Base class for payment form
  * @author Elaine
- *
  */
 public abstract class PaymentForm implements IPaymentForm {
 
@@ -51,32 +48,30 @@ public abstract class PaymentForm implements IPaymentForm {
 	private GridTab         	m_mTab;
 	
 	// Data from Order/Invoice
-	public String 				m_DocStatus = null;
+	protected String 				m_DocStatus = null;
 	/** Start Payment Rule */
-	public String 				m_PaymentRule = "";
+	protected String 				m_PaymentRule = "";
 	/** Start Acct Date */
-	public Timestamp 			m_DateAcct = null;
-	/** Start Payment */
-//	public int 					m_C_Payment_ID = 0;
-//	public MPayment 			m_mPayment = null;
-//	public MPayment 			m_mPaymentOriginal = null;
+	protected Timestamp 			m_DateAcct = null;
 
 	/** Invoice Currency */
-	public int 					m_C_Currency_ID = 0;
-	public int 					m_AD_Client_ID = 0;
-	public boolean 				m_Cash_As_Payment = true;
-	public int 					m_AD_Org_ID = 0;
-	public int 					m_C_BPartner_ID = 0;
-	public BigDecimal 			m_Amount = Env.ZERO; // Payment Amount
+	protected int 					m_C_Currency_ID = 0;
+	protected int 					m_AD_Client_ID = 0;
+	protected boolean 				m_Cash_As_Payment = true;
+	protected int 					m_AD_Org_ID = 0;
+	protected int 					m_C_BPartner_ID = 0;
+	protected BigDecimal 			m_Amount = Env.ZERO; // Payment Amount
 	
-	public boolean				m_needSave = false;
+	protected boolean				m_needSave = false;
 	/** Only allow changing Rule        */
-	public boolean 				m_onlyRule = false;
+	protected boolean 				m_onlyRule = false;
 	/** Is SOTrx					*/
-	public boolean				m_isSOTrx = true;
+	protected boolean				m_isSOTrx = true;
 	
-	public Hashtable<Integer,KeyNamePair> s_Currencies = null;
-	
+	/**
+	 * @param WindowNo
+	 * @param mTab
+	 */
 	public PaymentForm(int WindowNo, GridTab mTab) {
 		m_WindowNo = WindowNo;
 		m_isSOTrx = "Y".equals(Env.getContext(Env.getCtx(), WindowNo, "IsSOTrx"));
@@ -127,9 +122,6 @@ public abstract class PaymentForm implements IPaymentForm {
 		m_C_Currency_ID = ((Integer)m_mTab.getValue("C_Currency_ID")).intValue();
 		m_DateAcct = (Timestamp)m_mTab.getValue("DateAcct");
 		
-		if (s_Currencies == null)
-			loadCurrencies();
-				
 		/**
 		 *	Payment Combo
 		 */
@@ -146,10 +138,9 @@ public abstract class PaymentForm implements IPaymentForm {
 		// BF [ 1920179 ] perform the save in a trx's context.
 		final boolean[] success = new boolean[] { false };
 		final TrxRunnable r = new TrxRunnable() {
-
 			public void run(String trxName) {
 				//  only Payment Rule
-				if (m_onlyRule)
+				if (isOnlyRule())
 					success[0] = true;
 				else
 					success[0] = saveChangesInTrx(trxName);
@@ -164,42 +155,18 @@ public abstract class PaymentForm implements IPaymentForm {
 			success[0] = false;
 			throw new AdempiereException("PaymentError", e);
 		}
+		
+		afterSave(success[0]);
+		
 		return success[0];
-	} // saveChanges
+	}
 	
 	/**
-	 *	Fill s_Currencies with EMU currencies
+	 * After save and transaction have been committed/rollback
+	 * @param success
 	 */
-	protected void loadCurrencies()
-	{
-		s_Currencies = new Hashtable<Integer,KeyNamePair>(12);	//	Currenly only 10+1
-		String SQL = "SELECT C_Currency_ID, ISO_Code FROM C_Currency "
-			+ "WHERE (IsEMUMember='Y' AND EMUEntryDate<getDate()) OR IsEuro='Y' "
-			+ "ORDER BY 2";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(SQL, null);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				int id = rs.getInt(1);
-				String name = rs.getString(2);
-				s_Currencies.put(Integer.valueOf(id), new KeyNamePair(id, name));
-			}
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, SQL, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-	}	//	loadCurrencies
+	protected abstract void afterSave(boolean success);
+	
 	
 	@Override
 	public boolean needSave()
@@ -248,6 +215,17 @@ public abstract class PaymentForm implements IPaymentForm {
 		throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ActionNotSupported"));
 	}
 	
+	/**
+	 * Is online payment processor have been configured for bank account
+	 * @param ctx
+	 * @param tender
+	 * @param CCType
+	 * @param AD_Client_ID
+	 * @param C_Currency_ID
+	 * @param PayAmt
+	 * @param trxName
+	 * @return true if online payment processor have been configured for bank account
+	 */
 	protected boolean isBankAccountProcessorExist(Properties ctx, String tender, String CCType, int AD_Client_ID, int C_Currency_ID, BigDecimal PayAmt, String trxName)
 	{
 		MBankAccountProcessor[] m_mBankAccountProcessors = MBankAccountProcessor.find(ctx, tender, CCType, AD_Client_ID, C_Currency_ID, PayAmt, trxName);
@@ -259,6 +237,17 @@ public abstract class PaymentForm implements IPaymentForm {
 		return true;
 	}
 	
+	/**
+	 * Get online payment processor configuration
+	 * @param ctx
+	 * @param tender tender type
+	 * @param CCType credit card type
+	 * @param AD_Client_ID
+	 * @param C_Currency_ID
+	 * @param PayAmt
+	 * @param trxName
+	 * @return {@link MBankAccountProcessor}
+	 */
 	protected MBankAccountProcessor getBankAccountProcessor(Properties ctx, String tender, String CCType, int AD_Client_ID, int C_Currency_ID, BigDecimal PayAmt, String trxName)
 	{
 		MBankAccountProcessor[] m_mBankAccountProcessors = MBankAccountProcessor.find(ctx, tender, CCType, AD_Client_ID, C_Currency_ID, PayAmt, trxName);
@@ -283,11 +272,15 @@ public abstract class PaymentForm implements IPaymentForm {
 		return m_mBankAccountProcessor;
 	}
 	
+	/**
+	 * @return {@link GridTab}
+	 */
 	public GridTab getGridTab()
 	{
 		return m_mTab;
 	}
 	
+	@Override
 	public boolean isOnlyRule()
 	{
 		return m_onlyRule;
@@ -299,6 +292,9 @@ public abstract class PaymentForm implements IPaymentForm {
 		return true;
 	}
 	
+	/**
+	 * @return window no
+	 */
 	public int getWindowNo()
 	{
 		return m_WindowNo;
@@ -314,5 +310,5 @@ public abstract class PaymentForm implements IPaymentForm {
 	public void setBankAccountProcessor(MBankAccountProcessor bankAccountProcessor)
 	{
 		
-	}
+	}		
 }

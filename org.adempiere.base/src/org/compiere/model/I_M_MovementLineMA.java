@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_MovementLineMA
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_MovementLineMA 
 {
@@ -44,8 +44,8 @@ public interface I_M_MovementLineMA
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_MovementLineMA
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -128,6 +128,15 @@ public interface I_M_MovementLineMA
 
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException;
 
+    /** Column name M_MovementLineMA_UU */
+    public static final String COLUMNNAME_M_MovementLineMA_UU = "M_MovementLineMA_UU";
+
+	/** Set M_MovementLineMA_UU	  */
+	public void setM_MovementLineMA_UU (String M_MovementLineMA_UU);
+
+	/** Get M_MovementLineMA_UU	  */
+	public String getM_MovementLineMA_UU();
+
     /** Column name M_MovementLine_ID */
     public static final String COLUMNNAME_M_MovementLine_ID = "M_MovementLine_ID";
 
@@ -142,15 +151,6 @@ public interface I_M_MovementLineMA
 	public int getM_MovementLine_ID();
 
 	public org.compiere.model.I_M_MovementLine getM_MovementLine() throws RuntimeException;
-
-    /** Column name M_MovementLineMA_UU */
-    public static final String COLUMNNAME_M_MovementLineMA_UU = "M_MovementLineMA_UU";
-
-	/** Set M_MovementLineMA_UU	  */
-	public void setM_MovementLineMA_UU (String M_MovementLineMA_UU);
-
-	/** Get M_MovementLineMA_UU	  */
-	public String getM_MovementLineMA_UU();
 
     /** Column name MovementQty */
     public static final String COLUMNNAME_MovementQty = "MovementQty";

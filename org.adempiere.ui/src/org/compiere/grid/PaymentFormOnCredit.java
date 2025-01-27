@@ -26,15 +26,19 @@ import org.compiere.util.KeyNamePair;
 import org.compiere.util.Env;
 
 /**
- * 
+ * Payment form for on credit tender type
  * @author Elaine
  *
  */
 public abstract class PaymentFormOnCredit extends PaymentForm {
 	
 	/** Start Payment Term */
-	public int 				m_C_PaymentTerm_ID = 0;
+	protected int 				m_C_PaymentTerm_ID = 0;
 	
+	/**
+	 * @param windowNo
+	 * @param mTab
+	 */
 	public PaymentFormOnCredit(int windowNo, GridTab mTab) {
 		super(windowNo, mTab);
 	}
@@ -45,7 +49,12 @@ public abstract class PaymentFormOnCredit extends PaymentForm {
 			m_C_PaymentTerm_ID = ((Integer)getGridTab().getValue("C_PaymentTerm_ID")).intValue();
 	}
 
-	public KeyNamePair selectedPaymentTerm = null;
+	protected KeyNamePair selectedPaymentTerm = null;
+	
+	/**
+	 * Set selected payment term and return list of payment term records
+	 * @return list of active payment terms (C_PaymentTerm_ID, Name)
+	 */
 	public ArrayList<KeyNamePair> getPaymentTermList() {
 		selectedPaymentTerm = null;
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
@@ -98,10 +107,22 @@ public abstract class PaymentFormOnCredit extends PaymentForm {
 		return list;
 	}
 	
-	public boolean save(int newC_PaymentTerm_ID)
+	/**
+	 * Update payment term of parent grid tab, doesn't create payment record
+	 * @param C_PaymentTerm_ID
+	 * @return true if save successfully
+	 */
+	public boolean save(int C_PaymentTerm_ID)
 	{
-		if (newC_PaymentTerm_ID != m_C_PaymentTerm_ID)
-			getGridTab().setValue("C_PaymentTerm_ID", Integer.valueOf(newC_PaymentTerm_ID));
+		if (C_PaymentTerm_ID != m_C_PaymentTerm_ID)
+		{
+			getGridTab().setValue("C_PaymentTerm_ID", Integer.valueOf(C_PaymentTerm_ID));
+			m_needSave = true;
+		}
 		return true;
+	}
+	
+	@Override
+	protected void afterSave(boolean success) {		
 	}
 }

@@ -37,18 +37,22 @@ import org.zkoss.zul.ComboitemRenderer;
 import org.zkoss.zul.Div;
 
 /**
+ * Composite component with {@link Combobox} and {@link Button}
  * @author Low Heng Sin
  */
 public class ComboEditorBox extends Div {	
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 4187563277424346012L;
-	protected PropertyChangeSupport m_propertyChangeListeners = new PropertyChangeSupport(
-			this);
+	@Deprecated
+	protected PropertyChangeSupport m_propertyChangeListeners = new PropertyChangeSupport(this);
 	protected Combobox txt;
 	protected Button btn;
 
+	/**
+	 * Default constructor
+	 */
 	public ComboEditorBox() {
 		initComponents();
 	}
@@ -62,12 +66,15 @@ public class ComboEditorBox extends Div {
 	}
 
 	/**
-	 * @param imageSrc
+	 * @param imageSrc image url of button
 	 */
 	public void setButtonImage(String imageSrc) {
 		btn.setImage(imageSrc);
 	}
 
+	/**
+	 * Layout component
+	 */
 	private void initComponents() {
 		txt = new Combobox();
 		txt.setButtonVisible(false);
@@ -138,13 +145,14 @@ public class ComboEditorBox extends Div {
 	}
 
 	/**
-	 * @return boolean
+	 * @return true if enable, false otherwise
 	 */
 	public boolean isEnabled() {
 		return btn.isEnabled();
 	}
 
 	/**
+	 * If evtnm is ON_CLICK, add to {@link #btn}, otherwise add to {@link #txt}
 	 * @param evtnm
 	 * @param listener
 	 */
@@ -157,8 +165,10 @@ public class ComboEditorBox extends Div {
 	}
 
 	/**
-	 * @param l
+	 * @param l PropertyChangeListener
+	 * @deprecated not implemented
 	 */
+	@Deprecated
 	public synchronized void addPropertyChangeListener(PropertyChangeListener l) {
 		m_propertyChangeListeners.addPropertyChangeListener(l);
 	}
@@ -177,6 +187,10 @@ public class ComboEditorBox extends Div {
 		return btn;
 	}
 	
+	/**
+	 * set grid view mode on/off
+	 * @param flag
+	 */
 	public void setTableEditorMode(boolean flag) {
 		if (flag) {
 			ZKUpdateUtil.setHflex(this, "0");
@@ -188,5 +202,10 @@ public class ComboEditorBox extends Div {
 			LayoutUtils.removeSclass("grid-editor-button", btn);
 		}
 			
+	}
+
+	@Override
+	public void focus() {
+		txt.focus();
 	}
 }

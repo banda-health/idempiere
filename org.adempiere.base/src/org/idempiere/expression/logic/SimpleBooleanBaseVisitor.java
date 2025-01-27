@@ -1,4 +1,4 @@
-// Generated from SimpleBoolean.g4 by ANTLR 4.9.2
+// Generated from SimpleBoolean.g4 by ANTLR 4.9.3
 
     package org.idempiere.expression.logic;
 
@@ -47,7 +47,21 @@ public class SimpleBooleanBaseVisitor<T> extends AbstractParseTreeVisitor<T> imp
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitDoubleQuotedCSVText(SimpleBooleanParser.DoubleQuotedCSVTextContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitContextVariables(SimpleBooleanParser.ContextVariablesContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitQuotedCSVText(SimpleBooleanParser.QuotedCSVTextContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

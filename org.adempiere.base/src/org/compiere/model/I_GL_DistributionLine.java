@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for GL_DistributionLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_GL_DistributionLine 
 {
@@ -41,39 +41,13 @@ public interface I_GL_DistributionLine
 
     /** Load Meta Data */
 
-    /** Column name Account_ID */
-    public static final String COLUMNNAME_Account_ID = "Account_ID";
-
-	/** Set Account.
-	  * Account used
-	  */
-	public void setAccount_ID (int Account_ID);
-
-	/** Get Account.
-	  * Account used
-	  */
-	public int getAccount_ID();
-
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
-
-    /** Column name AD_Org_ID */
-    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
-
-	/** Set Organization.
-	  * Organizational entity within client
-	  */
-	public void setAD_Org_ID (int AD_Org_ID);
-
-	/** Get Organization.
-	  * Organizational entity within client
-	  */
-	public int getAD_Org_ID();
 
     /** Column name AD_OrgTrx_ID */
     public static final String COLUMNNAME_AD_OrgTrx_ID = "AD_OrgTrx_ID";
@@ -87,6 +61,32 @@ public interface I_GL_DistributionLine
 	  * Performing or initiating organization
 	  */
 	public int getAD_OrgTrx_ID();
+
+    /** Column name AD_Org_ID */
+    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
+
+	/** Set Organization.
+	  * Organizational entity within tenant
+	  */
+	public void setAD_Org_ID (int AD_Org_ID);
+
+	/** Get Organization.
+	  * Organizational entity within tenant
+	  */
+	public int getAD_Org_ID();
+
+    /** Column name Account_ID */
+    public static final String COLUMNNAME_Account_ID = "Account_ID";
+
+	/** Set Account.
+	  * Account used
+	  */
+	public void setAccount_ID (int Account_ID);
+
+	/** Get Account.
+	  * Account used
+	  */
+	public int getAccount_ID();
 
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
@@ -178,6 +178,21 @@ public interface I_GL_DistributionLine
 
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
 
+    /** Column name C_SalesRegion_ID */
+    public static final String COLUMNNAME_C_SalesRegion_ID = "C_SalesRegion_ID";
+
+	/** Set Sales Region.
+	  * Sales coverage region
+	  */
+	public void setC_SalesRegion_ID (int C_SalesRegion_ID);
+
+	/** Get Sales Region.
+	  * Sales coverage region
+	  */
+	public int getC_SalesRegion_ID();
+
+	public org.compiere.model.I_C_SalesRegion getC_SalesRegion() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -194,21 +209,6 @@ public interface I_GL_DistributionLine
 	  */
 	public int getCreatedBy();
 
-    /** Column name C_SalesRegion_ID */
-    public static final String COLUMNNAME_C_SalesRegion_ID = "C_SalesRegion_ID";
-
-	/** Set Sales Region.
-	  * Sales coverage region
-	  */
-	public void setC_SalesRegion_ID (int C_SalesRegion_ID);
-
-	/** Get Sales Region.
-	  * Sales coverage region
-	  */
-	public int getC_SalesRegion_ID();
-
-	public org.compiere.model.I_C_SalesRegion getC_SalesRegion() throws RuntimeException;
-
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 
@@ -221,21 +221,6 @@ public interface I_GL_DistributionLine
 	  * Optional short description of the record
 	  */
 	public String getDescription();
-
-    /** Column name GL_Distribution_ID */
-    public static final String COLUMNNAME_GL_Distribution_ID = "GL_Distribution_ID";
-
-	/** Set GL Distribution.
-	  * General Ledger Distribution
-	  */
-	public void setGL_Distribution_ID (int GL_Distribution_ID);
-
-	/** Get GL Distribution.
-	  * General Ledger Distribution
-	  */
-	public int getGL_Distribution_ID();
-
-	public org.compiere.model.I_GL_Distribution getGL_Distribution() throws RuntimeException;
 
     /** Column name GL_DistributionLine_ID */
     public static final String COLUMNNAME_GL_DistributionLine_ID = "GL_DistributionLine_ID";
@@ -258,6 +243,21 @@ public interface I_GL_DistributionLine
 
 	/** Get GL_DistributionLine_UU	  */
 	public String getGL_DistributionLine_UU();
+
+    /** Column name GL_Distribution_ID */
+    public static final String COLUMNNAME_GL_Distribution_ID = "GL_Distribution_ID";
+
+	/** Set GL Distribution.
+	  * General Ledger Distribution
+	  */
+	public void setGL_Distribution_ID (int GL_Distribution_ID);
+
+	/** Get GL Distribution.
+	  * General Ledger Distribution
+	  */
+	public int getGL_Distribution_ID();
+
+	public org.compiere.model.I_GL_Distribution getGL_Distribution() throws RuntimeException;
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -304,12 +304,12 @@ public interface I_GL_DistributionLine
     public static final String COLUMNNAME_Org_ID = "Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setOrg_ID (int Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getOrg_ID();
 
@@ -407,12 +407,12 @@ public interface I_GL_DistributionLine
     /** Column name OverwriteOrgTrx */
     public static final String COLUMNNAME_OverwriteOrgTrx = "OverwriteOrgTrx";
 
-	/** Set Overwrite Trx Organuzation.
+	/** Set Overwrite Trx Organization.
 	  * Overwrite the account segment Transaction Organization with the value specified
 	  */
 	public void setOverwriteOrgTrx (boolean OverwriteOrgTrx);
 
-	/** Get Overwrite Trx Organuzation.
+	/** Get Overwrite Trx Organization.
 	  * Overwrite the account segment Transaction Organization with the value specified
 	  */
 	public boolean isOverwriteOrgTrx();

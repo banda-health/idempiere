@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_ShipperPickupTypes
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_ShipperPickupTypes 
 {
@@ -44,8 +44,8 @@ public interface I_M_ShipperPickupTypes
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_ShipperPickupTypes
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -104,21 +104,6 @@ public interface I_M_ShipperPickupTypes
 	  */
 	public boolean isDefault();
 
-    /** Column name M_Shipper_ID */
-    public static final String COLUMNNAME_M_Shipper_ID = "M_Shipper_ID";
-
-	/** Set Shipper.
-	  * Method or manner of product delivery
-	  */
-	public void setM_Shipper_ID (int M_Shipper_ID);
-
-	/** Get Shipper.
-	  * Method or manner of product delivery
-	  */
-	public int getM_Shipper_ID();
-
-	public org.compiere.model.I_M_Shipper getM_Shipper() throws RuntimeException;
-
     /** Column name M_ShipperPickupTypesCfg_ID */
     public static final String COLUMNNAME_M_ShipperPickupTypesCfg_ID = "M_ShipperPickupTypesCfg_ID";
 
@@ -147,6 +132,21 @@ public interface I_M_ShipperPickupTypes
 
 	/** Get M_ShipperPickupTypes_UU	  */
 	public String getM_ShipperPickupTypes_UU();
+
+    /** Column name M_Shipper_ID */
+    public static final String COLUMNNAME_M_Shipper_ID = "M_Shipper_ID";
+
+	/** Set Shipper.
+	  * Method or manner of product delivery
+	  */
+	public void setM_Shipper_ID (int M_Shipper_ID);
+
+	/** Get Shipper.
+	  * Method or manner of product delivery
+	  */
+	public int getM_Shipper_ID();
+
+	public org.compiere.model.I_M_Shipper getM_Shipper() throws RuntimeException;
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

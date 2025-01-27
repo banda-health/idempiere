@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BankAccount_Processor
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_BankAccount_Processor 
 {
@@ -40,6 +40,27 @@ public interface I_C_BankAccount_Processor
     BigDecimal accessLevel = BigDecimal.valueOf(3);
 
     /** Load Meta Data */
+
+    /** Column name AD_Client_ID */
+    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+
+	/** Get Tenant.
+	  * Tenant for this installation.
+	  */
+	public int getAD_Client_ID();
+
+    /** Column name AD_Org_ID */
+    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
+
+	/** Set Organization.
+	  * Organizational entity within tenant
+	  */
+	public void setAD_Org_ID (int AD_Org_ID);
+
+	/** Get Organization.
+	  * Organizational entity within tenant
+	  */
+	public int getAD_Org_ID();
 
     /** Column name AcceptAMEX */
     public static final String COLUMNNAME_AcceptAMEX = "AcceptAMEX";
@@ -172,27 +193,6 @@ s Club
 	  * Accept Visa Cards
 	  */
 	public boolean isAcceptVisa();
-
-    /** Column name AD_Client_ID */
-    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
-
-	/** Get Client.
-	  * Client/Tenant for this installation.
-	  */
-	public int getAD_Client_ID();
-
-    /** Column name AD_Org_ID */
-    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
-
-	/** Set Organization.
-	  * Organizational entity within client
-	  */
-	public void setAD_Org_ID (int AD_Org_ID);
-
-	/** Get Organization.
-	  * Organizational entity within client
-	  */
-	public int getAD_Org_ID();
 
     /** Column name C_BankAccount_ID */
     public static final String COLUMNNAME_C_BankAccount_ID = "C_BankAccount_ID";
@@ -409,12 +409,12 @@ s Club
     /** Column name RequireVV */
     public static final String COLUMNNAME_RequireVV = "RequireVV";
 
-	/** Set Require CreditCard Verification Code.
+	/** Set Require Credit Card Verification Code.
 	  * Require 3/4 digit Credit Verification Code
 	  */
 	public void setRequireVV (boolean RequireVV);
 
-	/** Get Require CreditCard Verification Code.
+	/** Get Require Credit Card Verification Code.
 	  * Require 3/4 digit Credit Verification Code
 	  */
 	public boolean isRequireVV();

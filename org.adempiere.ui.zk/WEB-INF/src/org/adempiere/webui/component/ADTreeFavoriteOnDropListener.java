@@ -15,11 +15,10 @@ import org.adempiere.webui.dashboard.DPFavourites;
 import org.adempiere.webui.desktop.FavouriteController;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.TreeUtils;
-import org.adempiere.webui.window.FDialog;
+import org.adempiere.webui.window.Dialog;
 import org.compiere.model.MTable;
 import org.compiere.model.MTreeFavoriteNode;
 import org.compiere.model.MTreeNode;
-import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -57,7 +56,10 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 
 	private int						mTreeFavID;
 
-	//
+	/**
+	 * @param tree
+	 * @param treeModel
+	 */
 	public ADTreeFavoriteOnDropListener(Tree tree, FavoriteSimpleTreeModel treeModel)
 	{
 		this.tree = tree;
@@ -98,7 +100,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 				}
 				else
 				{
-					FDialog.error(0, "DragItemMenu");
+					Dialog.error(0, "DragItemMenu");
 					return;
 				}
 
@@ -198,7 +200,7 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 	 */
 	private void showWarningDialog()
 	{
-		FDialog.warn(0, Msg.getMsg(Env.getCtx(), "AlreadyExists"));
+		Dialog.warn(0, Msg.getMsg(Env.getCtx(), "AlreadyExists"));
 	} // showWarningDialog
 
 	/**
@@ -404,13 +406,8 @@ public class ADTreeFavoriteOnDropListener implements EventListener<Event>
 		{
 			favNode.setParent_ID(parentTNode.getNode_ID());
 			favNode.setSeqNo(seqNo);
-			try {
-				//For service users, needs to persist data in system tenant
-				PO.setCrossTenantSafe();
-				favNode.save();
-			}finally {
-				PO.clearCrossTenantSafe();
-			}
+			//For service users, needs to persist data in system tenant
+			favNode.saveCrossTenantSafeEx();
 		}
 	} // updateTFNParentAndSeqNo
 

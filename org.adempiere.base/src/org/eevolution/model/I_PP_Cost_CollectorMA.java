@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for PP_Cost_CollectorMA
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_PP_Cost_CollectorMA 
@@ -46,8 +46,8 @@ public interface I_PP_Cost_CollectorMA
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_PP_Cost_CollectorMA
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -121,17 +121,6 @@ public interface I_PP_Cost_CollectorMA
 	  */
 	public BigDecimal getMovementQty();
 
-    /** Column name PP_Cost_Collector_ID */
-    public static final String COLUMNNAME_PP_Cost_Collector_ID = "PP_Cost_Collector_ID";
-
-	/** Set Manufacturing Cost Collector	  */
-	public void setPP_Cost_Collector_ID (int PP_Cost_Collector_ID);
-
-	/** Get Manufacturing Cost Collector	  */
-	public int getPP_Cost_Collector_ID();
-
-	public org.eevolution.model.I_PP_Cost_Collector getPP_Cost_Collector() throws RuntimeException;
-
     /** Column name PP_Cost_CollectorMA_ID */
     public static final String COLUMNNAME_PP_Cost_CollectorMA_ID = "PP_Cost_CollectorMA_ID";
 
@@ -149,6 +138,17 @@ public interface I_PP_Cost_CollectorMA
 
 	/** Get PP_Cost_CollectorMA_UU	  */
 	public String getPP_Cost_CollectorMA_UU();
+
+    /** Column name PP_Cost_Collector_ID */
+    public static final String COLUMNNAME_PP_Cost_Collector_ID = "PP_Cost_Collector_ID";
+
+	/** Set Manufacturing Cost Collector	  */
+	public void setPP_Cost_Collector_ID (int PP_Cost_Collector_ID);
+
+	/** Get Manufacturing Cost Collector	  */
+	public int getPP_Cost_Collector_ID();
+
+	public org.eevolution.model.I_PP_Cost_Collector getPP_Cost_Collector() throws RuntimeException;
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

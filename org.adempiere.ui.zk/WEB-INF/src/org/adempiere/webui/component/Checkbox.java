@@ -21,30 +21,35 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 
 /**
- *
+ * Extend {@link org.zkoss.zul.Checkbox}
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Feb 25, 2007
- * @version $Revision: 0.10 $
  */
 public class Checkbox extends org.zkoss.zul.Checkbox
 {
     /**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 3306775098016676628L;
 
+	/**
+	 * @param enabled
+	 */
 	public void setEnabled(boolean enabled)
     {
         this.setDisabled(!enabled);
     }
     
+	/**
+	 * @return true if enable, false otherwise
+	 */
     public boolean isEnabled()
     {
     	return !this.isDisabled();
     }
 
     /**
-     * alias for setLabel, added to ease porting of swing form
+     * Alias for setLabel, added to ease porting of swing form
      * @param label
      */
 	public void setText(String label) {
@@ -54,7 +59,7 @@ public class Checkbox extends org.zkoss.zul.Checkbox
 	}
 
 	/**
-	 * alias for isChecked, to ease porting of swing form
+	 * Alias for isChecked, to ease porting of swing form
 	 * @return
 	 */
 	public boolean isSelected() {
@@ -62,7 +67,7 @@ public class Checkbox extends org.zkoss.zul.Checkbox
 	}
 
 	/**
-	 * alias for setChecked, to ease porting of swing form
+	 * Alias for setChecked, to ease porting of swing form
 	 * @param checked
 	 */
 	public void setSelected(boolean checked) {
@@ -70,7 +75,7 @@ public class Checkbox extends org.zkoss.zul.Checkbox
 	}
 
 	/**
-	 * alias for addEventListener(Events.ON_CHECK, listener), to ease porting of swing form
+	 * Shortcut for addEventListener(Events.ON_CHECK, listener), to ease porting of swing form
 	 * @param listener
 	 */
 	public void addActionListener(EventListener<?> listener) {

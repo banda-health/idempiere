@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_Asset
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_I_Asset 
 {
@@ -40,6 +40,40 @@ public interface I_I_Asset
     BigDecimal accessLevel = BigDecimal.valueOf(7);
 
     /** Load Meta Data */
+
+    /** Column name AD_Client_ID */
+    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+
+	/** Get Tenant.
+	  * Tenant for this installation.
+	  */
+	public int getAD_Client_ID();
+
+    /** Column name AD_Org_ID */
+    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
+
+	/** Set Organization.
+	  * Organizational entity within tenant
+	  */
+	public void setAD_Org_ID (int AD_Org_ID);
+
+	/** Get Organization.
+	  * Organizational entity within tenant
+	  */
+	public int getAD_Org_ID();
+
+    /** Column name AD_User_ID */
+    public static final String COLUMNNAME_AD_User_ID = "AD_User_ID";
+
+	/** Set User/Contact.
+	  * User within the system - Internal or Business Partner Contact
+	  */
+	public void setAD_User_ID (int AD_User_ID);
+
+	/** Get User/Contact.
+	  * User within the system - Internal or Business Partner Contact
+	  */
+	public int getAD_User_ID();
 
     /** Column name A_Accumdepreciation_Acct */
     public static final String COLUMNNAME_A_Accumdepreciation_Acct = "A_Accumdepreciation_Acct";
@@ -122,10 +156,10 @@ public interface I_I_Asset
     public static final String COLUMNNAME_A_Asset_Life_Years = "A_Asset_Life_Years";
 
 	/** Set Life Years	  */
-	public void setA_Asset_Life_Years (int A_Asset_Life_Years);
+	public void setA_Asset_Life_Years (BigDecimal A_Asset_Life_Years);
 
 	/** Get Life Years	  */
-	public int getA_Asset_Life_Years();
+	public BigDecimal getA_Asset_Life_Years();
 
     /** Column name A_Base_Amount */
     public static final String COLUMNNAME_A_Base_Amount = "A_Base_Amount";
@@ -162,14 +196,6 @@ public interface I_I_Asset
 
 	/** Get Current Period	  */
 	public int getA_Current_Period();
-
-    /** Column name AD_Client_ID */
-    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
-
-	/** Get Client.
-	  * Client/Tenant for this installation.
-	  */
-	public int getAD_Client_ID();
 
     /** Column name A_Depreciation_Acct */
     public static final String COLUMNNAME_A_Depreciation_Acct = "A_Depreciation_Acct";
@@ -219,32 +245,6 @@ public interface I_I_Asset
 
 	/** Get Variable Percent	  */
 	public BigDecimal getA_Depreciation_Variable_Perc();
-
-    /** Column name AD_Org_ID */
-    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
-
-	/** Set Organization.
-	  * Organizational entity within client
-	  */
-	public void setAD_Org_ID (int AD_Org_ID);
-
-	/** Get Organization.
-	  * Organizational entity within client
-	  */
-	public int getAD_Org_ID();
-
-    /** Column name AD_User_ID */
-    public static final String COLUMNNAME_AD_User_ID = "AD_User_ID";
-
-	/** Set User/Contact.
-	  * User within the system - Internal or Business Partner Contact
-	  */
-	public void setAD_User_ID (int AD_User_ID);
-
-	/** Get User/Contact.
-	  * User within the system - Internal or Business Partner Contact
-	  */
-	public int getAD_User_ID();
 
     /** Column name A_Life_Period */
     public static final String COLUMNNAME_A_Life_Period = "A_Life_Period";
@@ -734,12 +734,12 @@ public interface I_I_Asset
     /** Column name PostingType */
     public static final String COLUMNNAME_PostingType = "PostingType";
 
-	/** Set PostingType.
+	/** Set Posting Type.
 	  * The type of posted amount for the transaction
 	  */
 	public void setPostingType (String PostingType);
 
-	/** Get PostingType.
+	/** Get Posting Type.
 	  * The type of posted amount for the transaction
 	  */
 	public String getPostingType();
@@ -814,12 +814,12 @@ public interface I_I_Asset
 	/** Set Usable Life - Years.
 	  * Years of the usable life of the asset
 	  */
-	public void setUseLifeYears (int UseLifeYears);
+	public void setUseLifeYears (BigDecimal UseLifeYears);
 
 	/** Get Usable Life - Years.
 	  * Years of the usable life of the asset
 	  */
-	public int getUseLifeYears();
+	public BigDecimal getUseLifeYears();
 
     /** Column name UseUnits */
     public static final String COLUMNNAME_UseUnits = "UseUnits";

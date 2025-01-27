@@ -24,7 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -36,6 +36,7 @@ import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * Archive Model
@@ -45,9 +46,9 @@ import org.compiere.util.Env;
  */
 public class MArchive extends X_AD_Archive {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = 6934821005476123632L;
+	private static final long serialVersionUID = 1195510484179775189L;
 
 	/**
 	 * Get Archives
@@ -59,28 +60,29 @@ public class MArchive extends X_AD_Archive {
 	 * @return archives
 	 */
 	public static MArchive[] get(Properties ctx, String whereClause) {
-		ArrayList<MArchive> list = new ArrayList<MArchive>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM AD_Archive WHERE AD_Client_ID=?");
-		if (whereClause != null && whereClause.length() > 0)
+		return get(ctx, whereClause, null);
+	}
+	
+	/**
+	 * Get Archives
+	 * 
+	 * @param ctx
+	 *            context
+	 * @param whereClause
+	 *            optional where clause (starting with AND)
+	 * @param trxName optional trx name
+	 * @return archives
+	 */
+	public static MArchive[] get(Properties ctx, String whereClause, String trxName) {
+		StringBuilder sql = new StringBuilder("AD_Client_ID=?");
+		if (!Util.isEmpty(whereClause))
 			sql.append(whereClause);
-		sql.append(" ORDER BY Created");
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			pstmt = DB.prepareStatement(sql.toString(), null);
-			pstmt.setInt(1, Env.getAD_Client_ID(ctx));
-			rs = pstmt.executeQuery();
-			while (rs.next())
-				list.add(new MArchive(ctx, rs, null));
-		} catch (Exception e) {
-			s_log.log(Level.SEVERE, sql.toString(), e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
+
+		List<MArchive> list = new Query(ctx, Table_Name, sql.toString(),trxName)
+				.setParameters(Env.getAD_Client_ID(ctx))
+				.setOrderBy(COLUMNNAME_Created)
+				.list();
+
 		if (list.size() == 0)
 			s_log.fine(sql.toString());
 		else
@@ -94,7 +96,18 @@ public class MArchive extends X_AD_Archive {
 	/** Logger */
 	private static CLogger s_log = CLogger.getCLogger(MArchive.class);
 
-	/***************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_Archive_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MArchive(Properties ctx, String AD_Archive_UU, String trxName) {
+        super(ctx, AD_Archive_UU, trxName);
+		initArchiveStoreDetails(ctx, trxName);
+    }
+
+	/**
 	 * Standard Constructor
 	 * 
 	 * @param ctx
@@ -142,12 +155,14 @@ public class MArchive extends X_AD_Archive {
 		setAD_Process_ID(info.getAD_Process_ID());
 		setAD_Table_ID(info.getAD_Table_ID());
 		setRecord_ID(info.getRecord_ID());
+		setRecord_UU(info.getRecord_UU());
 		setC_BPartner_ID(info.getC_BPartner_ID());
 	} // MArchive
 
-	public MStorageProvider provider;
+	protected MStorageProvider provider;
+	
 	/**
-	 * Get the isStoreArchiveOnFileSystem and archivePath for the client.
+	 * Initialize storage provider
 	 * 
 	 * @param ctx
 	 * @param trxName
@@ -166,6 +181,7 @@ public class MArchive extends X_AD_Archive {
 	 * 
 	 * @return info
 	 */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("MArchive[");
 		sb.append(get_ID()).append(",Name=").append(getName());
@@ -173,8 +189,13 @@ public class MArchive extends X_AD_Archive {
 		return sb.toString();
 	} // toString
 
-	public byte[] getBinaryData() {
-		
+	/**
+	 * Get data as byte[] from storage provider
+	 * 
+	 * @return byte[] or null
+	 */
+	@Override
+	public byte[] getBinaryData() {		
 		IArchiveStore prov = provider.getArchiveStore();
 		if (prov != null)
 			return prov.loadLOBData(this,provider);
@@ -194,11 +215,12 @@ public class MArchive extends X_AD_Archive {
 	} // getInputStream
 
 	/**
-	 * Save Binary Data to file system or db.
+	 * Save Binary Data through storage provider
 	 * 
 	 * @param inflatedData
 	 *            inflated data
 	 */
+	@Override
 	public void setBinaryData(byte[] inflatedData) {
 		IArchiveStore prov = provider.getArchiveStore();
 		if (prov != null)
@@ -238,7 +260,7 @@ public class MArchive extends X_AD_Archive {
 	 * id. The process, table and record id are only included when they are not
 	 * null.
 	 * 
-	 * @return String
+	 * @return archive path
 	 */
 	public String getArchivePathSnippet() {
 		StringBuilder path = new StringBuilder().append(this.getAD_Client_ID()).append(File.separator).append(this.getAD_Org_ID())
@@ -251,36 +273,52 @@ public class MArchive extends X_AD_Archive {
 		}
 		if (this.getRecord_ID() > 0) {
 			path.append(this.getRecord_ID()).append(File.separator);
+		} else if (!Util.isEmpty(this.getRecord_UU())) {
+			path.append(this.getRecord_UU()).append(File.separator);
 		}
 
 		return path.toString();
 	}
 
+	/**
+	 * Get byte data from BinaryData column.
+	 * Usually, your code should call getBinaryData() instead (using provider).
+	 * @return byte[]
+	 */
 	public byte[] getByteData(){
 		return super.getBinaryData();
 	}
 	
+	/**
+	 * Store byte data to BinaryData column.
+	 * Usually, your code should call setBinaryData() instead (using provider).
+	 * @param BinaryData
+	 */
 	public void setByteData(byte[] BinaryData){
 		super.setBinaryData(BinaryData);
 	}
 
-	/**
-	 * Before Save
-	 * 
-	 * @param newRecord
-	 *            new
-	 * @return true if can be saved
-	 */
+	@Override
 	protected boolean beforeSave(boolean newRecord) {
 		// Binary Data is Mandatory
 		byte[] data = super.getBinaryData();
 		if (data == null || data.length == 0)
 			return false;
+		// Set Record_UU from Record_ID
+		if (getRecord_ID() > 0 && getAD_Table_ID() > 0 && Util.isEmpty(getRecord_UU())) {
+			MTable table = MTable.get(getAD_Table_ID());
+			PO po = table.getPO(getRecord_ID(), get_TrxName());
+			if (po != null)
+				setRecord_UU(po.get_UUID());
+		}
 		//
 		if (log.isLoggable(Level.FINE)) log.fine(toString());
 		return true;
 	} // beforeSave
 	
+	/**
+	 * Ask provider to remove archive content
+	 */
 	@Override
 	protected boolean postDelete()
 	{
@@ -291,6 +329,9 @@ public class MArchive extends X_AD_Archive {
 		
 	}
 
+	/**
+	 * Ask provider to flush buffer data (if any)
+	 */
 	@Override
 	protected void saveNew_afterSetID()
 	{
@@ -300,8 +341,8 @@ public class MArchive extends X_AD_Archive {
 	}
 
 	/**
-	 * Set Storage Provider
-	 * Used temporarily for the process to migrate storage provider
+	 * Set Storage Provider.
+	 * Also used temporarily for the migration of storage provider.
 	 * @param p Storage provider
 	 */
 	public void setStorageProvider(MStorageProvider p) {
@@ -314,11 +355,16 @@ public class MArchive extends X_AD_Archive {
 	 * @return File - the temporary file
 	 */
 	public File saveAsZip() {
-		String name = MTable.get(Env.getCtx(), getAD_Table_ID()).getTableName() + "_" + getRecord_ID();
+		StringBuilder name = new StringBuilder(MTable.get(Env.getCtx(), getAD_Table_ID()).getTableName())
+				.append("_");
+		if (getRecord_ID() > 0)
+			name.append(getRecord_ID()).append("_");
+		else if (!Util.isEmpty(getRecord_UU()))
+			name.append(getRecord_UU()).append("_");
 
 		File tempfolder = null; 
 		try {
-			Path tempPath = Files.createTempDirectory(name);
+			Path tempPath = Files.createTempDirectory(name.toString());
 			tempfolder = tempPath.toFile();
 		} catch (IOException e1) {
 			throw new AdempiereException("Unable to create temp folder", e1);
@@ -367,4 +413,81 @@ public class MArchive extends X_AD_Archive {
 		return destZipFile;
 	}
 
+	/**
+	 * Get number of document and report archive by table and record id
+	 * 
+	 * @param AD_Table_ID
+	 * @param Record_ID
+	 * @param trxName
+	 * @return int[], [0] = report count and [1] = document count
+	 * @deprecated - use {@link #getReportAndDocumentCountByRecordId(int, int, String, String)} instead
+	 */
+	@Deprecated
+	public static int[] getReportAndDocumentCountByRecordId(int AD_Table_ID, int Record_ID, String trxName) {
+		return getReportAndDocumentCountByRecordId(AD_Table_ID, Record_ID, null, trxName);
+	}
+
+	/**
+	 * Get number of document and report archive by table and record UUID
+	 * 
+	 * @param AD_Table_ID
+	 * @param Record_ID - record ID used when UUID is empty, or as C_BPartner_ID when searching for C_BPartner
+	 * @param Record_UU - record UUID
+	 * @param trxName
+	 * @return int[], [0] = report count and [1] = document count
+	 */
+	public static int[] getReportAndDocumentCountByRecordId(int AD_Table_ID, int Record_ID, String Record_UU, String trxName) {
+		int reportCount = 0;
+		int documentCount = 0;
+		StringBuilder sql = new StringBuilder("SELECT IsReport, COUNT(*) FROM AD_Archive ");
+		if (Util.isEmpty(Record_UU))
+			sql.append("WHERE (AD_Table_ID=? AND Record_ID=?) ");
+		else
+			sql.append("WHERE (AD_Table_ID=? AND Record_UU=?) ");
+		if (AD_Table_ID == MBPartner.Table_ID)
+			sql.append(" OR C_BPartner_ID=?");
+		sql.append(" GROUP BY IsReport"); 
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql.toString(), trxName);
+			pstmt.setInt(1, AD_Table_ID);
+			if (Util.isEmpty(Record_UU))
+				pstmt.setInt(2, Record_ID);
+			else
+				pstmt.setString(2, Record_UU);
+			if (AD_Table_ID == MBPartner.Table_ID)
+				pstmt.setInt(3, Record_ID);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				if ("Y".equals(rs.getString(1)))
+					reportCount += rs.getInt(2);
+				else
+					documentCount += rs.getInt(2);
+			}
+		}
+		catch (Exception e)
+		{
+			throw new AdempiereException(e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+		}
+		return new int[] {reportCount, documentCount};
+	}
+	
+	/**
+	 * Get number of report archive by table id
+	 * 
+	 * @param AD_Table_ID
+	 * @param trxName
+	 * @return Number of report archive for AD_Table_ID
+	 */
+	public static int getReportCountByTableId(int AD_Table_ID, String trxName) {
+		final String sql = "SELECT COUNT(*) FROM AD_Archive WHERE AD_Table_ID=? AND IsReport='Y'";
+		return DB.getSQLValueEx(trxName, sql, AD_Table_ID);
+	}
 } // MArchive

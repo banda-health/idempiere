@@ -33,9 +33,9 @@ import org.zkoss.zul.event.ListDataEvent;
 import org.zkoss.zul.ext.Sortable;
 
 /**
- * This is a ListModel<Object> to be used with Listbox.
- * The model allows for a table structure to be created, with columns
- * in addition to the rows provided by {@link org.zkoss.zul.ListModelList}.
+ * ListModel<Object> for Listbox and provide support for the Sortable interface.<br/>
+ * The model allows for a table structure to be created with columns, 
+ * in addition to the functionalities provided by {@link org.zkoss.zul.ListModelList}.
  *
  * @author Andrew Kimball
  *
@@ -43,7 +43,7 @@ import org.zkoss.zul.ext.Sortable;
 public class ListModelTable extends ListModelList<Object> implements Sortable<Object>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 1891313647781142789L;
 	/** Array of listeners to changes in the table model. */
@@ -63,9 +63,9 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	}
 
 	/**
-	 * Construct the ListModel<Object> with a collection of objects.
-	 * A copy is made of the collection.
-	 * The objects should be vectors of objects
+	 * Construct the ListModel<Object> with a collection of objects.<br/>
+	 * A copy is made of the collection.<br/>
+	 * The element in collection should be vector of objects.
 	 *
 	 * @param collection	The collection of objects with which to initialise the list
 	 */
@@ -90,7 +90,7 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	}
 
 	/**
-	 * Query thenumber of columns in the table.
+	 * Get the number of columns in the table.
 	 *
 	 * @return the number of columns in the table. 0 if uninitialised.
 	 */
@@ -113,7 +113,7 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	}
 
 	/**
-	 * Ensure that each of the rows contains the correct number of elements.
+	 * Ensure that each element of every row contains the correct number of element/column (i.e == m_noColumns).<br/>
 	 * Please note that the table cannot be shrunk.
 	 */
     private void ensureRowSize()
@@ -158,7 +158,7 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	}
 
 	/**
-	 * Query the number of rows in the table.
+	 * Get the number of rows in the table.
 	 * @return the number of rows in the table
 	 */
 	public int getNoRows()
@@ -245,7 +245,7 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	}
 
 	/**
-	 * Set the number of rows in the table and initialise new rows.
+	 * Set the number of rows in the table and initialise new rows (if necessary).<br/>
 	 * For each new row, an empty collection of the size specified by
 	 * {@link #setNoColumns(int)} is created.
 	 * @param rowCount	The number of rows to be contained in the table
@@ -279,7 +279,6 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 		}
 		else
 		{
-			//hot fix for:IDEMPIERE-2154 wait complete solution from zk update
 			if (rowCount == 0)
 				clearSelection();
 			removeRange(rowCount, currentSize);
@@ -288,7 +287,7 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 
 	/**
 	 * Add a listener for events from the data model.
-     *
+     * <p>
      * The listener will only be added if it doesn't already exist.
 	 *
 	 * @param listener	A listener for changes in the table mode
@@ -308,13 +307,18 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	    return;
 	}
 
+	/**
+	 * Remove WTableModelListener listener
+	 * @param listener
+	 */
     public void removeTableModelListener(WTableModelListener listener)
     {
         m_listeners.remove(listener);
     }
+    
 	/**
-	 * Send the specified <code>event</code> to all listeners.
-	 *
+	 * Fire table changed event to WTableModelListener in {@link #m_listeners}.
+	 * 
 	 * @param event	The event tofire
 	 */
 	private void fireTableChange(WTableModelEvent event)
@@ -323,14 +327,13 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	    {
 	       listener.tableChanged(event);
 	    }
-
-	    return;
 	}
 
     /*
      * (non-Javadoc)
      * @see org.zkoss.zul.ListModelList#sort(java.util.Comparator, boolean)
      */
+	@Override
     public void sort(Comparator<Object> cmpr, boolean ascending)
     {
     	if (sorter != null)
@@ -343,12 +346,10 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
                 WTableModelEvent.ALL_COLUMNS);
 
         fireTableChange(event);
-
-        return;
     }
 
     /**
-     * alias for getDataAt, to ease porting of swing form
+     * Alias for getDataAt, to ease porting of swing form
      * @param rowIndex
      * @param columnIndex
      * @return column value
@@ -358,7 +359,7 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	}
 
 	/**
-	 * alias for setDataAt, to ease porting of swing form
+	 * Alias for setDataAt, to ease porting of swing form
 	 * @param value
 	 * @param row
 	 * @param col
@@ -368,7 +369,7 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 	}
 
 	/**
-	 * alias for getSize, to ease porting of swing form
+	 * Alias for getSize, to ease porting of swing form
 	 * @return size
 	 */
 	public int getRowCount() {
@@ -395,6 +396,10 @@ public class ListModelTable extends ListModelList<Object> implements Sortable<Ob
 		}
 	}
 
+	/**
+	 * Set custom sorter for model
+	 * @param lme Custom Sortable implementation
+	 */
 	public void setSorter(Sortable<Object> lme)
 	{
 		sorter = lme;

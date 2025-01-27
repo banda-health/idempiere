@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_AcctProcessorLog
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_AcctProcessorLog 
 {
@@ -44,8 +44,8 @@ public interface I_C_AcctProcessorLog
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_C_AcctProcessorLog
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -74,21 +74,6 @@ public interface I_C_AcctProcessorLog
 	  * Binary Data
 	  */
 	public byte[] getBinaryData();
-
-    /** Column name C_AcctProcessor_ID */
-    public static final String COLUMNNAME_C_AcctProcessor_ID = "C_AcctProcessor_ID";
-
-	/** Set Accounting Processor.
-	  * Accounting Processor/Server Parameters
-	  */
-	public void setC_AcctProcessor_ID (int C_AcctProcessor_ID);
-
-	/** Get Accounting Processor.
-	  * Accounting Processor/Server Parameters
-	  */
-	public int getC_AcctProcessor_ID();
-
-	public org.compiere.model.I_C_AcctProcessor getC_AcctProcessor() throws RuntimeException;
 
     /** Column name C_AcctProcessorLog_ID */
     public static final String COLUMNNAME_C_AcctProcessorLog_ID = "C_AcctProcessorLog_ID";
@@ -111,6 +96,21 @@ public interface I_C_AcctProcessorLog
 
 	/** Get C_AcctProcessorLog_UU	  */
 	public String getC_AcctProcessorLog_UU();
+
+    /** Column name C_AcctProcessor_ID */
+    public static final String COLUMNNAME_C_AcctProcessor_ID = "C_AcctProcessor_ID";
+
+	/** Set Accounting Processor.
+	  * Accounting Processor/Server Parameters
+	  */
+	public void setC_AcctProcessor_ID (int C_AcctProcessor_ID);
+
+	/** Get Accounting Processor.
+	  * Accounting Processor/Server Parameters
+	  */
+	public int getC_AcctProcessor_ID();
+
+	public org.compiere.model.I_C_AcctProcessor getC_AcctProcessor() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for M_DiscountSchemaLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_M_DiscountSchemaLine 
 {
@@ -44,8 +44,8 @@ public interface I_M_DiscountSchemaLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_M_DiscountSchemaLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -377,6 +377,28 @@ public interface I_M_DiscountSchemaLine
 	  */
 	public String getList_Rounding();
 
+    /** Column name M_DiscountSchemaLine_ID */
+    public static final String COLUMNNAME_M_DiscountSchemaLine_ID = "M_DiscountSchemaLine_ID";
+
+	/** Set Discount Price List.
+	  * Line of the price list trade discount schema
+	  */
+	public void setM_DiscountSchemaLine_ID (int M_DiscountSchemaLine_ID);
+
+	/** Get Discount Price List.
+	  * Line of the price list trade discount schema
+	  */
+	public int getM_DiscountSchemaLine_ID();
+
+    /** Column name M_DiscountSchemaLine_UU */
+    public static final String COLUMNNAME_M_DiscountSchemaLine_UU = "M_DiscountSchemaLine_UU";
+
+	/** Set M_DiscountSchemaLine_UU	  */
+	public void setM_DiscountSchemaLine_UU (String M_DiscountSchemaLine_UU);
+
+	/** Get M_DiscountSchemaLine_UU	  */
+	public String getM_DiscountSchemaLine_UU();
+
     /** Column name M_DiscountSchema_ID */
     public static final String COLUMNNAME_M_DiscountSchema_ID = "M_DiscountSchema_ID";
 
@@ -391,28 +413,6 @@ public interface I_M_DiscountSchemaLine
 	public int getM_DiscountSchema_ID();
 
 	public org.compiere.model.I_M_DiscountSchema getM_DiscountSchema() throws RuntimeException;
-
-    /** Column name M_DiscountSchemaLine_ID */
-    public static final String COLUMNNAME_M_DiscountSchemaLine_ID = "M_DiscountSchemaLine_ID";
-
-	/** Set Discount Pricelist.
-	  * Line of the pricelist trade discount schema
-	  */
-	public void setM_DiscountSchemaLine_ID (int M_DiscountSchemaLine_ID);
-
-	/** Get Discount Pricelist.
-	  * Line of the pricelist trade discount schema
-	  */
-	public int getM_DiscountSchemaLine_ID();
-
-    /** Column name M_DiscountSchemaLine_UU */
-    public static final String COLUMNNAME_M_DiscountSchemaLine_UU = "M_DiscountSchemaLine_UU";
-
-	/** Set M_DiscountSchemaLine_UU	  */
-	public void setM_DiscountSchemaLine_UU (String M_DiscountSchemaLine_UU);
-
-	/** Get M_DiscountSchemaLine_UU	  */
-	public String getM_DiscountSchemaLine_UU();
 
     /** Column name M_Product_Category_ID */
     public static final String COLUMNNAME_M_Product_Category_ID = "M_Product_Category_ID";

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_TaxDeclarationAcct
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_TaxDeclarationAcct 
 {
@@ -41,6 +41,27 @@ public interface I_C_TaxDeclarationAcct
 
     /** Load Meta Data */
 
+    /** Column name AD_Client_ID */
+    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
+
+	/** Get Tenant.
+	  * Tenant for this installation.
+	  */
+	public int getAD_Client_ID();
+
+    /** Column name AD_Org_ID */
+    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
+
+	/** Set Organization.
+	  * Organizational entity within tenant
+	  */
+	public void setAD_Org_ID (int AD_Org_ID);
+
+	/** Get Organization.
+	  * Organizational entity within tenant
+	  */
+	public int getAD_Org_ID();
+
     /** Column name Account_ID */
     public static final String COLUMNNAME_Account_ID = "Account_ID";
 
@@ -55,27 +76,6 @@ public interface I_C_TaxDeclarationAcct
 	public int getAccount_ID();
 
 	public org.compiere.model.I_C_ElementValue getAccount() throws RuntimeException;
-
-    /** Column name AD_Client_ID */
-    public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
-
-	/** Get Client.
-	  * Client/Tenant for this installation.
-	  */
-	public int getAD_Client_ID();
-
-    /** Column name AD_Org_ID */
-    public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
-
-	/** Set Organization.
-	  * Organizational entity within client
-	  */
-	public void setAD_Org_ID (int AD_Org_ID);
-
-	/** Get Organization.
-	  * Organizational entity within client
-	  */
-	public int getAD_Org_ID();
 
     /** Column name AmtAcctCr */
     public static final String COLUMNNAME_AmtAcctCr = "AmtAcctCr";
@@ -174,22 +174,6 @@ public interface I_C_TaxDeclarationAcct
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
-    /** Column name Created */
-    public static final String COLUMNNAME_Created = "Created";
-
-	/** Get Created.
-	  * Date this record was created
-	  */
-	public Timestamp getCreated();
-
-    /** Column name CreatedBy */
-    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
-
-	/** Get Created By.
-	  * User who created this records
-	  */
-	public int getCreatedBy();
-
     /** Column name C_TaxDeclarationAcct_ID */
     public static final String COLUMNNAME_C_TaxDeclarationAcct_ID = "C_TaxDeclarationAcct_ID";
 
@@ -241,6 +225,22 @@ public interface I_C_TaxDeclarationAcct
 	public int getC_Tax_ID();
 
 	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException;
+
+    /** Column name Created */
+    public static final String COLUMNNAME_Created = "Created";
+
+	/** Get Created.
+	  * Date this record was created
+	  */
+	public Timestamp getCreated();
+
+    /** Column name CreatedBy */
+    public static final String COLUMNNAME_CreatedBy = "CreatedBy";
+
+	/** Get Created By.
+	  * User who created this records
+	  */
+	public int getCreatedBy();
 
     /** Column name DateAcct */
     public static final String COLUMNNAME_DateAcct = "DateAcct";

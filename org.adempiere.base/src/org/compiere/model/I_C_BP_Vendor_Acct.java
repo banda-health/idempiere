@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BP_Vendor_Acct
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_BP_Vendor_Acct 
 {
@@ -44,8 +44,8 @@ public interface I_C_BP_Vendor_Acct
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_C_BP_Vendor_Acct
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -77,6 +77,15 @@ public interface I_C_BP_Vendor_Acct
 
 	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException;
 
+    /** Column name C_BP_Vendor_Acct_UU */
+    public static final String COLUMNNAME_C_BP_Vendor_Acct_UU = "C_BP_Vendor_Acct_UU";
+
+	/** Set C_BP_Vendor_Acct_UU	  */
+	public void setC_BP_Vendor_Acct_UU (String C_BP_Vendor_Acct_UU);
+
+	/** Get C_BP_Vendor_Acct_UU	  */
+	public String getC_BP_Vendor_Acct_UU();
+
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
@@ -91,15 +100,6 @@ public interface I_C_BP_Vendor_Acct
 	public int getC_BPartner_ID();
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
-
-    /** Column name C_BP_Vendor_Acct_UU */
-    public static final String COLUMNNAME_C_BP_Vendor_Acct_UU = "C_BP_Vendor_Acct_UU";
-
-	/** Set C_BP_Vendor_Acct_UU	  */
-	public void setC_BP_Vendor_Acct_UU (String C_BP_Vendor_Acct_UU);
-
-	/** Get C_BP_Vendor_Acct_UU	  */
-	public String getC_BP_Vendor_Acct_UU();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

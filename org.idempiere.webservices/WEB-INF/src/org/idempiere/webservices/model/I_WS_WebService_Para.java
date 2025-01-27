@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for WS_WebService_Para
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 @SuppressWarnings("all")
 public interface I_WS_WebService_Para 
@@ -46,8 +46,8 @@ public interface I_WS_WebService_Para
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -55,12 +55,12 @@ public interface I_WS_WebService_Para
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -140,6 +140,17 @@ public interface I_WS_WebService_Para
 	  */
 	public int getUpdatedBy();
 
+    /** Column name WS_WebServiceType_ID */
+    public static final String COLUMNNAME_WS_WebServiceType_ID = "WS_WebServiceType_ID";
+
+	/** Set Web Service Type	  */
+	public void setWS_WebServiceType_ID (int WS_WebServiceType_ID);
+
+	/** Get Web Service Type	  */
+	public int getWS_WebServiceType_ID();
+
+	public I_WS_WebServiceType getWS_WebServiceType() throws RuntimeException;
+
     /** Column name WS_WebService_Para_ID */
     public static final String COLUMNNAME_WS_WebService_Para_ID = "WS_WebService_Para_ID";
 
@@ -157,15 +168,4 @@ public interface I_WS_WebService_Para
 
 	/** Get WS_WebService_Para_UU	  */
 	public String getWS_WebService_Para_UU();
-
-    /** Column name WS_WebServiceType_ID */
-    public static final String COLUMNNAME_WS_WebServiceType_ID = "WS_WebServiceType_ID";
-
-	/** Set Web Service Type	  */
-	public void setWS_WebServiceType_ID (int WS_WebServiceType_ID);
-
-	/** Get Web Service Type	  */
-	public int getWS_WebServiceType_ID();
-
-	public I_WS_WebServiceType getWS_WebServiceType() throws RuntimeException;
 }

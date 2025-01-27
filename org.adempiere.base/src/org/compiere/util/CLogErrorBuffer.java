@@ -28,7 +28,7 @@ import java.util.logging.LogRecord;
 import org.compiere.model.MIssue;
 
 /**
- *	Client Error Buffer
+ *	Handler that publish log record to the system error output stream
  *
  *  @author Jorg Janke
  *  @version $Id: CLogErrorBuffer.java,v 1.3 2006/07/30 00:54:36 jjanke Exp $
@@ -43,8 +43,7 @@ public class CLogErrorBuffer extends Handler
 	private static final String ERRORS_KEY = "org.compiere.util.CLogErrorBuffer.errors";
 	private static final String LOGS_KEY = "org.compiere.util.CLogErrorBuffer.logs";
 
-
-	/**************************************************************************
+	/**
 	 * 	Constructor
 	 */
 	public CLogErrorBuffer ()
@@ -63,8 +62,6 @@ public class CLogErrorBuffer extends Handler
      */
     private void initialize()
     {
-    //	System.out.println("CLogConsole.initialize");
-
     	//	Formatting
 		setFormatter(CLogFormatter.get());
 		//	Default Level
@@ -73,13 +70,17 @@ public class CLogErrorBuffer extends Handler
 		setFilter(CLogFilter.get());
     }	//	initialize
 
+    /**
+     * Is add log record to environment context
+     * @return true if log record should be added to environment context
+     */
     private boolean isAddLogRecordToContext()
     {
     	return CLogMgt.getLevelAsInt() <= Level.INFO.intValue();
     }
     
     /**
-     * 	Issue Error
+     * 	Is Issue Error (Save to MIssue)
      *	@return true if issue error
      */
     public boolean isIssueError()
@@ -94,7 +95,7 @@ public class CLogErrorBuffer extends Handler
     }	//	isIssueError
 
     /**
-     * 	Set Issue Error
+     * 	Set Issue Error (Save to MIssue)
      *	@param issueError issue error
      */
     public void setIssueError(boolean issueError)
@@ -103,12 +104,13 @@ public class CLogErrorBuffer extends Handler
     }	//	setIssueError
 
 	/**
-	 *	Set Level.
+	 *	Set Level.<br/>
 	 *	Ignore OFF - and higher then FINE
 	 *	@see java.util.logging.Handler#setLevel(java.util.logging.Level)
 	 *	@param newLevel ignored
 	 *	@throws java.lang.SecurityException
 	 */
+    @Override
 	public synchronized void setLevel (Level newLevel)
 		throws SecurityException
 	{
@@ -127,6 +129,7 @@ public class CLogErrorBuffer extends Handler
 	 *	@see java.util.logging.Handler#publish(java.util.logging.LogRecord)
 	 *	@param record log record
 	 */
+	@Override
 	public void publish (LogRecord record)
 	{
 		if (!isLoggable (record))
@@ -216,13 +219,14 @@ public class CLogErrorBuffer extends Handler
 				String methodName = record.getSourceMethodName();	//
 				if (methodName == null)
 					methodName = "";
-				if (DB.isConnected(false)
-					&& methodName != null
+				if (methodName != null
 					&& !methodName.equals("saveError")
 					&& !methodName.equals("get_Value")
 					&& !methodName.equals("dataSave")
 					&& loggerName.indexOf("Issue") == -1
 					&& loggerName.indexOf("CConnection") == -1
+					&& !loggerName.startsWith("com.zaxxer.hikari")
+					&& DB.isConnected()
 					)
 				{
 					// create issue on a separate thread in order to eventually
@@ -245,7 +249,8 @@ public class CLogErrorBuffer extends Handler
 						&& !methodName.equals("get_Value")
 						&& !methodName.equals("dataSave")
 						&& loggerName.indexOf("Issue") == -1
-						&& loggerName.indexOf("CConnection") == -1)
+						&& loggerName.indexOf("CConnection") == -1
+						&& !loggerName.startsWith("com.zaxxer.hikari"))
 					{
 						System.err.println(getFormatter().format(record));
 					}
@@ -258,6 +263,7 @@ public class CLogErrorBuffer extends Handler
 	 * Flush (NOP)
 	 * @see java.util.logging.Handler#flush()
 	 */
+	@Override
 	public void flush ()
 	{
 	}	// flush
@@ -267,6 +273,7 @@ public class CLogErrorBuffer extends Handler
 	 * @see java.util.logging.Handler#close()
 	 * @throws SecurityException
 	 */
+	@Override
 	public void close () throws SecurityException
 	{
 		Env.getCtx().remove(LOGS_KEY);
@@ -274,8 +281,7 @@ public class CLogErrorBuffer extends Handler
 		Env.getCtx().remove(HISTORY_KEY);
 	}	// close
 
-
-	/**************************************************************************
+	/**
 	 * 	Get ColumnNames of Log Entries
 	 * 	@param ctx context (not used)
 	 * 	@return string vector
@@ -303,7 +309,6 @@ public class CLogErrorBuffer extends Handler
 	public Vector<Vector<Object>> getLogData (boolean errorsOnly)
 	{
 		LogRecord[] records = getRecords(errorsOnly);
-	//	System.out.println("getLogData - " + events.length);
 		Vector<Vector<Object>> rows = new Vector<Vector<Object>>(records.length);
 
 		for (int i = 0; i < records.length; i++)
@@ -430,6 +435,9 @@ public class CLogErrorBuffer extends Handler
 		return sb.toString();
 	}	//	getErrorInfo
 
+	/**
+	 * Ensure environment context have been initialized with entry for log, error and history.
+	 */
 	private void checkContext()
 	{
 		if (!Env.getCtx().containsKey(LOGS_KEY))
@@ -474,6 +482,11 @@ public class CLogErrorBuffer extends Handler
 		return sb.toString ();
 	}	//	toString
 
+	/**
+	 * Get or create CLogErrorBuffer handler instance.
+	 * @param create
+	 * @return CLogErrorBuffer handler instance
+	 */
 	public static CLogErrorBuffer get(boolean create) {
 		Handler[] handlers = CLogMgt.getHandlers();
 		for (Handler handler : handlers)

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_Inventory
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_I_Inventory 
 {
@@ -44,8 +44,8 @@ public interface I_I_Inventory
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,12 +53,12 @@ public interface I_I_Inventory
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
 
@@ -262,21 +262,6 @@ public interface I_I_Inventory
 
 	public org.compiere.model.I_M_InventoryLine getM_CostingLine() throws RuntimeException;
 
-    /** Column name M_Inventory_ID */
-    public static final String COLUMNNAME_M_Inventory_ID = "M_Inventory_ID";
-
-	/** Set Phys.Inventory.
-	  * Parameters for a Physical Inventory
-	  */
-	public void setM_Inventory_ID (int M_Inventory_ID);
-
-	/** Get Phys.Inventory.
-	  * Parameters for a Physical Inventory
-	  */
-	public int getM_Inventory_ID();
-
-	public org.compiere.model.I_M_Inventory getM_Inventory() throws RuntimeException;
-
     /** Column name M_InventoryLine_ID */
     public static final String COLUMNNAME_M_InventoryLine_ID = "M_InventoryLine_ID";
 
@@ -292,6 +277,21 @@ public interface I_I_Inventory
 
 	public org.compiere.model.I_M_InventoryLine getM_InventoryLine() throws RuntimeException;
 
+    /** Column name M_Inventory_ID */
+    public static final String COLUMNNAME_M_Inventory_ID = "M_Inventory_ID";
+
+	/** Set Phys.Inventory.
+	  * Parameters for a Physical Inventory
+	  */
+	public void setM_Inventory_ID (int M_Inventory_ID);
+
+	/** Get Phys.Inventory.
+	  * Parameters for a Physical Inventory
+	  */
+	public int getM_Inventory_ID();
+
+	public org.compiere.model.I_M_Inventory getM_Inventory() throws RuntimeException;
+
     /** Column name M_Locator_ID */
     public static final String COLUMNNAME_M_Locator_ID = "M_Locator_ID";
 
@@ -306,19 +306,6 @@ public interface I_I_Inventory
 	public int getM_Locator_ID();
 
 	public org.compiere.model.I_M_Locator getM_Locator() throws RuntimeException;
-
-    /** Column name MovementDate */
-    public static final String COLUMNNAME_MovementDate = "MovementDate";
-
-	/** Set Movement Date.
-	  * Date a product was moved in or out of inventory
-	  */
-	public void setMovementDate (Timestamp MovementDate);
-
-	/** Get Movement Date.
-	  * Date a product was moved in or out of inventory
-	  */
-	public Timestamp getMovementDate();
 
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
@@ -349,6 +336,19 @@ public interface I_I_Inventory
 	public int getM_Warehouse_ID();
 
 	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
+
+    /** Column name MovementDate */
+    public static final String COLUMNNAME_MovementDate = "MovementDate";
+
+	/** Set Movement Date.
+	  * Date a product was moved in or out of inventory
+	  */
+	public void setMovementDate (Timestamp MovementDate);
+
+	/** Get Movement Date.
+	  * Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate();
 
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";

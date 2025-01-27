@@ -16,12 +16,18 @@ package org.compiere.grid;
 import org.compiere.model.GridTab;
 
 /**
- * 
+ * Factory interface for payment form instantiation
  * @author Elaine
- *
  */
 public interface IPaymentFormFactory {
 	
+	/**
+	 * Create payment form instance by paymentRule
+	 * @param windowNo
+	 * @param mTab
+	 * @param paymentRule
+	 * @return {@link IPaymentForm} instance
+	 */
 	public IPaymentForm create(int windowNo, GridTab mTab, String paymentRule);
 	
 }

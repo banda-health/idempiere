@@ -20,13 +20,13 @@ import java.util.List;
 import org.adempiere.base.Core;
 import org.adempiere.base.event.EventManager;
 import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.apps.BackgroundJob;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ServerPushTemplate;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MProcess;
-import org.compiere.model.Query;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -49,24 +49,33 @@ import org.zkoss.zul.Panelchildren;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Vbox;
 
+/**
+ * Dashboard gadget: running background jobs (Run As Job in Process Dialog).
+ */
 public class DPRunningJobs extends DashboardPanel implements EventListener<Event>, EventHandler {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -8515643315156488709L;
 
+	/** Job link ({@link A}) attribute to store AD_PInstance_ID value */
 	private static final String AD_PINSTANCE_ID_ATTR = "AD_PInstance_ID";
 	
 	private static TopicSubscriber topicSubscriber;
 
 	private Box bxJobs;
 
+	/** Login user id */
 	private int AD_User_ID;
 	
 	private WeakReference<Desktop> desktop;
 
+	/** Desktop cleanup listener to call {@link #cleanup()} */
 	private DesktopCleanup listener;
 	
+	/**
+	 * Default constructor
+	 */
 	public DPRunningJobs()
 	{
 		super();
@@ -82,7 +91,6 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 		ZKUpdateUtil.setHflex(bxJobs, "1");
 		this.setSclass("recentitems-box");
 		jobsContent.appendChild(bxJobs);
-		createJobsPanel();
 		
 		Toolbar jobsToolbar = new Toolbar();
 		this.appendChild(jobsToolbar);
@@ -115,12 +123,18 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 		};
 	}
 	
+	/**
+	 * Perform clean up
+	 */
 	protected void cleanup() 
 	{
 		EventManager.getInstance().unregister(this);
 		desktop = null;
 	}
 
+	/**
+	 * Setup {@link #topicSubscriber}
+	 */
 	private static synchronized void createTopicSubscriber() 
 	{
 		if (topicSubscriber == null) {
@@ -133,11 +147,6 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 		}
 	}
 
-	private void createJobsPanel()
-	{
-		refresh();
-	}
-	
 	@Override
 	public void onEvent(Event event) throws Exception 
 	{
@@ -148,6 +157,10 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
             doOnClick(comp);
 	}
 
+	/**
+     * Handle onClick event from Job link/button
+     * @param comp Component
+     */
 	private void doOnClick(Component comp) 
 	{
 		if (comp instanceof A)
@@ -172,6 +185,9 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 		}
 	}
 
+	/**
+	 * Reload from DB
+	 */
 	private synchronized void refresh() 
 	{
 		// Please review here - is throwing NPE in some cases when user push repeatedly the refresh button
@@ -203,15 +219,13 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 		}
 	}
 	
+	/**
+	 * @param AD_User_ID
+	 * @return List of running background jobs for AD_User_ID
+	 */
 	public static List<MPInstance> getRunningJobForUser(int AD_User_ID) 
 	{
-		List<MPInstance> pis = new Query(Env.getCtx(), MPInstance.Table_Name, "Coalesce(AD_User_ID,0)=? AND IsProcessing='Y' AND IsRunAsJob='Y'", null)
-			.setOnlyActiveRecords(true)
-			.setClient_ID()
-			.setParameters(AD_User_ID)
-			.setOrderBy("Updated DESC")
-			.list();
-		return pis;
+		return BackgroundJob.getRunningJobForUser(AD_User_ID);
 	}
 
 	@Override
@@ -230,7 +244,7 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 	}
 
 	/**
-	 * 
+	 * Update {@link #desktop} reference and setup {@link #listener}
 	 */
 	protected void updateDesktopReference() 
 	{
@@ -281,7 +295,19 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 		cleanup();
 	}
 	
+	@Override
+	public boolean isLazy() {
+		return true;
+	}
+	
+	/**
+	 * {@link ITopicSubscriber} for "onRunningJobChanged" topic. <br/>
+	 * Call {@link MPInstance#postOnChangedEvent(int)}.
+	 */
 	static class TopicSubscriber implements ITopicSubscriber<Integer> {
+		/**
+		 * @param message AD_User_ID
+		 */
 		@Override
 		public void onMessage(Integer message) {
 			MPInstance.postOnChangedEvent(message);

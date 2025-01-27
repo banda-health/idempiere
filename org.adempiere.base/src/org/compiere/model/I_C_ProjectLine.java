@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_ProjectLine
  *  @author iDempiere (generated) 
- *  @version Release 9
+ *  @version Release 12
  */
 public interface I_C_ProjectLine 
 {
@@ -44,8 +44,8 @@ public interface I_C_ProjectLine
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
 
-	/** Get Client.
-	  * Client/Tenant for this installation.
+	/** Get Tenant.
+	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
 
@@ -53,55 +53,14 @@ public interface I_C_ProjectLine
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
 	/** Set Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
-	  * Organizational entity within client
+	  * Organizational entity within tenant
 	  */
 	public int getAD_Org_ID();
-
-    /** Column name CommittedAmt */
-    public static final String COLUMNNAME_CommittedAmt = "CommittedAmt";
-
-	/** Set Committed Amount.
-	  * The (legal) commitment amount
-	  */
-	public void setCommittedAmt (BigDecimal CommittedAmt);
-
-	/** Get Committed Amount.
-	  * The (legal) commitment amount
-	  */
-	public BigDecimal getCommittedAmt();
-
-    /** Column name CommittedQty */
-    public static final String COLUMNNAME_CommittedQty = "CommittedQty";
-
-	/** Set Committed Quantity.
-	  * The (legal) commitment Quantity
-	  */
-	public void setCommittedQty (BigDecimal CommittedQty);
-
-	/** Get Committed Quantity.
-	  * The (legal) commitment Quantity
-	  */
-	public BigDecimal getCommittedQty();
-
-    /** Column name C_Order_ID */
-    public static final String COLUMNNAME_C_Order_ID = "C_Order_ID";
-
-	/** Set Order.
-	  * Order
-	  */
-	public void setC_Order_ID (int C_Order_ID);
-
-	/** Get Order.
-	  * Order
-	  */
-	public int getC_Order_ID();
-
-	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException;
 
     /** Column name C_OrderPO_ID */
     public static final String COLUMNNAME_C_OrderPO_ID = "C_OrderPO_ID";
@@ -118,20 +77,20 @@ public interface I_C_ProjectLine
 
 	public org.compiere.model.I_C_Order getC_OrderPO() throws RuntimeException;
 
-    /** Column name C_Project_ID */
-    public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
+    /** Column name C_Order_ID */
+    public static final String COLUMNNAME_C_Order_ID = "C_Order_ID";
 
-	/** Set Project.
-	  * Financial Project
+	/** Set Order.
+	  * Order
 	  */
-	public void setC_Project_ID (int C_Project_ID);
+	public void setC_Order_ID (int C_Order_ID);
 
-	/** Get Project.
-	  * Financial Project
+	/** Get Order.
+	  * Order
 	  */
-	public int getC_Project_ID();
+	public int getC_Order_ID();
 
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
+	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException;
 
     /** Column name C_ProjectIssue_ID */
     public static final String COLUMNNAME_C_ProjectIssue_ID = "C_ProjectIssue_ID";
@@ -199,6 +158,47 @@ public interface I_C_ProjectLine
 	public int getC_ProjectTask_ID();
 
 	public org.compiere.model.I_C_ProjectTask getC_ProjectTask() throws RuntimeException;
+
+    /** Column name C_Project_ID */
+    public static final String COLUMNNAME_C_Project_ID = "C_Project_ID";
+
+	/** Set Project.
+	  * Financial Project
+	  */
+	public void setC_Project_ID (int C_Project_ID);
+
+	/** Get Project.
+	  * Financial Project
+	  */
+	public int getC_Project_ID();
+
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
+
+    /** Column name CommittedAmt */
+    public static final String COLUMNNAME_CommittedAmt = "CommittedAmt";
+
+	/** Set Committed Amount.
+	  * The (legal) commitment amount
+	  */
+	public void setCommittedAmt (BigDecimal CommittedAmt);
+
+	/** Get Committed Amount.
+	  * The (legal) commitment amount
+	  */
+	public BigDecimal getCommittedAmt();
+
+    /** Column name CommittedQty */
+    public static final String COLUMNNAME_CommittedQty = "CommittedQty";
+
+	/** Set Committed Quantity.
+	  * The (legal) commitment Quantity
+	  */
+	public void setCommittedQty (BigDecimal CommittedQty);
+
+	/** Get Committed Quantity.
+	  * The (legal) commitment Quantity
+	  */
+	public BigDecimal getCommittedQty();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";

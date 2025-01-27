@@ -24,6 +24,7 @@
  **********************************************************************/
 package org.idempiere.test.performance;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -90,6 +91,7 @@ import org.compiere.model.MShipper;
 import org.compiere.model.MStorageProvider;
 import org.compiere.model.MTable;
 import org.compiere.model.MTaxProvider;
+import org.compiere.model.MTest;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.MZoomCondition;
 import org.compiere.model.ModelValidator;
@@ -97,6 +99,7 @@ import org.compiere.model.PaymentProcessor;
 import org.compiere.model.StandardTaxProvider;
 import org.compiere.model.X_C_AddressValidationCfg;
 import org.compiere.model.X_C_TaxProviderCfg;
+import org.compiere.print.MPrintFormat;
 import org.compiere.process.BPartnerValidate;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
@@ -113,20 +116,27 @@ import org.compiere.util.ReplenishInterface;
 import org.compiere.util.TimeUtil;
 import org.compiere.wf.MWorkflow;
 import org.eevolution.model.CalloutBOM;
+import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.fa.service.api.DepreciationFactoryLookupDTO;
 import org.idempiere.fa.service.api.IDepreciationMethod;
 import org.idempiere.fa.service.api.IDepreciationMethodFactory;
 import org.idempiere.test.AbstractTestCase;
+import org.idempiere.test.DictionaryIDs;
 import org.idempiere.test.TestActivator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 /**
  * 
  * @author hengsin
  *
  */
+@Isolated
 public class CacheTest extends AbstractTestCase {
 
+	private static final int ORDER_HEADER_PRINT_FORMAT_ID = 118;
+	private static final int SHIPMENT_HEADER_PRINT_FORMAT_ID = 122;
+		
 	public CacheTest() {
 	}
 	
@@ -207,9 +217,11 @@ public class CacheTest extends AbstractTestCase {
 		assertEquals(oak, p2.getM_Product_ID());
 		assertTrue(pc.getHit() > hit, "Second get of product Oak, cache hit should increase");
 		
+		String oakDescription = p2.getDescription();
 		p2 = new MProduct(Env.getCtx(), p2, getTrxName());
 		p2.setDescription("Test Update @ " + System.currentTimeMillis());
 		p2.saveEx();
+		commit();
 		
 		//get after p2 update, miss should increase
 		//wait 500ms since cache reset after update is async
@@ -236,6 +248,7 @@ public class CacheTest extends AbstractTestCase {
 		p3.saveEx();
 		
 		p3.deleteEx(true);
+		commit();
 		
 		//cache for p2 not effected by p3 delete, hit should increase
 		hit = pc.getHit();
@@ -250,6 +263,11 @@ public class CacheTest extends AbstractTestCase {
 		p2.saveEx();
 		
 		rollback();
+		
+		//revert description update
+		p2 = new MProduct(Env.getCtx(), oak, null);
+		p2.setDescription(oakDescription);
+		p2.saveEx();
 	}
 	
 	@Test
@@ -556,7 +574,7 @@ public class CacheTest extends AbstractTestCase {
 		line1.saveEx();
 		ProcessInfo info = MWorkflow.runDocumentActionWorkflow(invoice, DocAction.ACTION_Complete);
 		invoice.load(getTrxName());
-		assertFalse(info.isError());
+		assertFalse(info.isError(), info.getSummary());
 		assertEquals(DocAction.STATUS_Completed, invoice.getDocStatus());
 		if (!invoice.isPosted()) {
 			String error = DocumentEngine.postImmediate(Env.getCtx(), invoice.getAD_Client_ID(), MInvoice.Table_ID, invoice.get_ID(), true, getTrxName());
@@ -657,6 +675,8 @@ public class CacheTest extends AbstractTestCase {
 		//IDisplayTypeFactory
 		TestActivator.context.registerService(IDisplayTypeFactory.class, new FakeDisplayTypeFactory(), null);
 		cacheName = "IDisplayTypeFactory";
+		boolean isLOB = DisplayType.isLOB(FakeDisplayTypeFactory.DISPLAY_TYPE);
+		assertFalse(isLOB);
 		boolean isText = DisplayType.isText(FakeDisplayTypeFactory.DISPLAY_TYPE);
 		assertTrue(isText);
 		cache = findByNameAndKey(cacheName, FakeDisplayTypeFactory.DISPLAY_TYPE);
@@ -702,4 +722,241 @@ public class CacheTest extends AbstractTestCase {
 		}
 		return null;
 	}
+		
+	@Test
+	public void testPrintFormatCacheReset() {
+		MPrintFormat cache = MPrintFormat.get(ORDER_HEADER_PRINT_FORMAT_ID);
+		String description = cache.getDescription();
+		MPrintFormat cache1 = MPrintFormat.get(SHIPMENT_HEADER_PRINT_FORMAT_ID);
+		MPrintFormat update = new MPrintFormat(Env.getCtx(), cache.get_ID(), null);
+		try {			
+			update.setDescription(update.getAD_PrintFormat_UU());
+			update.saveEx();
+			
+			//wait for async cache reset
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+			
+			cache = MPrintFormat.get(ORDER_HEADER_PRINT_FORMAT_ID);
+			assertEquals(update.getDescription(), cache.getDescription(), "Expected cache reset doesn't happens");
+			
+			//shipment header shouldn't reload since only order header have been updated
+			cache = MPrintFormat.get(SHIPMENT_HEADER_PRINT_FORMAT_ID);
+			assertTrue(cache == cache1, "Unexpected cache reset for print format record that's not being updated");
+		} finally {
+			update.load((String)null);
+			update.setDescription(description);
+			update.saveEx();
+		}
+	}
+	
+	private static class MTestCache extends CCache<Integer, MTest> {
+		private static final long serialVersionUID = 1L;
+		private int resetCount = 0;
+		
+		public MTestCache(String name, int capacity) {
+			super(name, capacity);
+		}
+				
+		@Override
+		public int reset() {
+			resetCount++;
+			return super.reset();
+		}
+
+		@Override
+		public int reset(int recordId) {
+			resetCount++;
+			return super.reset(recordId);
+		}
+
+		@Override
+		public void newRecord(int record_ID) {
+			resetCount++;
+			super.newRecord(record_ID);
+		}
+		
+		public int getResetCount() {
+			return resetCount;
+		}
+		
+		public void clearResetCount() {
+			resetCount = 0;
+		}
+	};
+	
+	@Test
+	public void testSuspendCacheReset() {
+		MTest test1 = new MTest(Env.getCtx(), 0, getTrxName());
+		MTest test2 = new MTest(Env.getCtx(), 0, getTrxName());
+		MTest test3 = new MTest(Env.getCtx(), 0, getTrxName());
+		try {
+			MTestCache cache = new MTestCache(MTest.Table_Name, 10);
+			
+			//test insert and cache reset
+			test1.setName("test1");
+			test1.saveEx();
+			test2.setName("test2");
+			test2.saveEx();
+			test3.setName("test3");
+			test3.saveEx();
+			
+			cache.put(test1.get_ID(), test1);
+			cache.put(test2.get_ID(), test2);
+			cache.put(test3.get_ID(), test3);
+			
+			cache.clearResetCount();			
+			commit();
+			getTrx().start();
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}			
+			assertTrue(cache.getResetCount() > 0, "Cache reset count is zero");
+			
+			//test update and cache reset
+			
+			test1.setName("test1.1");
+			test1.saveEx();
+			test2.setName("test2.1");
+			test2.saveEx();
+			test3.setName("test3.1");
+			test3.saveEx();
+			
+			cache.put(test1.get_ID(), test1);
+			cache.put(test2.get_ID(), test2);
+			cache.put(test3.get_ID(), test3);
+			
+			cache.clearResetCount();			
+			commit();
+			getTrx().start();
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}			
+			assertTrue(cache.getResetCount() > 0, "Cache reset count is zero");
+			
+			//test update and cache reset after suspend reset call
+			
+			CacheMgt.get().suspendTableCacheReset(MTest.Table_Name);
+			
+			test1.setName("test1.2");
+			test1.saveEx();
+			test2.setName("test2.2");
+			test2.saveEx();
+			test3.setName("test3.2");
+			test3.saveEx();
+			
+			cache.put(test1.get_ID(), test1);
+			cache.put(test2.get_ID(), test2);
+			cache.put(test3.get_ID(), test3);
+			
+			cache.clearResetCount();			
+			commit();
+			getTrx().start();
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+			assertTrue(cache.getResetCount() == 0, "Cache reset count is not zero with suspendTableCacheReset active");
+			
+			//test delete and cache reset after suspend reset call
+			
+			cache.put(test1.get_ID(), test1);
+			cache.put(test2.get_ID(), test2);
+			cache.put(test3.get_ID(), test3);
+						
+			test1.deleteEx(true);
+			test1 = null;
+			test2.deleteEx(true);
+			test2 = null;
+			test3.deleteEx(true);
+			test3 = null;
+					
+			cache.clearResetCount();			
+			commit();
+			getTrx().start();
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}
+			assertTrue(cache.getResetCount() == 0, "Cache reset count is not zero with suspendTableCacheReset active");
+			
+			//test update and cache reset again after resume reset call
+			
+			CacheMgt.get().resumeTableCacheReset(MTest.Table_Name);
+			
+			test1 = new MTest(Env.getCtx(), 0, getTrxName());
+			test2 = new MTest(Env.getCtx(), 0, getTrxName());
+			test3 = new MTest(Env.getCtx(), 0, getTrxName());
+			
+			test1.setName("test1");
+			test1.saveEx();
+			test2.setName("test2");
+			test2.saveEx();
+			test3.setName("test3");
+			test3.saveEx();
+			
+			cache.put(test1.get_ID(), test1);
+			cache.put(test2.get_ID(), test2);
+			cache.put(test3.get_ID(), test3);
+			
+			cache.clearResetCount();			
+			commit();
+			getTrx().start();
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+			}			
+			assertTrue(cache.getResetCount() > 0, "Cache reset count is zero");
+			
+		} finally {
+			if (test1 != null && test1.get_ID() > 0)
+				test1.deleteEx(true);
+			if (test2 != null && test2.get_ID() > 0)
+				test2.deleteEx(true);
+			if (test3 != null && test3.get_ID() > 0)
+				test3.deleteEx(true);
+			
+			commit();
+		}
+	}
+	
+	@Test
+	public void testExpire() {
+		ImmutableIntPOCache<Integer,MProduct> cache	= new ImmutableIntPOCache<Integer,MProduct>(MProduct.Table_Name, 40, 1);	//1 minutes
+		cache.put(DictionaryIDs.M_Product.AZALEA_BUSH.id, new MProduct(Env.getCtx(), DictionaryIDs.M_Product.AZALEA_BUSH.id, null));
+		cache.put(DictionaryIDs.M_Product.P_CHAIR.id, new MProduct(Env.getCtx(), DictionaryIDs.M_Product.P_CHAIR.id, null));
+		
+		for(int i = 0; i < 2; i++) {
+			assertNotNull(cache.get(DictionaryIDs.M_Product.P_CHAIR.id), "Unexpected expire of cache item after " + i + " access");
+			try {
+				Thread.sleep(35*1000); //35 seconds
+			} catch (InterruptedException e) {}
+		}
+		
+		assertNotNull(cache.get(DictionaryIDs.M_Product.P_CHAIR.id), "Cache item expire despite being access recently");
+		assertNull(cache.get(DictionaryIDs.M_Product.AZALEA_BUSH.id), "Cache item not expire despite not being access for more than 1 minutes");
+		
+		CacheMgt.get().unregister(cache);
+	}
+
+	@Test
+	public void testNullKey() {
+		CCache<String, String> testCache = new CCache<String, String>(null, "Test_Cache", 10, 60, false);
+		assertThatNoException().isThrownBy(() -> testCache.get(null));
+		assertThatNoException().isThrownBy(() -> testCache.containsKey(null));
+		assertThatNoException().isThrownBy(() -> testCache.containsValue(null));
+		assertFalse(testCache.containsValue(null));
+		testCache.put("TestNull", null);
+		assertFalse(testCache.containsValue(null)); // still false because null is an unknown value
+	}
+
 }

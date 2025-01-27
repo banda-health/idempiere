@@ -33,6 +33,7 @@ import org.adempiere.base.equinox.EquinoxExtensionLocator;
 import org.adempiere.exceptions.AdempiereException;
 import org.apache.commons.codec.binary.Base64;
 import org.compiere.model.Lookup;
+import org.compiere.model.MColumn;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.model.POInfo;
@@ -129,7 +130,7 @@ public class AbstractService {
 			}
 		}
 		if (!okclient)
-			return "Error logging in - client not allowed for this user";
+			return "Error logging in - tenant not allowed for this user";
 
 		m_cs.getCtx().setProperty(Env.AD_CLIENT_ID, "" + loginRequest.getClientID());
        	Env.setContext(m_cs.getCtx(), Env.AD_CLIENT_ID, (String) selectedClient.getID());
@@ -266,7 +267,7 @@ public class AbstractService {
 			}
 	        if (!bAccess.booleanValue())
 	        {
-	            return "Web Service Error: Login role does not have access to the service type";
+	            return "Web Service Error: Login role does not have access to the service type '" + serviceTypeValue + "'";
 	        }			
 		}
         
@@ -390,11 +391,11 @@ public class AbstractService {
 	 * @throws AdempiereException
 	 */
 	protected String parseSQL(String sql, ArrayList<Object> sqlParas, PO po,POInfo poInfo, Map<String, Object> requestCtx) throws AdempiereException {
-		if (sql.startsWith("@SQL="))
+		if (sql.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 			sql = sql.substring(5);
 
 		if (sql.toLowerCase().indexOf(" where ") == -1)
-			throw new AdempiereException("Invalid SQL: Query do not have any filetering criteria");
+			throw new AdempiereException("Invalid SQL: Query do not have any filtering criteria");
 
 		StringBuilder sqlBuilder = new StringBuilder();
 
@@ -427,7 +428,7 @@ public class AbstractService {
 					int ind = sqlBuilder.lastIndexOf("=");
 					sqlBuilder.replace(ind, sqlBuilder.length(), " Is Null ");
 				}else if (val == null)
-					throw new AdempiereException("Can not resolve varialbe '" + token + "' in sql");
+					throw new AdempiereException("Can not resolve variable '" + token + "' in sql");
 				else{
 					sqlBuilder.append(" ? ");
 					sqlParas.add(val);
